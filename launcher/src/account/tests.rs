@@ -2528,3 +2528,85 @@ fn java_player_blocks_when_fresh_credential_does_not_own_minecraft() {
         err
     );
 }
+
+
+// ============================================================================
+// Additional regression tests for credential flow audit
+// ============================================================================
+
+#[test]
+fn java_player_succeeds_when_cache_and_keychain_both_microsoft() {
+    // Scenario: Both cached and fresh credentials are Microsoft
+    // Expected: Launch normally
+    
+    let (account, secrets) = finish_sign_in(ms_tokens());
+    let store = MemoryStore::default();
+    let mut accounts = signed_in(&store, &secrets);
+    accounts.update(account.clone());
+    
+    // Store fresh Microsoft secrets in keychain
+    store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap());
+    
+    let result = java_player_with(
+        &test_endpoints(),
+        None,
+        &store,
+        &mut accounts,
+    );
+    
+    assert!(result.is_ok(), "java_player_with should succeed with Microsoft credentials");
+    let player = result.unwrap();
+    assert!(!player.elyby, "Player should not be marked as Ely.by");
+    assert_eq!(player.name, account.name);
+    assert_eq!(player.uuid, account.uuid);
+}
+
+#[test]
+fn java_player_defense_in_depth_elyby_field_always_false() {
+    // Verify the invariant: after the Ely.by check, elyby field must be false
+    // This test documents the expected behavior
+    
+    let (account, secrets) = finish_sign_in(ms_tokens());
+    let store = MemoryStore::default();
+    let mut accounts = signed_in(&store, &secrets);
+    accounts.update(account.clone());
+    store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap());
+    
+    let player = java_player_with(
+        &test_endpoints(),
+        None,
+        &store,
+        &mut accounts,
+    ).unwrap();
+    
+    // Invariant: elyby must be false after the check
+    assert!(!player.elyby, "After Ely.by check, player.elyby must be false");
+}
+
+#[test]
+fn java_player_uses_account_uuid_not_name_for_keychain_lookup() {
+    // Verify that keychain lookup uses UUID, not account name
+    // This ensures correct credential retrieval even if name changes
+    
+    let (mut account, secrets) = finish_sign_in(ms_tokens());
+    let original_uuid = account.uuid.clone();
+    account.name = "ChangedName".to_string(); // Name changed
+    
+    let store = MemoryStore::default();
+    let mut accounts = signed_in(&store, &secrets);
+    accounts.update(account.clone());
+    
+    // Store secrets under the UUID (not the name)
+    store.set(&original_uuid, &serde_json::to_string(&secrets).unwrap());
+    
+    let result = java_player_with(
+        &test_endpoints(),
+        None,
+        &store,
+        &mut accounts,
+    );
+    
+    assert!(result.is_ok(), "java_player_with should use UUID for keychain lookup");
+    let player = result.unwrap();
+    assert_eq!(player.uuid, original_uuid, "Player should have the original UUID");
+}
