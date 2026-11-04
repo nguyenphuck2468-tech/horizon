@@ -449,6 +449,10 @@ pub fn parse_certificates(body: &str) -> Option<ChatKeyPair> {
 /// UserApiService.getKeyPair: the certificates endpoint, POSTed with the
 /// access token.
 pub fn fetch_chat_keys(session: &AuthSession) -> Result<ChatKeyPair, JoinError> {
+    // An Ely.by token is not a Minecraft Services token: never send it there.
+    if session.elyby {
+        return Err(JoinError::Unavailable);
+    }
     let doc = discovery()?;
     let url = endpoint(&doc, "player", "getCertificates").ok_or(JoinError::Unavailable)?;
     let body = match agent()
@@ -553,6 +557,10 @@ const MINECRAFT_PROFILE: &str = "https://api.minecraftservices.com/minecraft/pro
 /// Single-player and integrated servers often send no `textures` property, or
 /// one without the equipped cape; the client asks the profile endpoint once.
 pub fn own_textures(session: &AuthSession) -> Option<crate::skins::Textures> {
+    // An Ely.by token is not a Minecraft Services token: never send it there.
+    if session.elyby {
+        return None;
+    }
     let response = agent()
         .get(MINECRAFT_PROFILE)
         .set("Authorization", &format!("Bearer {}", session.access_token))

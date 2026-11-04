@@ -33,13 +33,26 @@ pub struct Tokens {
 }
 
 /// Public information shown while waiting for device authorization.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct DeviceCode {
     pub user_code: String,
     pub verification_uri: String,
     pub interval: u64,
     pub expires_at: u64,
     device_code: String,
+}
+
+// The device code is the secret half of the pair: it stays out of logs and `{:?}`.
+impl std::fmt::Debug for DeviceCode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("DeviceCode")
+            .field("user_code", &self.user_code)
+            .field("verification_uri", &self.verification_uri)
+            .field("interval", &self.interval)
+            .field("expires_at", &self.expires_at)
+            .field("device_code", &"<hidden>")
+            .finish()
+    }
 }
 
 pub enum DevicePoll {
@@ -630,5 +643,18 @@ mod tests {
         let (mut stream, _) = listener.accept().unwrap();
         assert!(read_callback(&mut stream).is_err());
         client.join().unwrap();
+    }
+
+    #[test]
+    fn the_device_code_is_not_printed() {
+        let code = DeviceCode {
+            user_code: "ABCD".into(),
+            verification_uri: "https://x".into(),
+            interval: 5,
+            expires_at: 1,
+            device_code: "SECRET-DEVICE-CODE".into(),
+        };
+        let shown = format!("{code:?}");
+        assert!(shown.contains("ABCD") && !shown.contains("SECRET-DEVICE-CODE"));
     }
 }
