@@ -2393,3 +2393,138 @@ fn plays_survives_the_keychain_round_trip_and_old_json_still_loads() {
     let old: Secrets = serde_json::from_str(old).unwrap();
     assert!(old.plays() && old.owns_minecraft());
 }
+
+
+// ============================================================================
+// Regression tests for TOCTOU fix in java_player_with
+// These tests verify that the function uses a single source of truth (fresh
+// keychain read) rather than mixing cached and fresh credentials.
+// ============================================================================
+
+#[test]
+fn java_player_fails_closed_when_keychain_read_errors() {
+    // Setup: valid account and secrets in the account list
+    let (account, secrets) = finish_sign_in(ms_tokens());
+    let store = MemoryStore::default();
+    let mut accounts = signed_in(&store, &secrets);
+    accounts.update(account.clone());
+    
+    // Store secrets, then corrupt them to simulate keychain read failure
+    store.set(&account.uuid, "invalid json that won't parse");
+    
+    // Attempt to get java player - should fail closed with keychain error
+    let result = java_player_with(
+        &test_endpoints(),
+        None,
+        &store,
+        &mut accounts,
+    );
+    
+    assert!(result.is_err(), "java_player_with must fail closed when keychain read fails");
+    let err = result.unwrap_err();
+    assert!(
+        err.contains("Cannot read credentials") || err.contains("keychain"),
+        "Error should mention keychain failure: {}",
+        err
+    );
+}
+
+#[test]
+fn java_player_uses_fresh_credential_not_cached_elyby() {
+    // Scenario: pass.session contains stale Ely.by secrets, but keychain has fresh Microsoft secrets
+    // Expected: Use fresh Microsoft secrets, not stale Ely.by
+    
+    // Setup: create an Ely.by account in the cached pass
+    let (ely_account, ely_secrets) = finish_ely_sign_in(ely_tokens());
+    let store = MemoryStore::default();
+    let mut accounts = signed_in(&store, &ely_secrets);
+    accounts.update(ely_account.clone());
+    
+    // Now update the keychain to have Microsoft secrets for the same UUID
+    // (simulating user changed account type or re-authenticated)
+    let (_, ms_secrets) = finish_sign_in(ms_tokens());
+    store.set(&ely_account.uuid, &serde_json::to_string(&ms_secrets).unwrap());
+    
+    // Attempt to get java player - should use fresh Microsoft secrets
+    let result = java_player_with(
+        &test_endpoints(),
+        None,
+        &store,
+        &mut accounts,
+    );
+    
+    // Should succeed with Microsoft credentials
+    assert!(result.is_ok(), "java_player_with should succeed with fresh Microsoft credentials");
+    let player = result.unwrap();
+    assert!(!player.elyby, "Player should not be marked as Ely.by");
+    assert_eq!(player.name, ely_account.name);
+}
+
+#[test]
+fn java_player_blocks_when_fresh_credential_is_elyby() {
+    // Scenario: pass.session contains stale Microsoft secrets, but keychain has fresh Ely.by secrets
+    // Expected: Block the launch (Ely.by not supported for Java)
+    
+    // Setup: create a Microsoft account in the cached pass
+    let (ms_account, ms_secrets) = finish_sign_in(ms_tokens());
+    let store = MemoryStore::default();
+    let mut accounts = signed_in(&store, &ms_secrets);
+    accounts.update(ms_account.clone());
+    
+    // Now update the keychain to have Ely.by secrets for the same UUID
+    let (_, ely_secrets) = finish_ely_sign_in(ely_tokens());
+    store.set(&ms_account.uuid, &serde_json::to_string(&ely_secrets).unwrap());
+    
+    // Attempt to get java player - should fail because fresh credential is Ely.by
+    let result = java_player_with(
+        &test_endpoints(),
+        None,
+        &store,
+        &mut accounts,
+    );
+    
+    // Should fail with Ely.by error
+    assert!(result.is_err(), "java_player_with must block when fresh credential is Ely.by");
+    let err = result.unwrap_err();
+    assert!(
+        err.contains("Ely.by") && err.contains("do not support"),
+        "Error should mention Ely.by incompatibility: {}",
+        err
+    );
+}
+
+#[test]
+fn java_player_blocks_when_fresh_credential_does_not_own_minecraft() {
+    // Scenario: Fresh credential exists but Minecraft services say it doesn't own the game
+    // Expected: Block the launch
+    
+    // Setup: account with secrets that don't own Minecraft
+    let (account, _) = finish_sign_in(ms_tokens());
+    let no_own_secrets = Secrets {
+        minecraft_token: "mc-token".into(),
+        owns: false,  // Does not own
+        plays: Some(true),
+        ..secrets("mc-token", false)
+    };
+    
+    let store = MemoryStore::default();
+    store.set(&account.uuid, &serde_json::to_string(&no_own_secrets).unwrap());
+    let mut accounts = signed_in(&store, &no_own_secrets);
+    accounts.update(account.clone());
+    
+    // Attempt to get java player - should fail because doesn't own Minecraft
+    let result = java_player_with(
+        &test_endpoints(),
+        None,
+        &store,
+        &mut accounts,
+    );
+    
+    assert!(result.is_err(), "java_player_with must block when account doesn't own Minecraft");
+    let err = result.unwrap_err();
+    assert!(
+        err.contains("does not own Minecraft"),
+        "Error should mention ownership failure: {}",
+        err
+    );
+}
