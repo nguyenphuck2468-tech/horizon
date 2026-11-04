@@ -2572,44 +2572,53 @@ fn java_player_with(
     accounts: &mut Accounts,
 ) -> Result<crate::java_launch::Player, String> {
     let pass = launch(ep, client_id, store, accounts).map_err(|e| e.to_string())?;
-    // The playing account, as the gate picked it: the session first, else an owner.
-    let playing = pass.session.clone().or_else(|| pass.owner.clone());
-    // E1.0.1, before anything else: if the account about to play signs in through Ely.by, say so
-    // plainly rather than start Mojang's game against it. Asked of the keychain, not of the
-    // gate's answer, so a stale copy can't slip past.
-    if let Some((account, _)) = &playing {
-        if secrets_in(store, &account.uuid).is_some_and(|s| is_ely(&s)) {
-            return Err(format!(
-                "{} signs in through Ely.by, which Minecraft: Java Edition instances do not \
-                 support yet. Play Horizon, or select a Microsoft account that owns the game.",
-                account.name
-            ));
-        }
-    }
-    let kept = || {
-        let order = accounts.selected().into_iter().chain(&accounts.accounts);
-        order.into_iter().find_map(|a| {
-            let secrets = secrets_in(store, &a.uuid).filter(|s| s.plays())?;
-            // E1.0.1: the fallback keeps only what the Minecraft services confirmed - never an
-            // Ely.by token, and never one that owned the game before Ely.by was added.
-            (!is_ely(&secrets) && secrets.owns_minecraft()).then(|| (a.clone(), secrets))
-        })
-    };
-    let (account, mut secrets) = pass
+    
+    // Determine the playing account from the gate's result.
+    let (account, cached_secrets) = pass
         .session
         .or(pass.owner)
-        .or_else(kept)
         .ok_or_else(|| NoOwner.to_string())?;
+    
+    // Read the authoritative credential from the keychain using the account UUID.
+    // This ensures we check and use the same credential (no TOCTOU).
+    // If the keychain cannot provide secrets for this account, fail closed rather than
+    // falling back to potentially stale cached data.
+    let fresh_secrets = secrets_in(store, &account.uuid).ok_or_else(|| {
+        format!(
+            "Cannot read credentials for {} from keychain. Sign in again to continue.",
+            account.name
+        )
+    })?;
+    
+    // Classify the provider on the authoritative credential itself.
+    // Ely.by tokens are not compatible with Mojang's Java authentication.
+    if is_ely(&fresh_secrets) {
+        return Err(format!(
+            "{} signs in through Ely.by, which Minecraft: Java Edition instances do not \
+             support yet. Play Horizon, or select a Microsoft account that owns the game.",
+            account.name
+        ));
+    }
+    
+    // Verify the fresh credential owns Minecraft before proceeding.
+    if !fresh_secrets.owns_minecraft() {
+        return Err(format!(
+            "{} does not own Minecraft according to the game services.",
+            account.name
+        ));
+    }
+    
+    // Build Player from the verified, fresh credential (defense-in-depth: elyby should be false here).
     Ok(crate::java_launch::Player {
         name: account.name,
         uuid: account.uuid,
-        token: secrets
+        token: fresh_secrets
             .minecraft_token
             .strip_prefix(ELY_ACCESS_PREFIX)
-            .unwrap_or(&secrets.minecraft_token)
+            .unwrap_or(&fresh_secrets.minecraft_token)
             .to_owned(),
-        xuid: secrets.xuid.take().unwrap_or_default(),
-        elyby: is_ely(&secrets),
+        xuid: fresh_secrets.xuid.clone().unwrap_or_default(),
+        elyby: is_ely(&fresh_secrets), // Invariant: this must be false after the check above
     })
 }
 
