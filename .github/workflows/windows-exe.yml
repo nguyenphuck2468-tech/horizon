@@ -1,0 +1,110 @@
+name: windows-exe
+# Builds horizon-launcher.exe for Windows x64 (the launcher's own release train is launcher.yml, which
+# publishes to the upstream project; this one only builds a downloadable exe for this repository).
+#
+#   gh workflow run windows-exe                      # build, keep the exe as a run artifact
+#   git tag exe-v1.0.0 && git push origin exe-v1.0.0 # build and publish a GitHub release with the exe
+#
+# Optional repository variables, compiled into the exe (docs/elyby-account.md, docs/microsoft-account.md):
+#   HORIZON_ELY_CLIENT_ID   Ely.by public client ID (Device Code sign-in)
+#   HORIZON_MSA_CLIENT_ID   Azure app ID for Microsoft sign-in
+# Never put a client secret here.
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_tests:
+        description: Run cargo test before building
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+    paths:
+      - 'launcher/**'
+      - 'crates/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/windows-exe.yml'
+    tags: ['exe-v*']
+  pull_request:
+    paths:
+      - '.github/workflows/windows-exe.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-exe-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # A build or a test run never reaches the telemetry server (docs/telemetry.md).
+  HORIZON_TELEMETRY_URL: "off"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    env:
+      # The C runtime linked in: without it the launcher asks for VCRUNTIME140.dll.
+      RUSTFLAGS: -C target-feature=+crt-static
+      HORIZON_ELY_CLIENT_ID: ${{ vars.HORIZON_ELY_CLIENT_ID }}
+      HORIZON_MSA_CLIENT_ID: ${{ vars.HORIZON_MSA_CLIENT_ID }}
+    defaults:
+      run:
+        working-directory: launcher
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: launcher
+          shared-key: windows-exe
+      - name: Test
+        if: github.event_name == 'workflow_dispatch' && inputs.run_tests
+        run: cargo test --release --locked
+      - name: Build
+        run: cargo build --release --locked
+      - name: Version
+        run: target/release/horizon-launcher.exe --version
+      - name: Only system libraries
+        run: python ../tools/check_imports.py target/release/horizon-launcher.exe
+      - name: Collect
+        run: |
+          mkdir -p out
+          cp target/release/horizon-launcher.exe out/horizon-launcher.exe
+          # The same binary under the setup's name opens the per-user installer (launcher/src/installer.rs).
+          cp target/release/horizon-launcher.exe out/horizon-launcher-setup.exe
+          (cd out && sha256sum horizon-launcher.exe horizon-launcher-setup.exe > SHA256SUMS.txt && cat SHA256SUMS.txt)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: horizon-launcher-windows-x64
+          path: launcher/out/*
+          if-no-files-found: error
+          retention-days: 30
+
+  release:
+    # Only a pushed exe-v* tag publishes anything.
+    if: startsWith(github.ref, 'refs/tags/exe-v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: horizon-launcher-windows-x64
+          path: out
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" out/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Horizon Launcher $TAG" \
+            --notes "Windows x64 build of the launcher. SHA-256 of each file is in SHA256SUMS.txt." \
+            --prerelease
