@@ -2574,7 +2574,7 @@ fn java_player_with(
     let pass = launch(ep, client_id, store, accounts).map_err(|e| e.to_string())?;
     
     // Determine the playing account from the gate's result.
-    let (account, cached_secrets) = pass
+    let (account, _) = pass
         .session
         .or(pass.owner)
         .ok_or_else(|| NoOwner.to_string())?;
