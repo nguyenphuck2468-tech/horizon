@@ -577,7 +577,6 @@ impl Secrets {
     }
     /// Whether the Minecraft services confirmed the account owns the game. Never true for
     /// Ely.by, which has no such answer.
-    #[allow(dead_code)]
     fn owns_minecraft(&self) -> bool {
         self.owns && !is_ely(self)
     }
@@ -2596,7 +2595,7 @@ fn java_player_with(
             (!is_ely(&secrets) && secrets.owns_minecraft()).then(|| (a.clone(), secrets))
         })
     };
-    let (account, secrets) = pass
+    let (account, mut secrets) = pass
         .session
         .or(pass.owner)
         .or_else(kept)
@@ -2609,7 +2608,7 @@ fn java_player_with(
             .strip_prefix(ELY_ACCESS_PREFIX)
             .unwrap_or(&secrets.minecraft_token)
             .to_owned(),
-        xuid: secrets.xuid.unwrap_or_default(),
+        xuid: secrets.xuid.take().unwrap_or_default(),
         elyby: is_ely(&secrets),
     })
 }
