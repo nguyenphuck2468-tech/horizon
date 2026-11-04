@@ -307,11 +307,23 @@ fn is_ely(secrets: &Secrets) -> bool {
     secrets.minecraft_token.starts_with(ELY_ACCESS_PREFIX)
 }
 
+static ELY_KNOWN: Mutex<Vec<(String, bool)>> = Mutex::new(Vec::new());
+
+/// Whether the account signed in through Ely.by. Asked while drawing, so the keychain is read
+/// once per account and the answer kept.
 pub fn is_ely_account(uuid: &str) -> bool {
-    secrets_in(store(), uuid).is_some_and(|secrets| is_ely(&secrets))
+    if let Some(&(_, ely)) = ELY_KNOWN.lock().unwrap().iter().find(|(u, _)| u == uuid) {
+        return ely;
+    }
+    let ely = secrets_in(store(), uuid).is_some_and(|secrets| is_ely(&secrets));
+    let mut known = ELY_KNOWN.lock().unwrap();
+    known.retain(|(u, _)| u != uuid);
+    known.push((uuid.to_owned(), ely));
+    ely
 }
 
 fn finish_ely_sign_in(tokens: crate::ely::Tokens) -> (Account, Secrets) {
+    ELY_KNOWN.lock().unwrap().retain(|(u, _)| *u != tokens.profile.uuid);
     let account = Account {
         uuid: tokens.profile.uuid,
         name: tokens.profile.name,
@@ -583,7 +595,7 @@ impl Secrets {
             minecraft_token: mc.token,
             minecraft_expires_at: mc.expires_at,
             xuid: mc.xuid,
-            owns: false,
+            owns: true,
         }
     }
 }
@@ -628,10 +640,12 @@ fn check_ely(account: &Account, mut secrets: Secrets, progress: &dyn Fn(session:
                 secrets,
             )
         }
-        Err(error) => {
+        Err(crate::ely::RefreshError::Rejected(error)) => {
             secrets.sign_in_required = true;
             Check::NoAnswer(error, secrets)
         }
+        // Network or server trouble: keep the sign-in, try again later.
+        Err(crate::ely::RefreshError::Unavailable(error)) => Check::NoAnswer(error, secrets),
     }
 }
 
@@ -2137,7 +2151,11 @@ impl SignIn {
     }
 
     fn start_expected(expected: Option<Account>) -> Self {
-        Self::start_expected_provider(expected, false)
+        // Re-signing in an Ely.by account goes back to Ely.by, whatever the caller asked for.
+        if expected.as_ref().is_some_and(|a| is_ely_account(&a.uuid)) {
+            return Self::start_ely_provider(expected, false);
+        }
+        Self::start_microsoft(expected)
     }
 
     pub fn start_ely() -> Self {
@@ -2150,14 +2168,49 @@ impl SignIn {
 
     /// Explicit fallback for a user who configured a confidential Ely.by
     /// application. The normal UI and CLI never select this automatically.
+    #[allow(dead_code)]
     pub fn start_ely_callback() -> Self {
         Self::start_ely_provider(None, true)
     }
 
-    fn start_expected_provider(expected: Option<Account>) -> Self {
-        Self::start_ely_provider(expected, false)
+    fn start_microsoft(expected: Option<Account>) -> Self {
+        use std::sync::atomic::Ordering;
+        let state = std::sync::Arc::new(Mutex::new(SignInState::Starting));
+        let cancel = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+        let (thread_state, thread_cancel) = (state.clone(), cancel.clone());
+        std::thread::spawn(move || {
+            let set = |s| *thread_state.lock().unwrap() = s;
+            let result = (|| {
+                let ep = Endpoints::live();
+                let client_id = client_id().ok_or(NOT_CONFIGURED)?;
+                let code = device_code(&ep, &client_id)?;
+                set(SignInState::Code(code.clone()));
+                let ms = wait_for_sign_in(&ep, &client_id, &code, &|| {
+                    thread_cancel.load(Ordering::Relaxed)
+                })?;
+                let progress = |phase| set(SignInState::Working(phase));
+                let (account, secrets) = finish_sign_in_with_progress(&ep, ms, &progress)?;
+                progress(session::Phase::Queued);
+                let store = store();
+                let _operation = session::lock(store)?;
+                let mut accounts = Accounts::load();
+                accept_sign_in(
+                    &mut accounts,
+                    store,
+                    expected.as_ref(),
+                    account.clone(),
+                    &secrets,
+                    &|| thread_cancel.load(Ordering::Relaxed),
+                    &progress,
+                )?;
+                progress(session::Phase::Saving);
+                accounts.save()?;
+                Ok(account)
+            })();
+            set(SignInState::Done(result));
+        });
+        Self { state, cancel }
     }
-
     fn start_ely_provider(expected: Option<Account>, callback: bool) -> Self {
         use std::sync::atomic::Ordering;
         let state = std::sync::Arc::new(Mutex::new(SignInState::Starting));

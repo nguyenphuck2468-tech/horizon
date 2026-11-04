@@ -149,8 +149,18 @@ fn poll_device(code: &DeviceCode) -> Result<DevicePoll, String> {
     tokens(status, &body).map(DevicePoll::Done)
 }
 
-pub fn refresh(refresh_token: &str) -> Result<Tokens, String> {
-    let client_id = client_id().ok_or("This build has no Ely.by public client ID.")?;
+/// Why a refresh failed: Ely.by refused the token (sign in again), or could not be asked
+/// (network or server trouble: the sign-in is still good, try later).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum RefreshError {
+    Rejected(String),
+    Unavailable(String),
+}
+
+pub fn refresh(refresh_token: &str) -> Result<Tokens, RefreshError> {
+    let client_id = client_id().ok_or_else(|| {
+        RefreshError::Unavailable("This build has no Ely.by public client ID.".into())
+    })?;
     let (status, body) = post_form(
         TOKEN_URL,
         &[
@@ -159,8 +169,21 @@ pub fn refresh(refresh_token: &str) -> Result<Tokens, String> {
             ("refresh_token", &refresh_token.to_owned()),
             ("grant_type", &"refresh_token".to_owned()),
         ],
-    )?;
-    tokens(status, &body)
+    )
+    .map_err(RefreshError::Unavailable)?;
+    if status >= 500 {
+        return Err(RefreshError::Unavailable(error_message(
+            &body,
+            "Ely.by is unavailable right now.",
+        )));
+    }
+    if status != 200 {
+        return Err(RefreshError::Rejected(error_message(
+            &body,
+            "Ely.by refused the sign-in.",
+        )));
+    }
+    tokens(status, &body).map_err(RefreshError::Unavailable)
 }
 
 fn tokens(status: u16, body: &Value) -> Result<Tokens, String> {
@@ -267,15 +290,22 @@ impl Callback {
             }
             match self.listener.accept() {
                 Ok((mut stream, _)) => {
-                    let request = read_callback(&mut stream)?;
+                    // The accepted socket may inherit the listener's non-blocking mode.
+                    let _ = stream.set_nonblocking(false);
+                    let _ = stream.set_read_timeout(Some(Duration::from_secs(5)));
+                    let Ok(request) = read_callback(&mut stream) else {
+                        // A stray or slow local connection must not end the sign-in.
+                        continue;
+                    };
                     if request.method != "GET" || request.path != "/callback" {
                         respond(&mut stream, "Invalid callback request.");
                         continue;
                     }
                     let query = request.query;
                     if query.get("state").map(String::as_str) != Some(self.state.as_str()) {
-                        respond(&mut stream, "The sign-in state did not match. Start again.");
-                        return Err("The Ely.by sign-in state did not match. Start again.".into());
+                        // Not our request (another local program, a stale tab): keep waiting.
+                        respond(&mut stream, "The sign-in state did not match.");
+                        continue;
                     }
                     let code = match query.get("code") {
                         Some(code) if !code.is_empty() => code,
@@ -468,4 +498,49 @@ fn now() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map_or(0, |duration| duration.as_secs())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::{Read, Write};
+
+    #[test]
+    fn encode_and_decode_round_trip() {
+        let text = "account_info offline_access/ü &=+%";
+        assert_eq!(decode(&encode(text)).as_deref(), Some(text));
+        assert_eq!(encode("a b"), "a%20b");
+        assert_eq!(decode("a+b%21").as_deref(), Some("a b!"));
+        assert_eq!(decode("%zz"), None);
+        assert_eq!(decode("%4"), None);
+    }
+
+    #[test]
+    fn error_message_prefers_the_description() {
+        let v: Value = serde_json::json!({"error": "invalid_grant", "error_description": "Expired"});
+        assert_eq!(error_message(&v, "x"), "Expired");
+        assert_eq!(error_message(&Value::Null, "fallback"), "fallback");
+    }
+
+    #[test]
+    fn the_callback_request_is_read() {
+        let listener = TcpListener::bind(("127.0.0.1", 0)).unwrap();
+        let port = listener.local_addr().unwrap().port();
+        let client = std::thread::spawn(move || {
+            let mut s = TcpStream::connect(("127.0.0.1", port)).unwrap();
+            s.write_all(b"GET /callback?code=abc%20d&state=s1 HTTP/1.1\r\nHost: x\r\n\r\n")
+                .unwrap();
+            let mut out = String::new();
+            let _ = s.read_to_string(&mut out);
+        });
+        let (mut stream, _) = listener.accept().unwrap();
+        let request = read_callback(&mut stream).unwrap();
+        assert_eq!(request.method, "GET");
+        assert_eq!(request.path, "/callback");
+        assert_eq!(request.query.get("code").map(String::as_str), Some("abc d"));
+        assert_eq!(request.query.get("state").map(String::as_str), Some("s1"));
+        respond(&mut stream, "ok");
+        drop(stream);
+        client.join().unwrap();
+    }
 }

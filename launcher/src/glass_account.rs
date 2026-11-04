@@ -40,7 +40,7 @@ impl Launcher {
                         .map(|a| a.name.clone())
                         .unwrap_or_default(),
                     if elyby {
-                        (Tone::Live, tr("Ely.by account · online servers too"))
+                        (Tone::Live, tr("Ely.by account · servers that accept Ely.by"))
                     } else {
                         (Tone::Live, tr("Microsoft account · online servers too"))
                     },
