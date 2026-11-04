@@ -358,6 +358,7 @@ pub(super) fn renew_for_game_with(
 /// Mojang's session server: what an online-mode server asks to check that a player is who they
 /// say (`hasJoined`), after the client said so (`join`).
 pub const SESSION_SERVER: &str = "https://sessionserver.mojang.com";
+const ELY_SESSION_SERVER: &str = "https://authserver.ely.by";
 
 /// Prove to a service that `who` owns their Minecraft account the way a client proves it to an
 /// online-mode server: tell Mojang's session server that this account joins `server_id`, a
@@ -397,11 +398,23 @@ pub(super) fn join_server_with(
         read(store, &account.uuid)?.ok_or("Sign in with a Minecraft account first.")?
     };
     let body = json!({
-        "accessToken": secrets.minecraft_token,
+        "accessToken": secrets
+            .minecraft_token
+            .strip_prefix(super::ELY_ACCESS_PREFIX)
+            .unwrap_or(&secrets.minecraft_token),
         "selectedProfile": account.uuid,
         "serverId": server_id,
     });
-    let url = format!("{session}/session/minecraft/join");
+    let session = if super::is_ely(&secrets) {
+        ELY_SESSION_SERVER
+    } else {
+        session
+    };
+    let url = if super::is_ely(&secrets) {
+        format!("{session}/session/join")
+    } else {
+        format!("{session}/session/minecraft/join")
+    };
     match send(
         request_to("POST", &url),
         Some(Body::Json(body)),

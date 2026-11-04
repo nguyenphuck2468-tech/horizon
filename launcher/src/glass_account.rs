@@ -29,16 +29,23 @@ impl Launcher {
         let t = self.theme;
         let now = self.accounts.player();
         let (uuid, name, status) = match &now {
-            Player::Microsoft(uuid) => (
-                Some(uuid.clone()),
-                self.accounts
-                    .accounts
-                    .iter()
-                    .find(|a| &a.uuid == uuid)
-                    .map(|a| a.name.clone())
-                    .unwrap_or_default(),
-                (Tone::Live, tr("Microsoft account · online servers too")),
-            ),
+            Player::Microsoft(uuid) => {
+                let elyby = account::is_ely_account(uuid);
+                (
+                    Some(uuid.clone()),
+                    self.accounts
+                        .accounts
+                        .iter()
+                        .find(|a| &a.uuid == uuid)
+                        .map(|a| a.name.clone())
+                        .unwrap_or_default(),
+                    if elyby {
+                        (Tone::Live, tr("Ely.by account · online servers too"))
+                    } else {
+                        (Tone::Live, tr("Microsoft account · online servers too"))
+                    },
+                )
+            }
             Player::Offline(name) => (
                 None,
                 name.clone(),

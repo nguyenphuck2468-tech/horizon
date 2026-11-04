@@ -1825,6 +1825,13 @@ impl Launcher {
         self.begin_sign_in(None);
     }
 
+    fn start_ely_sign_in(&mut self) {
+        self.cancel_sign_in();
+        self.sign_in = Some(SignIn::start_ely());
+        self.sign_in_target = None;
+        self.sign_in_state = Some(SignInState::Starting);
+    }
+
     fn re_sign_in(&mut self, uuid: &str) {
         if let Some(account) = self.accounts.find(uuid).cloned() {
             self.begin_sign_in(Some(account));
@@ -4235,13 +4242,13 @@ impl Launcher {
     /// happening (the code to enter, a problem), and its buttons.
     fn sign_in_parts(&self, cx: &mut Context<Self>) -> (String, Div, Option<AnyElement>) {
         let t = self.theme;
-        let configured = account::client_id().is_some();
+        let configured = account::client_id().is_some() || account::ely_configured();
         let busy = matches!(
             self.sign_in_state,
             Some(SignInState::Starting | SignInState::Code(_) | SignInState::Working(_))
         );
         let detail = match &self.sign_in_state {
-            _ if !configured => div().child(tr(account::NOT_CONFIGURED)),
+            _ if !configured => div().child(tr("This build has no configured account provider.")),
             Some(SignInState::Starting) => div().child(tr("Asking Microsoft…")),
             Some(SignInState::Working(phase)) => div().child(tr(phase.label())),
             Some(SignInState::Code(code)) => div()
@@ -4252,12 +4259,14 @@ impl Launcher {
                     "Open {link} in your browser and enter this code:",
                     &[("link", &code.verification_uri)],
                 ))
-                .child(
-                    text(theme::HEADING)
-                        .font_family(theme::MONO)
-                        .text_color(t.ink)
-                        .child(code.user_code.clone()),
-                ),
+                .when(!code.user_code.is_empty(), |d| {
+                    d.child(
+                        text(theme::HEADING)
+                            .font_family(theme::MONO)
+                            .text_color(t.ink)
+                            .child(code.user_code.clone()),
+                    )
+                }),
             Some(SignInState::Done(Ok(a))) => {
                 div().child(trf("Signed in as {name}.", &[("name", &a.name)]))
             }
@@ -4297,16 +4306,16 @@ impl Launcher {
                 div()
                     .flex()
                     .gap(px(4.))
-                    .child(
-                        button("sign-in-copy", "Copy code", Kind::Secondary, &t).on_click(
+                    .when(!user_code.is_empty(), |d| {
+                        d.child(button("sign-in-copy", "Copy code", Kind::Secondary, &t).on_click(
                             move |_, _, cx| {
                                 copy_to_clipboard(
                                     cx,
                                     gpui::ClipboardItem::new_string(user_code.clone()),
                                 )
                             },
-                        ),
-                    )
+                        ))
+                    })
                     .child(
                         button("sign-in-open", "Open link", Kind::Secondary, &t)
                             .on_click(move |_, _, cx| cx.open_url(&uri)),
@@ -4333,22 +4342,37 @@ impl Launcher {
         } else {
             let target = self.sign_in_target.as_ref().map(|a| a.uuid.clone());
             let targeted = target.is_some();
-            // Re-signing one account names it; adding one is Microsoft's own button.
-            let sign_in = if targeted {
-                button("sign-in", "Sign in again", Kind::Secondary, &t)
+            let mut actions = div().flex().gap(px(4.));
+            if targeted {
+                actions = actions.child(
+                    button("sign-in", "Sign in again", Kind::Secondary, &t).on_click(
+                        cx.listener(move |this, _: &ClickEvent, _, cx| {
+                            if let Some(uuid) = &target {
+                                this.re_sign_in(uuid);
+                            }
+                            cx.notify();
+                        }),
+                    ),
+                );
             } else {
-                microsoft::sign_in_button("sign-in", &t)
-            };
-            let mut actions = div().flex().gap(px(4.)).child(sign_in.on_click(cx.listener(
-                move |this, _: &ClickEvent, _, cx| {
-                    if let Some(uuid) = &target {
-                        this.re_sign_in(uuid);
-                    } else {
-                        this.start_sign_in();
-                    }
-                    cx.notify();
-                },
-            )));
+                if account::client_id().is_some() {
+                    actions = actions.child(microsoft::sign_in_button("sign-in-microsoft", &t).on_click(
+                        cx.listener(|this, _: &ClickEvent, _, cx| {
+                            this.start_sign_in();
+                            cx.notify();
+                        }),
+                    ));
+                }
+                if account::ely_configured() {
+                    actions = actions.child(
+                        button("sign-in-elyby", "Sign in with Ely.by", Kind::Secondary, &t)
+                            .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                                this.start_ely_sign_in();
+                                cx.notify();
+                            })),
+                    );
+                }
+            }
             if targeted {
                 actions = actions.child(
                     button("sign-in-cancel-target", "Cancel", Kind::Ghost, &t).on_click(

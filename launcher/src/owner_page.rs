@@ -26,7 +26,11 @@ impl Launcher {
     /// Opens the screen and starts the sign-in on it.
     pub(crate) fn sign_in_to_play(&mut self) {
         self.owner_screen_open = true;
-        self.start_sign_in();
+        if account::client_id().is_some() {
+            self.start_sign_in();
+        } else {
+            self.start_ely_sign_in();
+        }
     }
 
     /// Closes it; it comes back with the next refused Play.
@@ -42,11 +46,11 @@ impl Launcher {
     pub(crate) fn owner_screen(&mut self, cx: &mut Context<Self>) -> Stateful<Div> {
         let t = self.theme;
         let n = t.night;
-        let configured = account::client_id().is_some();
+        let configured = account::client_id().is_some() || account::ely_configured();
         // The screenshot preview shows a code without asking Microsoft for one.
         let state = match &self.sign_in_state {
             _ if sign_in_preview() => Shown::Code("https://www.microsoft.com/link", "K7Q-4MXR"),
-            _ if !configured => Shown::Error(tr(account::NOT_CONFIGURED)),
+            _ if !configured => Shown::Error(tr("This build has no configured account provider.")),
             Some(SignInState::Starting) => Shown::Starting("Asking Microsoft…"),
             Some(SignInState::Working(phase)) => Shown::Starting(phase.label()),
             Some(SignInState::Code(code)) => Shown::Code(&code.verification_uri, &code.user_code),

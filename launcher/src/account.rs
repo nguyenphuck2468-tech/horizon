@@ -1,4 +1,5 @@
-//! Microsoft account sign-in (docs/microsoft-account.md): the OAuth device-code flow, then Xbox
+//! Microsoft and Ely.by account sign-in: both use device-code flows by default, while Ely.by
+//! keeps an explicit OAuth2 loopback callback fallback. Microsoft then uses Xbox
 //! Live, XSTS and the Minecraft services, the game ownership check and the profile. Secrets (the
 //! Microsoft refresh token, the Minecraft access token, the last ownership answer) live in the OS
 //! keychain, or in a file only the player can read where there is none; accounts.json keeps only
@@ -44,6 +45,14 @@ pub fn client_id() -> Option<String> {
         .or_else(|| option_env!("HORIZON_MSA_CLIENT_ID").map(str::to_owned))
         .map(|id| id.trim().to_owned())
         .filter(|id| !id.is_empty())
+}
+
+pub fn ely_configured() -> bool {
+    crate::ely::configured()
+}
+
+pub fn ely_callback_configured() -> bool {
+    crate::ely::callback_configured()
 }
 
 /// Where the requests go: the real services, or a mock in tests.
@@ -134,6 +143,18 @@ pub struct DeviceCode {
     pub interval: u64,
     pub expires_at: u64,
     device_code: String,
+}
+
+impl From<crate::ely::DeviceCode> for DeviceCode {
+    fn from(code: crate::ely::DeviceCode) -> Self {
+        Self {
+            user_code: code.user_code,
+            verification_uri: code.verification_uri,
+            interval: code.interval,
+            expires_at: code.expires_at,
+            device_code: String::new(),
+        }
+    }
 }
 
 impl std::fmt::Debug for DeviceCode {
@@ -277,6 +298,44 @@ fn refresh_ms(ep: &Endpoints, client_id: &str, refresh: &str) -> Result<MsTokens
         "Microsoft",
     )?;
     ms_tokens(status, &v)
+}
+
+const ELY_ACCESS_PREFIX: &str = "elyby:";
+const ELY_REFRESH_PREFIX: &str = "elyby-refresh:";
+
+fn is_ely(secrets: &Secrets) -> bool {
+    secrets.minecraft_token.starts_with(ELY_ACCESS_PREFIX)
+}
+
+pub fn is_ely_account(uuid: &str) -> bool {
+    secrets_in(store(), uuid).is_some_and(|secrets| is_ely(&secrets))
+}
+
+fn finish_ely_sign_in(tokens: crate::ely::Tokens) -> (Account, Secrets) {
+    let account = Account {
+        uuid: tokens.profile.uuid,
+        name: tokens.profile.name,
+        skin: None,
+        cape: None,
+    };
+    let refresh = tokens.refresh_token.unwrap_or_default();
+    (
+        account,
+        Secrets {
+            refresh_token: format!("{ELY_REFRESH_PREFIX}{refresh}"),
+            sign_in_required: false,
+            minecraft_token: format!("{ELY_ACCESS_PREFIX}{}", tokens.access_token),
+            minecraft_expires_at: tokens.expires_at,
+            xuid: None,
+            // Ely.by is an alternate Minecraft authentication service. Its
+            // account is allowed to play through Horizon without Microsoft ownership.
+            owns: true,
+        },
+    )
+}
+
+pub fn finish_ely_for_cli(tokens: crate::ely::Tokens) -> (Account, Secrets) {
+    finish_ely_sign_in(tokens)
 }
 
 // ----- Xbox Live, XSTS, Minecraft ----------------------------------------------------------------
@@ -524,7 +583,7 @@ impl Secrets {
             minecraft_token: mc.token,
             minecraft_expires_at: mc.expires_at,
             xuid: mc.xuid,
-            owns: true,
+            owns: false,
         }
     }
 }
@@ -537,6 +596,43 @@ enum Check {
     DoesNot(Secrets),
     /// No answer (no network, a sign-in that can't be renewed): the last answer stands.
     NoAnswer(String, Secrets),
+}
+
+fn check_ely(account: &Account, mut secrets: Secrets, progress: &dyn Fn(session::Phase)) -> Check {
+    if secrets.minecraft_expires_at > now() + RENEW_BEFORE {
+        return Check::Owns(account.clone(), secrets);
+    }
+    progress(session::Phase::ElyBy);
+    let refresh = secrets
+        .refresh_token
+        .strip_prefix(ELY_REFRESH_PREFIX)
+        .unwrap_or_default();
+    if refresh.is_empty() {
+        secrets.sign_in_required = true;
+        return Check::NoAnswer(SIGN_IN_AGAIN.into(), secrets);
+    }
+    match crate::ely::refresh(refresh) {
+        Ok(tokens) => {
+            secrets.minecraft_token = format!("{ELY_ACCESS_PREFIX}{}", tokens.access_token);
+            secrets.minecraft_expires_at = tokens.expires_at;
+            if let Some(refresh) = tokens.refresh_token {
+                secrets.refresh_token = format!("{ELY_REFRESH_PREFIX}{refresh}");
+            }
+            Check::Owns(
+                Account {
+                    uuid: tokens.profile.uuid,
+                    name: tokens.profile.name,
+                    skin: account.skin.clone(),
+                    cape: account.cape.clone(),
+                },
+                secrets,
+            )
+        }
+        Err(error) => {
+            secrets.sign_in_required = true;
+            Check::NoAnswer(error, secrets)
+        }
+    }
 }
 
 /// Asks whether `account` owns the game, with a Minecraft token renewed through the refresh token
@@ -555,6 +651,9 @@ fn check_with(
 ) -> Check {
     if secrets.sign_in_required {
         return Check::NoAnswer(SIGN_IN_AGAIN.into(), secrets);
+    }
+    if is_ely(&secrets) {
+        return check_ely(account, secrets, progress);
     }
     if force || secrets.minecraft_expires_at <= now() + RENEW_BEFORE {
         progress(session::Phase::Microsoft);
@@ -1900,8 +1999,11 @@ pub fn write_session_file(
     let body = json!({
         "name": account.name,
         "uuid": account.uuid,
-        "access_token": secrets.minecraft_token,
-        "user_type": "msa",
+        "access_token": secrets
+            .minecraft_token
+            .strip_prefix(ELY_ACCESS_PREFIX)
+            .unwrap_or(&secrets.minecraft_token),
+        "user_type": if is_ely(secrets) { "elyby" } else { "msa" },
         "xuid": secrets.xuid,
     });
     std::io::Write::write_all(&mut file, body.to_string().as_bytes()).map_err(|e| e.to_string())?;
@@ -2035,6 +2137,28 @@ impl SignIn {
     }
 
     fn start_expected(expected: Option<Account>) -> Self {
+        Self::start_expected_provider(expected, false)
+    }
+
+    pub fn start_ely() -> Self {
+        Self::start_ely_provider(None, false)
+    }
+
+    pub fn start_ely_for(account: Account) -> Self {
+        Self::start_ely_provider(Some(account), false)
+    }
+
+    /// Explicit fallback for a user who configured a confidential Ely.by
+    /// application. The normal UI and CLI never select this automatically.
+    pub fn start_ely_callback() -> Self {
+        Self::start_ely_provider(None, true)
+    }
+
+    fn start_expected_provider(expected: Option<Account>) -> Self {
+        Self::start_ely_provider(expected, false)
+    }
+
+    fn start_ely_provider(expected: Option<Account>, callback: bool) -> Self {
         use std::sync::atomic::Ordering;
         let state = std::sync::Arc::new(Mutex::new(SignInState::Starting));
         let cancel = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
@@ -2042,15 +2166,27 @@ impl SignIn {
         std::thread::spawn(move || {
             let set = |s| *thread_state.lock().unwrap() = s;
             let result = (|| {
-                let ep = Endpoints::live();
-                let client_id = client_id().ok_or(NOT_CONFIGURED)?;
-                let code = device_code(&ep, &client_id)?;
-                set(SignInState::Code(code.clone()));
-                let ms = wait_for_sign_in(&ep, &client_id, &code, &|| {
-                    thread_cancel.load(Ordering::Relaxed)
-                })?;
                 let progress = |phase| set(SignInState::Working(phase));
-                let (account, secrets) = finish_sign_in_with_progress(&ep, ms, &progress)?;
+                let (account, secrets) = if callback {
+                    let (url, callback) = crate::ely::begin()?;
+                    set(SignInState::Code(DeviceCode {
+                        user_code: String::new(),
+                        verification_uri: url,
+                        interval: 0,
+                        expires_at: now() + 600,
+                        device_code: String::new(),
+                    }));
+                    let tokens = callback.wait(&|| thread_cancel.load(Ordering::Relaxed))?;
+                    finish_ely_sign_in(tokens)
+                } else {
+                    let code = crate::ely::device_code()?;
+                    set(SignInState::Code(code.clone().into()));
+                    let tokens = crate::ely::wait_for_device_code(
+                        &code,
+                        &|| thread_cancel.load(Ordering::Relaxed),
+                    )?;
+                    finish_ely_sign_in(tokens)
+                };
                 progress(session::Phase::Queued);
                 let store = store();
                 let _operation = session::lock(store)?;
