@@ -1725,6 +1725,7 @@ pub(crate) const GLIBC_LOADER: &str = "/lib64/ld-linux-x86-64.so.2";
 /// Runs `cmd` with Java at `home`: JAVA_HOME names it and its `bin` leads the PATH, as the
 /// versions' own preparers look for Java.
 fn with_java(cmd: &mut Command, home: &Path) {
+    crate::process::scrub_secrets(cmd);
     let mut path = vec![home.join("bin")];
     path.extend(
         std::env::var_os("PATH")
@@ -2274,6 +2275,7 @@ pub fn client_command(tag: &str) -> Command {
     let _ = fs::create_dir_all(&home);
     let mut cmd = Command::new(client_program(tag));
     strip_launcher_render_env(&mut cmd);
+    crate::process::scrub_secrets(&mut cmd);
     cmd.current_dir(home).arg("--resources").arg(resources(tag));
     cmd.env_remove("HORIZON_ACCOUNT_SESSIONS");
     // How the game asks for a renewed session (`account session`) while it runs.
@@ -2306,6 +2308,7 @@ fn client_program(tag: &str) -> PathBuf {
 
 pub fn server_command(tag: &str, folder: &Path) -> Command {
     let mut cmd = Command::new(version_dir(tag).join(CLIENT));
+    crate::process::scrub_secrets(&mut cmd);
     cmd.current_dir(folder)
         .arg("--resources")
         .arg(resources(tag))

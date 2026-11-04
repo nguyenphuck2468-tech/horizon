@@ -1977,14 +1977,33 @@ fn account_command(action: AccountCmd, as_json: bool) -> Result<(), String> {
                     match sign_in.state() {
                         account::SignInState::Code(code) if !shown => {
                             shown = true;
-                            eprintln!("To sign in with Ely.by, open {} in a browser", code.verification_uri);
+                            if as_json {
+                                json(serde_json::json!({
+                                    "link": code.verification_uri,
+                                    "code": code.user_code,
+                                }));
+                            } else if code.user_code.is_empty() {
+                                eprintln!(
+                                    "To sign in with Ely.by, open {} in a browser",
+                                    code.verification_uri
+                                );
+                            } else {
+                                eprintln!(
+                                    "To sign in with Ely.by, open {} in a browser and enter the code {}",
+                                    code.verification_uri, code.user_code
+                                );
+                            }
                         }
                         account::SignInState::Done(result) => break result?,
                         _ => {}
                     }
                     std::thread::sleep(std::time::Duration::from_millis(200));
                 };
-                println!("Signed in as {}.", signed_in.name);
+                if as_json {
+                    json(serde_json::json!({ "signed_in": signed_in.uuid }));
+                } else {
+                    println!("Signed in as {}.", signed_in.name);
+                }
                 return Ok(());
             }
             let client_id = account::client_id().ok_or(account::NOT_CONFIGURED)?;

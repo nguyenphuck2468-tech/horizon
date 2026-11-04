@@ -167,7 +167,8 @@ fn poll_device(code: &DeviceCode) -> Result<DevicePoll, String> {
         Ok(answer) => answer,
         Err(error) => return Ok(DevicePoll::Offline(error)),
     };
-    if status >= 500 {
+    // Server trouble or rate limiting: the code is still good, keep polling.
+    if status >= 500 || status == 429 || status == 408 {
         return Ok(DevicePoll::Offline(error_message(
             &body,
             "Ely.by is unavailable right now.",

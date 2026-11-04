@@ -477,6 +477,7 @@ pub fn command(version: &Value, launch: &Launch) -> Result<Command, String> {
     jvm.extend(jvm_list.iter().map(|a| fill(a, &vars)));
     jvm.extend(launch.jvm_args.iter().cloned());
     let mut cmd = Command::new(launch.java);
+    crate::process::scrub_secrets(&mut cmd);
     cmd.current_dir(launch.game_dir)
         .args(&jvm)
         .arg(main)
