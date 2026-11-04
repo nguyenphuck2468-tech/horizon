@@ -2610,3 +2610,196 @@ fn java_player_uses_account_uuid_not_name_for_keychain_lookup() {
     let player = result.unwrap();
     assert_eq!(player.uuid, original_uuid, "Player should have the original UUID");
 }
+
+
+// ============================================================================
+// Tests proving no fallback needed and session_file boundary
+// ============================================================================
+
+#[test]
+fn java_player_returns_no_owner_when_no_account_owns_minecraft() {
+    // Scenario: All accounts in the list do not own Minecraft
+    // Expected: Return NoOwner error, do NOT fallback to another account
+    
+    let store = MemoryStore::default();
+    let mut accounts = Accounts::default();
+    
+    // Create multiple accounts that don't own Minecraft
+    for i in 0..3 {
+        let (account, secrets) = finish_sign_in(ms_tokens());
+        let mut no_own_secrets = secrets.clone();
+        no_own_secrets.owns = false; // Does not own Minecraft
+        
+        accounts.update(account.clone());
+        store.set(&account.uuid, &serde_json::to_string(&no_own_secrets).unwrap());
+        
+        if i == 0 {
+            accounts.selected = Some(account.uuid.clone());
+        }
+    }
+    
+    let result = java_player_with(
+        &test_endpoints(),
+        None,
+        &store,
+        &mut accounts,
+    );
+    
+    // Should fail with NoOwner, not fallback to another account
+    assert!(result.is_err(), "java_player_with must return NoOwner when no account owns Minecraft");
+    let err = result.unwrap_err();
+    assert!(
+        err.contains("no account") || err.contains("NoOwner"),
+        "Error should indicate no owner: {}",
+        err
+    );
+}
+
+#[test]
+fn java_player_does_not_fallback_when_selected_account_is_elyby() {
+    // Scenario: Selected account is Ely.by, other accounts are Microsoft
+    // Expected: Block launch (Ely.by not supported), do NOT fallback to Microsoft account
+    
+    let store = MemoryStore::default();
+    let mut accounts = Accounts::default();
+    
+    // Create Ely.by account (selected)
+    let (ely_account, ely_secrets) = finish_ely_sign_in(ely_tokens());
+    accounts.update(ely_account.clone());
+    accounts.selected = Some(ely_account.uuid.clone());
+    store.set(&ely_account.uuid, &serde_json::to_string(&ely_secrets).unwrap());
+    
+    // Create Microsoft account (not selected)
+    let (ms_account, ms_secrets) = finish_sign_in(ms_tokens());
+    accounts.update(ms_account.clone());
+    store.set(&ms_account.uuid, &serde_json::to_string(&ms_secrets).unwrap());
+    
+    let result = java_player_with(
+        &test_endpoints(),
+        None,
+        &store,
+        &mut accounts,
+    );
+    
+    // Should fail because selected account is Ely.by, not fallback to Microsoft
+    assert!(result.is_err(), "java_player_with must block Ely.by, not fallback");
+    let err = result.unwrap_err();
+    assert!(
+        err.contains("Ely.by"),
+        "Error should mention Ely.by: {}",
+        err
+    );
+}
+
+#[test]
+fn launch_returns_no_owner_when_all_accounts_fail_ownership_check() {
+    // Scenario: Multiple accounts, all fail ownership check
+    // Expected: launch() returns NoOwner, no fallback
+    
+    let store = MemoryStore::default();
+    let mut accounts = Accounts::default();
+    
+    // Create 3 accounts that don't own Minecraft
+    for i in 0..3 {
+        let (account, mut secrets) = finish_sign_in(ms_tokens());
+        secrets.owns = false;
+        
+        accounts.update(account.clone());
+        store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap());
+        
+        if i == 0 {
+            accounts.selected = Some(account.uuid.clone());
+        }
+    }
+    
+    let result = launch(
+        &test_endpoints(),
+        None,
+        &store,
+        &mut accounts,
+    );
+    
+    // Should return NoOwner error
+    assert!(result.is_err(), "launch() must return NoOwner when no account owns Minecraft");
+    assert!(matches!(result.unwrap_err(), NoOwner), "Error should be NoOwner");
+}
+
+#[test]
+fn session_file_writes_user_type_correctly_for_elyby() {
+    // Verify that session_file correctly marks Ely.by accounts
+    // This ensures Horizon Client knows the provider type
+    
+    let (account, secrets) = finish_ely_sign_in(ely_tokens());
+    let dir = tempfile::tempdir().unwrap();
+    
+    let result = write_session_file(
+        dir.path(),
+        &account,
+        &secrets,
+    );
+    
+    assert!(result.is_ok(), "write_session_file should succeed");
+    let path = result.unwrap();
+    
+    // Read the file and verify content
+    let content = std::fs::read_to_string(&path).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&content).unwrap();
+    
+    assert_eq!(json["user_type"], "elyby", "user_type should be 'elyby' for Ely.by accounts");
+    assert_eq!(json["name"], account.name);
+    assert_eq!(json["uuid"], account.uuid);
+}
+
+#[test]
+fn session_file_writes_user_type_correctly_for_microsoft() {
+    // Verify that session_file correctly marks Microsoft accounts
+    
+    let (account, secrets) = finish_sign_in(ms_tokens());
+    let dir = tempfile::tempdir().unwrap();
+    
+    let result = write_session_file(
+        dir.path(),
+        &account,
+        &secrets,
+    );
+    
+    assert!(result.is_ok(), "write_session_file should succeed");
+    let path = result.unwrap();
+    
+    // Read the file and verify content
+    let content = std::fs::read_to_string(&path).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&content).unwrap();
+    
+    assert_eq!(json["user_type"], "msa", "user_type should be 'msa' for Microsoft accounts");
+    assert_eq!(json["name"], account.name);
+    assert_eq!(json["uuid"], account.uuid);
+}
+
+#[test]
+fn session_file_strips_elyby_prefix_from_token() {
+    // Verify that session_file strips the 'elyby:' prefix from tokens
+    // This ensures Horizon Client gets the raw token
+    
+    let (account, secrets) = finish_ely_sign_in(ely_tokens());
+    let dir = tempfile::tempdir().unwrap();
+    
+    let result = write_session_file(
+        dir.path(),
+        &account,
+        &secrets,
+    );
+    
+    assert!(result.is_ok(), "write_session_file should succeed");
+    let path = result.unwrap();
+    
+    // Read the file and verify token is stripped
+    let content = std::fs::read_to_string(&path).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&content).unwrap();
+    
+    let access_token = json["access_token"].as_str().unwrap();
+    assert!(
+        !access_token.starts_with("elyby:"),
+        "access_token should not have 'elyby:' prefix: {}",
+        access_token
+    );
+}
