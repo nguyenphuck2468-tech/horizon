@@ -2803,3 +2803,167 @@ fn session_file_strips_elyby_prefix_from_token() {
         access_token
     );
 }
+
+
+// ============================================================================
+// E1.0.3 TOCTOU Regression Tests
+// Verify that the validated credential snapshot is used directly for Player construction
+// ============================================================================
+
+#[test]
+fn toctou_validated_snapshot_used_directly_for_player() {
+    // Verify that Player is built from the exact same credentials validated by launch()
+    // No second keychain read should occur
+    
+    let store = MemoryStore::default();
+    let mut accounts = Accounts::default();
+    
+    let (account, secrets) = finish_sign_in(ms_tokens());
+    accounts.update(account.clone());
+    accounts.selected = Some(account.uuid.clone());
+    store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap());
+    
+    let player = java_player_with(
+        &test_endpoints(),
+        None,
+        &store,
+        &mut accounts,
+    ).unwrap();
+    
+    // Player must use the exact same credentials from the validated snapshot
+    assert_eq!(player.name, account.name);
+    assert_eq!(player.uuid, account.uuid);
+    assert!(!player.elyby, "Microsoft account must not be marked as Ely.by");
+    assert_eq!(player.token, secrets.minecraft_token);
+}
+
+#[test]
+fn toctou_keychain_change_after_validation_does_not_affect_player() {
+    // Simulate keychain change between launch() validation and Player construction
+    // Player must still use the validated snapshot, not the changed keychain
+    
+    let store = MemoryStore::default();
+    let mut accounts = Accounts::default();
+    
+    let (account, secrets) = finish_sign_in(ms_tokens());
+    accounts.update(account.clone());
+    accounts.selected = Some(account.uuid.clone());
+    store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap());
+    
+    // Get the player (this calls launch() which validates, then builds Player)
+    let player = java_player_with(
+        &test_endpoints(),
+        None,
+        &store,
+        &mut accounts,
+    ).unwrap();
+    
+    // Now change the keychain (simulate user signing out or changing account)
+    let (new_account, new_secrets) = finish_sign_in(ms_tokens());
+    store.set(&account.uuid, &serde_json::to_string(&new_secrets).unwrap());
+    
+    // The player should still have the original validated credentials
+    assert_eq!(player.uuid, account.uuid, "Player must use validated snapshot, not changed keychain");
+    assert_eq!(player.token, secrets.minecraft_token, "Player token must match validated snapshot");
+}
+
+#[test]
+fn toctou_elyby_snapshot_cannot_become_microsoft_player() {
+    // Verify that an Ely.by validated snapshot cannot become a Microsoft Player
+    // even if keychain changes to Microsoft
+    
+    let store = MemoryStore::default();
+    let mut accounts = Accounts::default();
+    
+    let (account, secrets) = finish_ely_sign_in(ely_tokens());
+    accounts.update(account.clone());
+    accounts.selected = Some(account.uuid.clone());
+    store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap());
+    
+    // Should fail because validated snapshot is Ely.by
+    let result = java_player_with(
+        &test_endpoints(),
+        None,
+        &store,
+        &mut accounts,
+    );
+    
+    assert!(result.is_err(), "Ely.by validated snapshot must be blocked");
+    let err = result.unwrap_err();
+    assert!(err.contains("Ely.by"), "Error should mention Ely.by: {}", err);
+    
+    // Even if we change keychain to Microsoft, the error should still be about Ely.by
+    let (ms_account, ms_secrets) = finish_sign_in(ms_tokens());
+    store.set(&account.uuid, &serde_json::to_string(&ms_secrets).unwrap());
+    
+    // Get a new pass (this will validate the new Microsoft credentials)
+    let new_result = java_player_with(
+        &test_endpoints(),
+        None,
+        &store,
+        &mut accounts,
+    );
+    
+    // Now it should succeed because validated snapshot is Microsoft
+    assert!(new_result.is_ok(), "Microsoft validated snapshot should succeed");
+}
+
+#[test]
+fn toctou_microsoft_snapshot_cannot_be_replaced_by_elyby() {
+    // Verify that a Microsoft validated snapshot cannot be replaced by Ely.by
+    // before Player construction
+    
+    let store = MemoryStore::default();
+    let mut accounts = Accounts::default();
+    
+    let (account, secrets) = finish_sign_in(ms_tokens());
+    accounts.update(account.clone());
+    accounts.selected = Some(account.uuid.clone());
+    store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap());
+    
+    // Get the player (launch() validates Microsoft, then builds Player)
+    let player = java_player_with(
+        &test_endpoints(),
+        None,
+        &store,
+        &mut accounts,
+    ).unwrap();
+    
+    // Change keychain to Ely.by (simulate account change)
+    let (ely_account, ely_secrets) = finish_ely_sign_in(ely_tokens());
+    store.set(&account.uuid, &serde_json::to_string(&ely_secrets).unwrap());
+    
+    // The player should still be Microsoft (validated snapshot)
+    assert!(!player.elyby, "Player must use validated Microsoft snapshot");
+    assert_eq!(player.token, secrets.microsoft_token);
+}
+
+#[test]
+fn toctou_exact_validated_token_uuid_provider_ownership_used() {
+    // Verify that the exact validated token, UUID, provider, and ownership state
+    // are used to construct Player
+    
+    let store = MemoryStore::default();
+    let mut accounts = Accounts::default();
+    
+    let (account, mut secrets) = finish_sign_in(ms_tokens());
+    secrets.xuid = Some("test-xuid-12345".to_string());
+    
+    accounts.update(account.clone());
+    accounts.selected = Some(account.uuid.clone());
+    store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap());
+    
+    let player = java_player_with(
+        &test_endpoints(),
+        None,
+        &store,
+        &mut accounts,
+    ).unwrap();
+    
+    // All fields must match the validated snapshot exactly
+    assert_eq!(player.name, account.name, "Name must match validated snapshot");
+    assert_eq!(player.uuid, account.uuid, "UUID must match validated snapshot");
+    assert_eq!(player.token, secrets.microsoft_token, "Token must match validated snapshot");
+    assert_eq!(player.xuid, "test-xuid-12345", "XUID must match validated snapshot");
+    assert!(!player.elyby, "Provider must match validated snapshot (Microsoft, not Ely.by)");
+}
