@@ -45,8 +45,13 @@ pub struct DeviceCode {
 pub enum DevicePoll {
     Pending,
     SlowDown,
+    /// Ely.by could not be reached (network trouble or a 5xx): worth trying again.
+    Offline(String),
     Done(Tokens),
 }
+
+/// How many polls in a row may fail to reach Ely.by before the sign-in gives up.
+const MAX_OFFLINE_POLLS: u32 = 6;
 
 pub fn client_id() -> Option<String> {
     std::env::var("HORIZON_ELY_CLIENT_ID")
@@ -103,6 +108,7 @@ pub fn wait_for_device_code(
     cancelled: &dyn Fn() -> bool,
 ) -> Result<Tokens, String> {
     let mut interval = code.interval;
+    let mut offline = 0u32;
     loop {
         let until = Instant::now() + Duration::from_secs(interval);
         while Instant::now() < until {
@@ -118,8 +124,18 @@ pub fn wait_for_device_code(
             return Err("The Ely.by sign-in code expired. Start again.".into());
         }
         match poll_device(code)? {
-            DevicePoll::Pending => {}
-            DevicePoll::SlowDown => interval = interval.saturating_add(5),
+            DevicePoll::Pending => offline = 0,
+            DevicePoll::SlowDown => {
+                offline = 0;
+                interval = interval.saturating_add(5);
+            }
+            // One dropped request must not end a sign-in the player is still completing.
+            DevicePoll::Offline(error) => {
+                offline += 1;
+                if offline >= MAX_OFFLINE_POLLS {
+                    return Err(error);
+                }
+            }
             DevicePoll::Done(tokens) => return Ok(tokens),
         }
     }
@@ -127,14 +143,23 @@ pub fn wait_for_device_code(
 
 fn poll_device(code: &DeviceCode) -> Result<DevicePoll, String> {
     let client_id = client_id().ok_or("This build has no Ely.by public client ID.")?;
-    let (status, body) = post_form(
+    let (status, body) = match post_form(
         TOKEN_URL,
         &[
             ("grant_type", &DEVICE_GRANT.to_owned()),
             ("client_id", &client_id),
             ("device_code", &code.device_code),
         ],
-    )?;
+    ) {
+        Ok(answer) => answer,
+        Err(error) => return Ok(DevicePoll::Offline(error)),
+    };
+    if status >= 500 {
+        return Ok(DevicePoll::Offline(error_message(
+            &body,
+            "Ely.by is unavailable right now.",
+        )));
+    }
     match body.get("error").and_then(Value::as_str) {
         Some("authorization_pending") => return Ok(DevicePoll::Pending),
         Some("slow_down") => return Ok(DevicePoll::SlowDown),
@@ -171,19 +196,20 @@ pub fn refresh(refresh_token: &str) -> Result<Tokens, RefreshError> {
         ],
     )
     .map_err(RefreshError::Unavailable)?;
-    if status >= 500 {
-        return Err(RefreshError::Unavailable(error_message(
-            &body,
-            "Ely.by is unavailable right now.",
-        )));
-    }
     if status != 200 {
-        return Err(RefreshError::Rejected(error_message(
-            &body,
-            "Ely.by refused the sign-in.",
-        )));
+        return Err(refresh_failure(status, error_message(&body, "Ely.by refused the sign-in.")));
     }
     tokens(status, &body).map_err(RefreshError::Unavailable)
+}
+
+/// A refresh that did not give tokens: only a real refusal (4xx other than "too many requests"
+/// or "timed out") means the sign-in is gone. A 5xx, a 429 or a 408 is Ely.by being busy.
+fn refresh_failure(status: u16, message: String) -> RefreshError {
+    if status >= 500 || status == 429 || status == 408 {
+        RefreshError::Unavailable(message)
+    } else {
+        RefreshError::Rejected(message)
+    }
 }
 
 fn tokens(status: u16, body: &Value) -> Result<Tokens, String> {
@@ -382,16 +408,27 @@ struct CallbackRequest {
     query: HashMap<String, String>,
 }
 
+/// The longest request line and headers accepted from the loopback callback.
+const MAX_CALLBACK_REQUEST: usize = 8192;
+
 fn read_callback(stream: &mut TcpStream) -> Result<CallbackRequest, String> {
     use std::io::Read;
-    let mut bytes = [0u8; 4096];
-    let n = stream
-        .read(&mut bytes)
-        .map_err(|e| format!("Could not read the Ely.by callback: {e}"))?;
-    if n == bytes.len() && !bytes.windows(4).any(|window| window == b"\r\n\r\n") {
-        return Err("The Ely.by callback request was too large.".into());
+    // A request can arrive in several pieces: read until the end of the headers.
+    let mut bytes = Vec::with_capacity(1024);
+    let mut chunk = [0u8; 1024];
+    while !bytes.windows(4).any(|window| window == b"\r\n\r\n") {
+        if bytes.len() >= MAX_CALLBACK_REQUEST {
+            return Err("The Ely.by callback request was too large.".into());
+        }
+        let n = stream
+            .read(&mut chunk)
+            .map_err(|e| format!("Could not read the Ely.by callback: {e}"))?;
+        if n == 0 {
+            break;
+        }
+        bytes.extend_from_slice(&chunk[..n]);
     }
-    let request = String::from_utf8_lossy(&bytes[..n]);
+    let request = String::from_utf8_lossy(&bytes);
     let line = request
         .lines()
         .next()
@@ -541,6 +578,57 @@ mod tests {
         assert_eq!(request.query.get("state").map(String::as_str), Some("s1"));
         respond(&mut stream, "ok");
         drop(stream);
+        client.join().unwrap();
+    }
+
+    #[test]
+    fn only_a_refusal_ends_the_sign_in() {
+        for status in [500, 502, 503, 429, 408] {
+            assert!(matches!(
+                refresh_failure(status, "x".into()),
+                RefreshError::Unavailable(_)
+            ));
+        }
+        for status in [400, 401, 403] {
+            assert!(matches!(
+                refresh_failure(status, "x".into()),
+                RefreshError::Rejected(_)
+            ));
+        }
+    }
+
+    #[test]
+    fn a_callback_request_in_pieces_is_read() {
+        let listener = TcpListener::bind(("127.0.0.1", 0)).unwrap();
+        let port = listener.local_addr().unwrap().port();
+        let client = std::thread::spawn(move || {
+            let mut s = TcpStream::connect(("127.0.0.1", port)).unwrap();
+            s.set_nodelay(true).unwrap();
+            s.write_all(b"GET /callback?code=abc").unwrap();
+            std::thread::sleep(Duration::from_millis(150));
+            s.write_all(b"&state=s1 HTTP/1.1\r\nHost: x\r\n\r\n").unwrap();
+            let mut out = String::new();
+            let _ = s.read_to_string(&mut out);
+        });
+        let (mut stream, _) = listener.accept().unwrap();
+        let request = read_callback(&mut stream).unwrap();
+        assert_eq!(request.query.get("code").map(String::as_str), Some("abc"));
+        assert_eq!(request.query.get("state").map(String::as_str), Some("s1"));
+        respond(&mut stream, "ok");
+        drop(stream);
+        client.join().unwrap();
+    }
+
+    #[test]
+    fn an_oversized_callback_is_refused() {
+        let listener = TcpListener::bind(("127.0.0.1", 0)).unwrap();
+        let port = listener.local_addr().unwrap().port();
+        let client = std::thread::spawn(move || {
+            let mut s = TcpStream::connect(("127.0.0.1", port)).unwrap();
+            let _ = s.write_all(&vec![b'a'; MAX_CALLBACK_REQUEST + 2048]);
+        });
+        let (mut stream, _) = listener.accept().unwrap();
+        assert!(read_callback(&mut stream).is_err());
         client.join().unwrap();
     }
 }

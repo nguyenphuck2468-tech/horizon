@@ -315,7 +315,11 @@ pub fn is_ely_account(uuid: &str) -> bool {
     if let Some(&(_, ely)) = ELY_KNOWN.lock().unwrap().iter().find(|(u, _)| u == uuid) {
         return ely;
     }
-    let ely = secrets_in(store(), uuid).is_some_and(|secrets| is_ely(&secrets));
+    // No secrets (keychain locked or busy, not saved yet) is not an answer: don't remember it.
+    let Some(secrets) = secrets_in(store(), uuid) else {
+        return false;
+    };
+    let ely = is_ely(&secrets);
     let mut known = ELY_KNOWN.lock().unwrap();
     known.retain(|(u, _)| u != uuid);
     known.push((uuid.to_owned(), ely));
