@@ -25,7 +25,6 @@ pub struct Player {
     /// token is neither: the Java game cannot check it with Mojang, so a Java instance must not
     /// be started with one (see `account::java_player`). Horizon Client reads its session file
     /// instead, where `account::write_session_file` says `elyby`.
-    #[serde(default)]
     pub elyby: bool,
 }
 
