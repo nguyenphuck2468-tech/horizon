@@ -2545,6 +2545,13 @@ fn account_sessions_until(
 /// ([`launch`]): the selected account when it owns the game, else one that does. With no answer
 /// from the services, an account that owned it plays with its last token. Mojang's game takes the
 /// token on its command line, as Mojang's launcher gives it; that command is never logged.
+///
+/// E1.0.1: Ely.by is not supported here yet. An Ely.by token is not a Microsoft one: Mojang's
+/// game would take it for `--userType msa`, cannot check it with Mojang, and the player would
+/// hear nothing but a failure from the game. A Java instance therefore starts only for an account
+/// whose sign-in the Minecraft services confirmed (`owns`); an Ely.by account is refused by name,
+/// and never falls through to another account's token either. The Horizon Client path
+/// ([`session_for_game`] and its session file, which says `user_type: "elyby"`) is unchanged.
 pub fn java_player() -> Result<crate::java_launch::Player, String> {
     let mut accounts = Accounts::load();
     let player = java_player_with(
@@ -2566,11 +2573,28 @@ fn java_player_with(
     accounts: &mut Accounts,
 ) -> Result<crate::java_launch::Player, String> {
     let pass = launch(ep, client_id, store, accounts).map_err(|e| e.to_string())?;
+    // The playing account, as the gate picked it: the session first, else an owner.
+    let playing = pass.session.clone().or_else(|| pass.owner.clone());
+    // E1.0.1, before anything else: if the account about to play signs in through Ely.by, say so
+    // plainly rather than start Mojang's game against it. Asked of the keychain, not of the
+    // gate's answer, so a stale copy can't slip past.
+    if let Some((account, _)) = &playing {
+        if secrets_in(store, &account.uuid).is_some_and(|s| is_ely(&s)) {
+            return Err(format!(
+                "{} signs in through Ely.by, which Minecraft: Java Edition instances do not \
+                 support yet. Play Horizon, or select a Microsoft account that owns the game.",
+                account.name
+            ));
+        }
+    }
     let kept = || {
         let order = accounts.selected().into_iter().chain(&accounts.accounts);
-        order
-            .into_iter()
-            .find_map(|a| Some((a.clone(), secrets_in(store, &a.uuid).filter(|s| s.plays())?)))
+        order.into_iter().find_map(|a| {
+            let secrets = secrets_in(store, &a.uuid).filter(|s| s.plays())?;
+            // E1.0.1: the fallback keeps only what the Minecraft services confirmed - never an
+            // Ely.by token, and never one that owned the game before Ely.by was added.
+            (!is_ely(&secrets) && secrets.owns_minecraft()).then(|| (a.clone(), secrets))
+        })
     };
     let (account, secrets) = pass
         .session
@@ -2580,8 +2604,13 @@ fn java_player_with(
     Ok(crate::java_launch::Player {
         name: account.name,
         uuid: account.uuid,
-        token: secrets.minecraft_token,
+        token: secrets
+            .minecraft_token
+            .strip_prefix(ELY_ACCESS_PREFIX)
+            .unwrap_or(&secrets.minecraft_token)
+            .to_owned(),
         xuid: secrets.xuid.unwrap_or_default(),
+        elyby: is_ely(&secrets),
     })
 }
 
