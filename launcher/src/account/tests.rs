@@ -328,6 +328,7 @@ fn secrets(token: &str, owns: bool) -> Secrets {
         minecraft_expires_at: now() + 7200,
         xuid: None,
         owns,
+        plays: None,
     }
 }
 
@@ -812,6 +813,7 @@ fn accounts_keep_secrets_in_the_store_only() {
         minecraft_expires_at: 1,
         xuid: None,
         owns: true,
+        plays: None,
     };
     accounts.add(&store, account.clone(), &secrets).unwrap();
     assert_eq!(accounts.selected(), Some(&account));
@@ -1114,6 +1116,7 @@ fn session_files_are_private_and_complete() {
         minecraft_expires_at: 1,
         xuid: Some("25".into()),
         owns: true,
+        plays: None,
     };
     let path = write_session_file(&dir, &account, &secrets).unwrap();
     let v: Value = serde_json::from_str(&std::fs::read_to_string(&path).unwrap()).unwrap();
@@ -2323,4 +2326,70 @@ fn joining_a_service_id_tells_mojangs_session_server() {
         "svc-42",
     );
     assert!(refused.unwrap_err().contains("Sign in again"));
+}
+
+// ----- E1: Ely.by plays without owning; Microsoft and offline are unchanged -----------------------
+
+fn ely_tokens() -> crate::ely::Tokens {
+    crate::ely::Tokens {
+        access_token: "ely-access".into(),
+        refresh_token: Some("ely-refresh".into()),
+        expires_at: now() + 7200,
+        profile: crate::ely::Profile {
+            uuid: "11111111111111111111111111111111".into(),
+            name: "ElyPlayer".into(),
+        },
+    }
+}
+
+#[test]
+fn ely_sign_in_plays_but_never_claims_minecraft_ownership() {
+    let (_, secrets) = finish_ely_sign_in(ely_tokens());
+    assert!(secrets.plays(), "Ely.by must still launch through Horizon");
+    assert!(!secrets.owns, "Ely.by never confirms Minecraft ownership");
+    assert!(!secrets.owns_minecraft());
+}
+
+#[test]
+fn ely_account_opens_the_gate_and_reports_ready() {
+    let (account, secrets) = finish_ely_sign_in(ely_tokens());
+    let store = MemoryStore::default();
+    let mut accounts = signed_in(&store, &secrets);
+    accounts.update(account);
+    assert!(accounts.has_owner(&store));
+    assert!(!matches!(
+        session::Status::from_secrets(Some(&secrets)).state,
+        session::State::OwnershipRequired
+    ));
+}
+
+#[test]
+fn legacy_ely_secrets_saved_with_owns_true_still_play_but_do_not_own() {
+    let legacy = Secrets {
+        minecraft_token: "elyby:old".into(),
+        owns: true,
+        plays: None,
+        ..secrets("elyby:old", true)
+    };
+    assert!(legacy.plays());
+    assert!(!legacy.owns_minecraft());
+}
+
+#[test]
+fn microsoft_plays_follows_ownership_exactly_as_before() {
+    assert!(secrets("mc-token", true).plays());
+    assert!(secrets("mc-token", true).owns_minecraft());
+    assert!(!secrets("mc-token", false).plays());
+    assert!(!secrets("mc-token", false).owns_minecraft());
+}
+
+#[test]
+fn plays_survives_the_keychain_round_trip_and_old_json_still_loads() {
+    let (_, secrets) = finish_ely_sign_in(ely_tokens());
+    let text = serde_json::to_string(&secrets).unwrap();
+    let back: Secrets = serde_json::from_str(&text).unwrap();
+    assert!(back.plays() && !back.owns);
+    let old = r#"{"refresh_token":"r","minecraft_token":"t","minecraft_expires_at":1,"xuid":null}"#;
+    let old: Secrets = serde_json::from_str(old).unwrap();
+    assert!(old.plays() && old.owns_minecraft());
 }

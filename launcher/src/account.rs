@@ -343,9 +343,11 @@ fn finish_ely_sign_in(tokens: crate::ely::Tokens) -> (Account, Secrets) {
             minecraft_token: format!("{ELY_ACCESS_PREFIX}{}", tokens.access_token),
             minecraft_expires_at: tokens.expires_at,
             xuid: None,
-            // Ely.by is an alternate Minecraft authentication service. Its
-            // account is allowed to play through Horizon without Microsoft ownership.
-            owns: true,
+            // Ely.by is an alternate Minecraft authentication service. It never confirms
+            // Minecraft ownership (`owns` stays false); the account is allowed to play
+            // through Horizon by the separate `plays` entitlement.
+            owns: false,
+            plays: Some(true),
         },
     )
 }
@@ -561,6 +563,24 @@ pub struct Secrets {
     /// existed passed the same check at sign-in, which refuses everyone else.
     #[serde(default = "owned_at_sign_in")]
     owns: bool,
+    /// Whether Horizon lets this account play, apart from owning the game. `None` (accounts
+    /// saved before this existed, and Microsoft accounts) means it follows `owns`; an Ely.by
+    /// account sets `Some(true)`, since that service never confirms ownership.
+    #[serde(default)]
+    plays: Option<bool>,
+}
+impl Secrets {
+    /// Whether the account may play through Horizon: what the owner gate asks.
+    fn plays(&self) -> bool {
+        // Accounts saved by the first Ely.by builds had `owns: true` and no `plays`.
+        self.plays.unwrap_or(self.owns)
+    }
+    /// Whether the Minecraft services confirmed the account owns the game. Never true for
+    /// Ely.by, which has no such answer.
+    #[allow(dead_code)]
+    fn owns_minecraft(&self) -> bool {
+        self.owns && !is_ely(self)
+    }
 }
 fn owned_at_sign_in() -> bool {
     true
@@ -600,6 +620,7 @@ impl Secrets {
             minecraft_expires_at: mc.expires_at,
             xuid: mc.xuid,
             owns: true,
+            plays: None,
         }
     }
 }
@@ -1721,7 +1742,7 @@ impl Accounts {
         self.selected()
             .into_iter()
             .chain(self.accounts.iter().filter(|a| Some(*a) != self.selected()))
-            .any(|a| secrets_in(store, &a.uuid).is_some_and(|s| s.owns))
+            .any(|a| secrets_in(store, &a.uuid).is_some_and(|s| s.plays()))
     }
 
     /// Who plays now.
@@ -1931,7 +1952,7 @@ pub fn launch(
             Check::DoesNot(secrets) => (Some(DOES_NOT_OWN.to_string()), secrets),
             Check::NoAnswer(e, secrets) => (Some(e), secrets),
         };
-        owned = secrets.owns;
+        owned = secrets.plays();
         if plays {
             pass.offline = said;
         }
@@ -2470,7 +2491,7 @@ fn account_sessions_until(
         // An account the services sent back to sign-in (a refused refresh, a token now for
         // another profile) is never handed over, whatever its token's time says.
         let holds = |s: &Secrets, margin: u64| {
-            s.owns && !s.sign_in_required && s.minecraft_expires_at > now() + margin
+            s.plays() && !s.sign_in_required && s.minecraft_expires_at > now() + margin
         };
         let known = holds(&secrets, RENEW_BEFORE);
         let late = operation.is_err() || Instant::now() >= deadline;
@@ -2499,7 +2520,7 @@ fn account_sessions_until(
         }
         drop(operation);
         let Some(account) = account else {
-            list.push(if secrets.owns { fallback } else {
+            list.push(if secrets.plays() { fallback } else {
                 json!({ "name": fallback["name"], "uuid": uuid, "skipped": "This account needs Minecraft: Java Edition ownership confirmed in the launcher." })
             });
             continue;
@@ -2549,7 +2570,7 @@ fn java_player_with(
         let order = accounts.selected().into_iter().chain(&accounts.accounts);
         order
             .into_iter()
-            .find_map(|a| Some((a.clone(), secrets_in(store, &a.uuid).filter(|s| s.owns)?)))
+            .find_map(|a| Some((a.clone(), secrets_in(store, &a.uuid).filter(|s| s.plays())?)))
     };
     let (account, secrets) = pass
         .session

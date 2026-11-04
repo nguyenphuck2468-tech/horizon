@@ -81,11 +81,11 @@ impl Status {
         }
     }
 
-    fn from_secrets(secrets: Option<&Secrets>) -> Self {
+    pub(super) fn from_secrets(secrets: Option<&Secrets>) -> Self {
         let state = match secrets {
             None => State::SignInRequired,
             Some(s) if s.sign_in_required => State::SignInRequired,
-            Some(s) if !s.owns => State::OwnershipRequired,
+            Some(s) if !s.plays() => State::OwnershipRequired,
             Some(s) if s.minecraft_expires_at <= now() + RENEW_BEFORE => State::NeedsRefresh,
             Some(_) => State::Ready,
         };
