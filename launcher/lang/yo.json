@@ -1091,5 +1091,7 @@
   "{count} min ago": "iṣẹju {count} sẹyin",
   "{count} on the official SMP": "{count} lori SMP osise",
   "{mode} · stopped": "{mode} · ti duro",
-  "{online} of {max}": "{online} ninu {max}"
+  "{online} of {max}": "{online} ninu {max}",
+  "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
+  "This build has no configured account provider.": "This build has no configured account provider."
 }

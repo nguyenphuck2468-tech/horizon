@@ -1091,5 +1091,7 @@
   "{count} min ago": "{count} mun zo",
   "{count} on the official SMP": "{count} war ar SMP ofisiel",
   "{mode} · stopped": "{mode} · paouezet",
-  "{online} of {max}": "{online} diwar {max}"
+  "{online} of {max}": "{online} diwar {max}",
+  "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
+  "This build has no configured account provider.": "This build has no configured account provider."
 }

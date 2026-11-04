@@ -1091,5 +1091,7 @@
   "{count} on the official SMP": "Рәсми SMP серверында {count}",
   "{mode} · stopped": "{mode} · туктатылды",
   "{online} of {max}": "{max} эченнән {online}",
-  "{support} in Horizon": "Horizon эчендә {support}"
+  "{support} in Horizon": "Horizon эчендә {support}",
+  "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
+  "This build has no configured account provider.": "This build has no configured account provider."
 }

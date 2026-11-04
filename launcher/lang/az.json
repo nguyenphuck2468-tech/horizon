@@ -1091,5 +1091,7 @@
   "{online} of {max}": "{online} / {max}",
   "{support} in Horizon": "Horizon-da {support}",
   "{value} px": "{value} px",
-  "{value}%": "{value}%"
+  "{value}%": "{value}%",
+  "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
+  "This build has no configured account provider.": "This build has no configured account provider."
 }

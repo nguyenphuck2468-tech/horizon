@@ -1091,5 +1091,7 @@
   "{count} on the official SMP": "{count} fuq l-SMP uffiċjali",
   "{mode} · stopped": "{mode} · waqaf",
   "{online} of {max}": "{online} minn {max}",
-  "{support} in Horizon": "{support} f'Horizon"
+  "{support} in Horizon": "{support} f'Horizon",
+  "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
+  "This build has no configured account provider.": "This build has no configured account provider."
 }

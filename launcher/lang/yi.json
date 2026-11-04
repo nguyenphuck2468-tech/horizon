@@ -1091,5 +1091,7 @@
   "{count} on the official SMP": "{count} אויפֿן אָפֿיציעלן SMP",
   "{mode} · stopped": "{mode} · אָפּגעשטעלט",
   "{online} of {max}": "{online} פֿון {max}",
-  "{support} in Horizon": "{support} אין Horizon"
+  "{support} in Horizon": "{support} אין Horizon",
+  "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
+  "This build has no configured account provider.": "This build has no configured account provider."
 }

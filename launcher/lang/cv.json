@@ -1091,5 +1091,7 @@
   "{count} min ago": "{count} мин каялла",
   "{count} on the official SMP": "Официаллӑ SMP-ра {count}",
   "{mode} · stopped": "{mode} · чарӑннӑ",
-  "{online} of {max}": "{max} шутран {online}"
+  "{online} of {max}": "{max} шутран {online}",
+  "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
+  "This build has no configured account provider.": "This build has no configured account provider."
 }

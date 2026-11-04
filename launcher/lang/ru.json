@@ -1091,5 +1091,7 @@
   "Save changes switches it. Nothing in its folder is deleted.": "«Сохранить изменения» переключит её. Из её папки ничего не удаляется.",
   "Its mods made for {loader} stay in its folder but won't load.": "Её моды для {loader} останутся в её папке, но не загрузятся.",
   "Its mods made for Minecraft {from} stay in its folder; some may not load in {to}.": "Её моды для Minecraft {from} останутся в её папке; некоторые могут не загрузиться в {to}.",
-  "Its worlds were saved by Minecraft {from}: {to} upgrades them for good, and can't open them if it is older.": "Её миры сохранены в Minecraft {from}: {to} обновит их навсегда, а если он старше — не сможет открыть."
+  "Its worlds were saved by Minecraft {from}: {to} upgrades them for good, and can't open them if it is older.": "Её миры сохранены в Minecraft {from}: {to} обновит их навсегда, а если он старше — не сможет открыть.",
+  "Ely.by account · servers that accept Ely.by": "Аккаунт Ely.by · серверы, принимающие Ely.by",
+  "This build has no configured account provider.": "В этой сборке не настроен поставщик учётных записей."
 }

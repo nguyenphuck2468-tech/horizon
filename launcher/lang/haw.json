@@ -1091,5 +1091,7 @@
   "{count} on the official SMP": "{count} ma ka SMP kūhelu",
   "{mode} · stopped": "{mode} · ua hoʻōki ʻia",
   "{online} of {max}": "{online} o {max}",
-  "{support} in Horizon": "{support} ma Horizon"
+  "{support} in Horizon": "{support} ma Horizon",
+  "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
+  "This build has no configured account provider.": "This build has no configured account provider."
 }

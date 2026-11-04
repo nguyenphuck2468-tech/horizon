@@ -1091,5 +1091,7 @@
   "{count} min ago": "virun {count} Min.",
   "{count} on the official SMP": "{count} um offiziellen SMP",
   "{mode} · stopped": "{mode} · gestoppt",
-  "{online} of {max}": "{online} vun {max}"
+  "{online} of {max}": "{online} vun {max}",
+  "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
+  "This build has no configured account provider.": "This build has no configured account provider."
 }
