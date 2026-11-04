@@ -2573,26 +2573,17 @@ fn java_player_with(
 ) -> Result<crate::java_launch::Player, String> {
     let pass = launch(ep, client_id, store, accounts).map_err(|e| e.to_string())?;
     
-    // Determine the playing account from the gate's result.
-    let (account, _) = pass
+    // Use the validated credential snapshot directly from Launch.
+    // This eliminates the TOCTOU window: the exact credentials validated by the ownership
+    // gate are used to construct the Player, with no second keychain read.
+    let (account, secrets) = pass
         .session
         .or(pass.owner)
         .ok_or_else(|| NoOwner.to_string())?;
     
-    // Read the authoritative credential from the keychain using the account UUID.
-    // This ensures we check and use the same credential (no TOCTOU).
-    // If the keychain cannot provide secrets for this account, fail closed rather than
-    // falling back to potentially stale cached data.
-    let fresh_secrets = secrets_in(store, &account.uuid).ok_or_else(|| {
-        format!(
-            "Cannot read credentials for {} from keychain. Sign in again to continue.",
-            account.name
-        )
-    })?;
-    
-    // Classify the provider on the authoritative credential itself.
+    // Validate provider on the validated snapshot.
     // Ely.by tokens are not compatible with Mojang's Java authentication.
-    if is_ely(&fresh_secrets) {
+    if is_ely(&secrets) {
         return Err(format!(
             "{} signs in through Ely.by, which Minecraft: Java Edition instances do not \
              support yet. Play Horizon, or select a Microsoft account that owns the game.",
@@ -2600,25 +2591,26 @@ fn java_player_with(
         ));
     }
     
-    // Verify the fresh credential owns Minecraft before proceeding.
-    if !fresh_secrets.owns_minecraft() {
+    // Validate ownership on the validated snapshot.
+    if !secrets.owns_minecraft() {
         return Err(format!(
             "{} does not own Minecraft according to the game services.",
             account.name
         ));
     }
     
-    // Build Player from the verified, fresh credential (defense-in-depth: elyby should be false here).
+    // Build Player from the validated credential snapshot.
+    // Invariant: elyby must be false after the check above.
     Ok(crate::java_launch::Player {
         name: account.name,
         uuid: account.uuid,
-        token: fresh_secrets
+        token: secrets
             .minecraft_token
             .strip_prefix(ELY_ACCESS_PREFIX)
-            .unwrap_or(&fresh_secrets.minecraft_token)
+            .unwrap_or(&secrets.minecraft_token)
             .to_owned(),
-        xuid: fresh_secrets.xuid.clone().unwrap_or_default(),
-        elyby: is_ely(&fresh_secrets), // Invariant: this must be false after the check above
+        xuid: secrets.xuid.clone().unwrap_or_default(),
+        elyby: is_ely(&secrets),
     })
 }
 
