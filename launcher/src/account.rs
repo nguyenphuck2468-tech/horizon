@@ -2196,8 +2196,13 @@ fn accept_sign_in(
     }
     if let Some(expected) = expected {
         if expected.uuid != account.uuid {
+            let provider = if is_ely(secrets) {
+                "Ely.by"
+            } else {
+                "Microsoft"
+            };
             return Err(format!(
-                "Signed in as {} instead of {}. Use the Microsoft account for {} and try again.",
+                "Signed in as {} instead of {}. Use the {provider} account for {} and try again.",
                 account.name, expected.name, expected.name
             ));
         }
