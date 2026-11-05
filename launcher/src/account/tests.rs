@@ -3555,16 +3555,13 @@ fn renewed_game_handoff_rechecks_the_credential_after_refresh() {
     ));
     let _ = std::fs::remove_dir_all(&dir);
 
-    let result = session::renew_for_game_with(
-        &ep,
-        Some("test-client"),
-        &store,
-        &notch(),
-        &nowhere(),
-        &dir,
-    );
+    let result =
+        session::renew_for_game_with(&ep, Some("test-client"), &store, &notch(), &nowhere(), &dir);
 
     let status = result.unwrap_err();
     assert_eq!(status.state, session::State::SignInRequired);
-    assert!(!dir.exists(), "a revoked credential must never create a session file");
+    assert!(
+        !dir.exists(),
+        "a revoked credential must never create a session file"
+    );
 }
