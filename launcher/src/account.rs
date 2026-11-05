@@ -1550,6 +1550,11 @@ impl SecretStore for Layered {
     fn persistent(&self) -> bool {
         true
     }
+    fn lock_file(&self) -> Option<PathBuf> {
+        // Match the lock used by the direct OS keychain stores. Hold it across the entire
+        // read/refresh/write operation, not just the individual file and keychain calls.
+        Some(self.file.path.with_file_name("account-session.lock"))
+    }
 }
 
 /// The OS keychain if it answers, else why not.
