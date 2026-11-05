@@ -1965,6 +1965,9 @@ pub fn launch(
     accounts: &mut Accounts,
 ) -> Result<Launch, NoOwner> {
     let selected = accounts.selected.clone();
+    // An Ely.by entitlement authorizes the selected Ely.by player, not a saved offline name.
+    // Offline names keep the existing Java-owner requirement even if an Ely.by account remains.
+    let offline_name = selected.is_none() && accounts.offline_selected.is_some();
     let mut order = accounts.accounts.clone();
     order.sort_by_key(|a| Some(&a.uuid) != selected.as_ref());
     let mut pass = Launch::default();
@@ -2008,7 +2011,7 @@ pub fn launch(
             Check::DoesNot(secrets) => (Some(DOES_NOT_OWN.to_string()), secrets),
             Check::NoAnswer(e, secrets) => (Some(e), secrets),
         };
-        playable |= secrets.plays();
+        playable |= secrets.plays() && !(offline_name && is_ely(&secrets));
         if plays {
             pass.offline = said;
         }
