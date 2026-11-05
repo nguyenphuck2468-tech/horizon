@@ -123,11 +123,11 @@ pub fn device_code() -> Result<DeviceCode, String> {
                 .and_then(Value::as_u64)
                 .unwrap_or(5)
                 .max(1),
-            expires_at: now()
-                + body
-                    .get("expires_in")
+            expires_at: now().saturating_add(
+                body.get("expires_in")
                     .and_then(Value::as_u64)
                     .unwrap_or(900),
+            ),
             device_code,
         }),
         _ => Err(error_message(
@@ -277,11 +277,11 @@ fn tokens(status: u16, body: &Value) -> Result<Tokens, String> {
     Ok(Tokens {
         access_token,
         refresh_token: string_field(body, "refresh_token"),
-        expires_at: now()
-            + body
-                .get("expires_in")
+        expires_at: now().saturating_add(
+            body.get("expires_in")
                 .and_then(Value::as_u64)
                 .unwrap_or(86400),
+        ),
         profile,
     })
 }
