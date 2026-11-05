@@ -2723,7 +2723,9 @@ fn java_player_fails_closed_when_credential_json_is_corrupted() {
     accounts.update(account.clone());
 
     // Store corrupted JSON to simulate credential corruption
-    store.set(&account.uuid, "invalid json that won't parse").unwrap();
+    store
+        .set(&account.uuid, "invalid json that won't parse")
+        .unwrap();
 
     // Attempt to get java player - should fail because credential cannot be parsed
     let result = java_player_with(&test_endpoints(), None, &store, &mut accounts);
@@ -2787,11 +2789,12 @@ fn java_player_uses_fresh_credential_not_cached_elyby() {
     // Now update the keychain to have Microsoft secrets for the same UUID
     // (simulating user changed account type or re-authenticated)
     let (_, ms_secrets) = finish_ms_sign_in(ms_tokens());
-    store.set(
-        &ely_account.uuid,
-        &serde_json::to_string(&ms_secrets).unwrap(),
-    )
-    .unwrap();
+    store
+        .set(
+            &ely_account.uuid,
+            &serde_json::to_string(&ms_secrets).unwrap(),
+        )
+        .unwrap();
 
     // Attempt to get java player - should use fresh Microsoft secrets
     let result = java_player_with(&test_endpoints(), None, &store, &mut accounts);
@@ -2822,11 +2825,12 @@ fn java_player_blocks_when_fresh_credential_is_elyby() {
 
     // Now update the keychain to have Ely.by secrets for the same UUID
     let (_, ely_secrets) = finish_ely_sign_in(ely_tokens());
-    store.set(
-        &ms_account.uuid,
-        &serde_json::to_string(&ely_secrets).unwrap(),
-    )
-    .unwrap();
+    store
+        .set(
+            &ms_account.uuid,
+            &serde_json::to_string(&ely_secrets).unwrap(),
+        )
+        .unwrap();
 
     // Attempt to get java player - should fail because fresh credential is Ely.by
     let result = java_player_with(&test_endpoints(), None, &store, &mut accounts);
@@ -2859,11 +2863,12 @@ fn java_player_blocks_when_fresh_credential_does_not_own_minecraft() {
     };
 
     let store = MemoryStore::default();
-    store.set(
-        &account.uuid,
-        &serde_json::to_string(&no_own_secrets).unwrap(),
-    )
-    .unwrap();
+    store
+        .set(
+            &account.uuid,
+            &serde_json::to_string(&no_own_secrets).unwrap(),
+        )
+        .unwrap();
     let mut accounts = signed_in(&store, &no_own_secrets);
     accounts.update(account.clone());
 
@@ -2892,7 +2897,9 @@ fn java_player_succeeds_when_cache_and_keychain_both_microsoft() {
     accounts.update(account.clone());
 
     // Store fresh Microsoft secrets in keychain
-    store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap()).unwrap();
+    store
+        .set(&account.uuid, &serde_json::to_string(&secrets).unwrap())
+        .unwrap();
 
     let result = java_player_with(&test_endpoints(), None, &store, &mut accounts);
 
@@ -2940,7 +2947,9 @@ fn java_player_uses_account_uuid_not_name_for_keychain_lookup() {
     accounts.update(account.clone());
 
     // Store secrets under the UUID (not the name)
-    store.set(&original_uuid, &serde_json::to_string(&secrets).unwrap()).unwrap();
+    store
+        .set(&original_uuid, &serde_json::to_string(&secrets).unwrap())
+        .unwrap();
 
     let result = java_player_with(&test_endpoints(), None, &store, &mut accounts);
 
