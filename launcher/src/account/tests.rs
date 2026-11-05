@@ -2401,8 +2401,6 @@ fn plays_survives_the_keychain_round_trip_and_old_json_still_loads() {
 // ============================================================================
 
 #[test]
-
-#[test]
 fn java_player_fails_closed_when_credential_json_is_corrupted() {
     // This test verifies behavior when the credential exists in the keychain
     // but is corrupted (invalid JSON that cannot be parsed).
@@ -2876,7 +2874,6 @@ impl MutatingSecretStore {
     }
     
 
-    }
     
     fn reads_for_uuid(&self, uuid: &str) -> usize {
         *self.reads_by_uuid.lock().unwrap().get(uuid).unwrap_or(&0)
