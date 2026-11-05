@@ -2538,10 +2538,9 @@ fn ely_account_opens_the_gate_and_reports_ready() {
         !accounts.has_owner(&store),
         "an Ely.by session is playable but does not establish Java ownership"
     );
-    assert!(!matches!(
-        session::Status::from_secrets(Some(&secrets)).state,
-        session::State::OwnershipRequired
-    ));
+    let status = session::Status::from_secrets(Some(&secrets));
+    assert_eq!(status.state, session::State::Ready);
+    assert!(!status.owns_minecraft);
 }
 
 #[test]
