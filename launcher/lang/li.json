@@ -396,7 +396,6 @@
   "When it starts": "Es ut begint",
   "{name}'s skin": "{name}'s huid",
   "Start": "Begin",
-  "No Minecraft install needed: Horizon downloads it from Mojang for your account.": "Gein Minecraft installatie nuudig: Horizon downloadt ‘t vaan Mojang veur eur account.",
   "Logs": "Logs",
   "On": "Op",
   "{program} said: {output}": "{program} zag: {output}",
@@ -536,7 +535,6 @@
   "After the game": "Nao de wedsjtried",
   "Game arguments": "Sjpelarguminte",
   "Default": "Standaard",
-  "Horizon needs a Microsoft account that owns Minecraft: Java Edition, like other launchers.": "Horizon heet un Microsoft-account nuudig dat Minecraft: Java-editie bezit, net wie anger launchers.",
   "Follow": "Volg",
   "Not in your desktop's menu.": "Neet in ut menu vaan eur bureaublaad.",
   "Port {count} mods": "Port {count} mods",
@@ -922,7 +920,6 @@
   "Horizon's cosmetics service had a problem. Try again later.": "Horizon's cosmeticaservice had un probleem. Probeer ‘t later nog ‘nmaol.",
   "Mojang could not confirm your account. Sign in again and retry.": "Mojang kon eur account neet bevestige. Meld weer aan en probeer ‘t weer.",
   "Sign in with a Minecraft account first.": "Meld iers aan mit un Minecraft-account.",
-  "Mojang's session server is not answering. Try again later.": "De sessieserver vaan Mojang antwoord neet. Probeer ‘t later nog ‘nmaol.",
   "Head": "Kop",
   "Back": "Terug",
   "Nothing": "Niks",
@@ -1093,5 +1090,10 @@
   "Save changes switches it. Nothing in its folder is deleted.": "‘Wijziginge opsjlaon’ verandert 't. Niks in z'n map weurt gewis.",
   "What this change can't keep": "Wat dees verandering neet kin hawwe",
   "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
-  "This build has no configured account provider.": "This build has no configured account provider."
+  "This build has no configured account provider.": "This build has no configured account provider.",
+  "Java Edition owner required": "Eigener va Java Edition nuudig",
+  "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Vu Mojang-downloads en Java Edition-eksimplare is 'n Microsoft-account nuudig die Minecraft: Java Edition bezit.",
+  "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Ely.by-accounts kunne Horizon Client spele op servers die Ely.by anneme, mer kinne Mojang-downloads of Java Edition-eksimplare net goodkeure.",
+  "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Dze build héet gèn Microsoft-aanmelding gesteld. Ely.by-accounts kunne Horizon Client spele, mer kinne 't Java Edition-besit net bevestige.",
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Sundare en Microsoft-account die 't spul bezit, gebroek 'n beste Minecraft 26.3-installatsie."
 }

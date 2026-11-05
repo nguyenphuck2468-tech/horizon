@@ -395,7 +395,6 @@
   "When it starts": "Nigbati o bẹrẹ",
   "{name}'s skin": "{name}n awo",
   "Start": "Bẹrẹ",
-  "No Minecraft install needed: Horizon downloads it from Mojang for your account.": "Ko si Minecraft fifi sori ẹrọ nilo: Horizon ṣe igbasilẹ lati Mojang fun akọọlẹ rẹ.",
   "Logs": "Awọn akọọlẹ",
   "On": "Lori",
   "{program} said: {output}": "{program} sọ pé: {output}",
@@ -534,7 +533,6 @@
   "After the game": "Lẹhin ti awọn ere",
   "Game arguments": "Awọn ariyanjiyan ere",
   "Default": "Aiyipada",
-  "Horizon needs a Microsoft account that owns Minecraft: Java Edition, like other launchers.": "Horizon nilo akọọlẹ Microsoft kan ti o ni Minecraft: Java Ẹya, bii awọn ifilọlẹ miiran.",
   "Follow": "Tẹle",
   "Not in your desktop's menu.": "Ko si ninu akojọ aṣayan tabili tabili rẹ.",
   "Port {count} mods": "Port {count} mods",
@@ -920,7 +918,6 @@
   "Horizon's cosmetics service had a problem. Try again later.": "Iṣẹ ohun ikunra Horizon ni iṣoro kan. Gbiyanju lẹẹkansi nigbamii.",
   "Mojang could not confirm your account. Sign in again and retry.": "Mojang ko le jẹrisi akọọlẹ rẹ. Wọle lẹẹkansi ki o tun gbiyanju.",
   "Sign in with a Minecraft account first.": "Wọle pẹlu akọọlẹ Minecraft kan akọkọ.",
-  "Mojang's session server is not answering. Try again later.": "Olupin igba Mojang ko dahun. Gbiyanju lẹẹkansi nigbamii.",
   "Head": "Ori",
   "Back": "Pada",
   "Nothing": "Ko si nkankan",
@@ -1093,5 +1090,10 @@
   "{mode} · stopped": "{mode} · ti duro",
   "{online} of {max}": "{online} ninu {max}",
   "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
-  "This build has no configured account provider.": "This build has no configured account provider."
+  "This build has no configured account provider.": "This build has no configured account provider.",
+  "Java Edition owner required": "Oní Java Edition ni a nilo",
+  "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Fún àyọkà Mojang àti àpẹẹrẹ Java Edition, akọọlẹ Microsoft kan tí o ni Minecraft: Java Ẹya nilo.",
+  "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Awọn akọọlẹ Ely.by lè fi ṣeré Horizon Client lori awọn olupin tí o gba Ely.by, ṣùgbọ́n kò lè fúnni ayọkà Mojang tàbí àpẹẹrẹ Java Edition.",
+  "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Èyí kò ní ìwọle Microsoft tí a ṣeto. Àwọn akọọlẹ Ely.by lè fi ṣeré Horizon Client, ṣùgbọ́n kò lè jẹ́risi Java Edition.",
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Bí kò bá sí akọọlẹ Microsoft oní eré náà, lo Minecraft 26.3 tí ó ti wà."
 }

@@ -395,7 +395,6 @@
   "When it starts": "Калі пачнецца",
   "{name}'s skin": "Скін {name}",
   "Start": "Пачаць",
-  "No Minecraft install needed: Horizon downloads it from Mojang for your account.": "Minecraft не патрабуецца ўсталёўваць: Horizon спампоўвае яго з Mojang для вашага ўліковага запісу.",
   "Logs": "Лагі",
   "On": "Укл",
   "{program} said: {output}": "{program} сказаў: {output}",
@@ -534,7 +533,6 @@
   "After the game": "Пасля гульні",
   "Game arguments": "Гульня аргументы",
   "Default": "Па змаўчанні",
-  "Horizon needs a Microsoft account that owns Minecraft: Java Edition, like other launchers.": "Horizon патрабуе ўліковага запісу Microsoft, які валодае Minecraft: Java Edition, як і іншыя праграмы запуску.",
   "Follow": "Выконвайце",
   "Not in your desktop's menu.": "Няма ў меню працоўнага стала.",
   "Port {count} mods": "Моды порта {count}",
@@ -920,7 +918,6 @@
   "Horizon's cosmetics service had a problem. Try again later.": "У касметычнай службы Horizon узнікла праблема. Паўтарыце спробу пазней.",
   "Mojang could not confirm your account. Sign in again and retry.": "Mojang не можа пацвердзіць ваш уліковы запіс. Увайдзіце яшчэ раз і паўтарыце спробу.",
   "Sign in with a Minecraft account first.": "Спачатку ўвайдзіце з уліковым запісам Minecraft.",
-  "Mojang's session server is not answering. Try again later.": "Сервер сесіі Mojang не адказвае. Паўтарыце спробу пазней.",
   "Head": "Галава",
   "Back": "Назад",
   "Nothing": "нічога",
@@ -1093,5 +1090,10 @@
   "{value} px": "{value} px",
   "{value}%": "{value}%",
   "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
-  "This build has no configured account provider.": "This build has no configured account provider."
+  "This build has no configured account provider.": "This build has no configured account provider.",
+  "Java Edition owner required": "Патрэбны ўладальнік Java Edition",
+  "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Для спамповак Mojang і копій Java Edition патрэбны ўліковы запіс Microsoft, які валодае Minecraft: Java Edition.",
+  "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Уліковыя запісы Ely.by могуць гуляць у Horizon Client на серверах, што прымаюць Ely.by, але не могуць дазваляць спампоўкі Mojang або копіі Java Edition.",
+  "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "У гэтай зборцы няма наладжанага ўваходу праз Microsoft. Уліковыя запісы Ely.by могуць гуляць у Horizon Client, але не могуць пацвердзіць валоданне Java Edition.",
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Без уліковага запісу Microsoft-уладальніка карыстайцеся наяўнай устаноўкай Minecraft 26.3."
 }

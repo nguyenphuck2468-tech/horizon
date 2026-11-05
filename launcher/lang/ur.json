@@ -396,7 +396,6 @@
   "When it starts": "جب یہ شروع ہوتا ہے۔",
   "{name}'s skin": "{name} کی جلد",
   "Start": "شروع کریں۔",
-  "No Minecraft install needed: Horizon downloads it from Mojang for your account.": "کسی Minecraft انسٹال کی ضرورت نہیں ہے: Horizon اسے Mojang سے آپ کے اکاؤنٹ کے لیے ڈاؤن لوڈ کرتا ہے۔",
   "Logs": "نوشتہ جات",
   "On": "پر",
   "{program} said: {output}": "{program} نے کہا: {output}",
@@ -536,7 +535,6 @@
   "After the game": "کھیل کے بعد",
   "Game arguments": "کھیل کے دلائل",
   "Default": "طے شدہ",
-  "Horizon needs a Microsoft account that owns Minecraft: Java Edition, like other launchers.": "Horizon کو ایک Microsoft اکاؤنٹ کی ضرورت ہے جو Minecraft کا مالک ہو: Java Edition، دوسرے لانچرز کی طرح۔",
   "Follow": "پیروی کریں۔",
   "Not in your desktop's menu.": "آپ کے ڈیسک ٹاپ کے مینو میں نہیں ہے۔",
   "Port {count} mods": "پورٹ {count} موڈز",
@@ -922,7 +920,6 @@
   "Horizon's cosmetics service had a problem. Try again later.": "Horizon کی کاسمیٹکس سروس میں ایک مسئلہ تھا۔ بعد میں دوبارہ کوشش کریں۔",
   "Mojang could not confirm your account. Sign in again and retry.": "موجنگ آپ کے اکاؤنٹ کی تصدیق نہیں کر سکا۔ دوبارہ سائن ان کریں اور دوبارہ کوشش کریں۔",
   "Sign in with a Minecraft account first.": "پہلے Minecraft اکاؤنٹ سے سائن ان کریں۔",
-  "Mojang's session server is not answering. Try again later.": "موجنگ کا سیشن سرور جواب نہیں دے رہا ہے۔ بعد میں دوبارہ کوشش کریں۔",
   "Head": "سر",
   "Back": "پیچھے",
   "Nothing": "کچھ بھی نہیں۔",
@@ -1093,5 +1090,10 @@
   "Its mods made for Minecraft {from} stay in its folder; some may not load in {to}.": "Minecraft {from} کے لیے بنے اس کے موڈ اس کے فولڈر میں رہتے ہیں؛ کچھ شاید {to} میں لوڈ نہ ہوں۔",
   "Its worlds were saved by Minecraft {from}: {to} upgrades them for good, and can't open them if it is older.": "اس کی دنیائیں Minecraft {from} نے محفوظ کیں: {to} انہیں ہمیشہ کے لیے اپ گریڈ کرتا ہے، اور اگر پرانا ہو تو انہیں کھول نہیں سکتا۔",
   "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
-  "This build has no configured account provider.": "This build has no configured account provider."
+  "This build has no configured account provider.": "This build has no configured account provider.",
+  "Java Edition owner required": "Java Edition کا مالک درکار ہے",
+  "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Mojang ڈاؤن لوڈز اور Java Edition کے نمونوں کے لیے ایک Microsoft اکاؤنٹ کی ضرورت ہے جس کے پاس Minecraft: Java Edition ہو۔",
+  "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Ely.by اکاؤنٹس ان سرورز پر Horizon Client کھیل سکتے ہیں جو Ely.by قبول کرتے ہیں، لیکن وہ Mojang ڈاؤن لوڈز یا Java Edition کے نمونوں کی اجازت نہیں دے سکتے۔",
+  "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "اس بلڈ میں Microsoft سائن ان ترتیب نہیں دیا گیا۔ Ely.by اکاؤنٹس Horizon Client کھیل سکتے ہیں، لیکن Java Edition کی ملکیت کی تصدیق نہیں کر سکتے۔",
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Microsoft مالک اکاؤنٹ کے بغیر، موجودہ Minecraft 26.3 انسٹالیشن استعمال کریں۔"
 }

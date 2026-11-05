@@ -395,7 +395,6 @@
   "When it starts": "Apabila ia bermula",
   "{name}'s skin": "kulit {name}",
   "Start": "Mulakan",
-  "No Minecraft install needed: Horizon downloads it from Mojang for your account.": "Tiada pemasangan Minecraft diperlukan: Horizon memuat turunnya daripada Mojang untuk akaun anda.",
   "Logs": "Log",
   "On": "hidup",
   "{program} said: {output}": "{program} berkata: {output}",
@@ -534,7 +533,6 @@
   "After the game": "Selepas permainan",
   "Game arguments": "Hujah permainan",
   "Default": "Lalai",
-  "Horizon needs a Microsoft account that owns Minecraft: Java Edition, like other launchers.": "Horizon memerlukan akaun Microsoft yang memiliki Minecraft: Java Edition, seperti pelancar lain.",
   "Follow": "Ikut",
   "Not in your desktop's menu.": "Tiada dalam menu desktop anda.",
   "Port {count} mods": "Port {count} mod",
@@ -920,7 +918,6 @@
   "Horizon's cosmetics service had a problem. Try again later.": "Perkhidmatan kosmetik Horizon mempunyai masalah. Cuba lagi nanti.",
   "Mojang could not confirm your account. Sign in again and retry.": "Mojang tidak dapat mengesahkan akaun anda. Log masuk semula dan cuba semula.",
   "Sign in with a Minecraft account first.": "Log masuk dengan akaun Minecraft dahulu.",
-  "Mojang's session server is not answering. Try again later.": "Pelayan sesi Mojang tidak menjawab. Cuba lagi nanti.",
   "Head": "kepala",
   "Back": "belakang",
   "Nothing": "tiada apa",
@@ -1093,5 +1090,10 @@
   "{value} px": "{value} px",
   "{value}%": "{value}%",
   "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
-  "This build has no configured account provider.": "This build has no configured account provider."
+  "This build has no configured account provider.": "This build has no configured account provider.",
+  "Java Edition owner required": "Pemilik Java Edition diperlukan",
+  "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Untuk muat turun Mojang dan salinan Java Edition diperlukan akaun Microsoft yang memiliki Minecraft: Java Edition.",
+  "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Akaun Ely.by boleh bermain Horizon Client pada pelayan yang menerima Ely.by, tetapi tidak boleh membenarkan muat turun Mojang atau salinan Java Edition.",
+  "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Binaan ini tidak mempunyai log masuk Microsoft yang dikonfigurasikan. Akaun Ely.by boleh bermain Horizon Client, tetapi tidak boleh mengesahkan pemilikan Java Edition.",
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Tanpa akaun Microsoft pemilik permainan, gunakan pemasangan Minecraft 26.3 yang sedia ada."
 }

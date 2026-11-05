@@ -395,7 +395,6 @@
   "When it starts": "Kur fillon",
   "{name}'s skin": "lëkura e {name}",
   "Start": "Filloni",
-  "No Minecraft install needed: Horizon downloads it from Mojang for your account.": "Nuk nevojitet instalim i Minecraft: Horizon e shkarkon atë nga Mojang për llogarinë tuaj.",
   "Logs": "Regjistrat",
   "On": "Aktiv",
   "{program} said: {output}": "{program} tha: {output}",
@@ -534,7 +533,6 @@
   "After the game": "Pas ndeshjes",
   "Game arguments": "Argumentet e lojës",
   "Default": "E paracaktuar",
-  "Horizon needs a Microsoft account that owns Minecraft: Java Edition, like other launchers.": "Horizon ka nevojë për një llogari të Microsoft që zotëron Minecraft: Java Edition, si lëshuesit e tjerë.",
   "Follow": "Ndiqni",
   "Not in your desktop's menu.": "Jo në menynë e desktopit tuaj.",
   "Port {count} mods": "Modat e portit {count}",
@@ -920,7 +918,6 @@
   "Horizon's cosmetics service had a problem. Try again later.": "Shërbimi i kozmetikës i Horizon kishte një problem. Provo sërish më vonë.",
   "Mojang could not confirm your account. Sign in again and retry.": "Mojang nuk mund ta konfirmonte llogarinë tuaj. Identifikohu përsëri dhe provo sërish.",
   "Sign in with a Minecraft account first.": "Hyni fillimisht me një llogari Minecraft.",
-  "Mojang's session server is not answering. Try again later.": "Serveri i sesionit të Mojang nuk po përgjigjet. Provo sërish më vonë.",
   "Head": "kokë",
   "Back": "Mbrapa",
   "Nothing": "Asgjë",
@@ -1093,5 +1090,10 @@
   "{value} px": "{value} px",
   "{value}%": "{value}%",
   "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
-  "This build has no configured account provider.": "This build has no configured account provider."
+  "This build has no configured account provider.": "This build has no configured account provider.",
+  "Java Edition owner required": "Kërkohet një zotërues i Java Edition",
+  "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Për shkarkimet nga Mojang dhe kopjet e Java Edition kërkohet një llogari e Microsoft që zotëron Minecraft: Java Edition.",
+  "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Llogaritë e Ely.by mund të luajnë Horizon Client në serverë që pranojnë Ely.by, por nuk mund të autorizojnë shkarkimet nga Mojang apo kopjet e Java Edition.",
+  "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Ky build nuk ka një hyrje të konfiguruar në Microsoft. Llogaritë e Ely.by mund të luajnë Horizon Client, por nuk mund të konfirmojnë pronarin e Java Edition.",
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Pa një llogari Microsoft që zotëron lojën, përdorni një instalim ekzistues të Minecraft 26.3."
 }

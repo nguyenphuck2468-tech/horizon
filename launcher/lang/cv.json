@@ -395,7 +395,6 @@
   "When it starts": "Вӑл хӑҫан пуҫланать",
   "{name}'s skin": "{name} тирӗ",
   "Start": "Пуҫла",
-  "No Minecraft install needed: Horizon downloads it from Mojang for your account.": "Minecraft лартма кирлӗ мар: Horizon ӑна Mojang-ран сирӗн аккаунт валли скачать тӑвать.",
   "Logs": "Журналсем",
   "On": "Ҫ",
   "{program} said: {output}": "{program} каланӑ: {output}",
@@ -534,7 +533,6 @@
   "After the game": "Вӑйӑ хыҫҫӑн",
   "Game arguments": "Вӑйӑ аргументӗсем",
   "Default": "Стандарт",
-  "Horizon needs a Microsoft account that owns Minecraft: Java Edition, like other launchers.": "Horizon ытти лаунчерсем пекех Minecraft: Java Edition тытакан Microsoft аккаунт кирлӗ.",
   "Follow": "Хыҫҫӑн пыма",
   "Not in your desktop's menu.": "Сирӗн ӗҫ сӗтелӗн менюӗнче мар.",
   "Port {count} mods": "Порт {count} моды",
@@ -920,7 +918,6 @@
   "Horizon's cosmetics service had a problem. Try again later.": "Horizon косметика службинче йывӑрлӑх сиксе тухнӑ. Кайран тепӗр хут тытӑнса пӑхӑр.",
   "Mojang could not confirm your account. Sign in again and retry.": "Mojang сирӗн аккаунта ҫирӗплетеймерӗ. Тепӗр хут кӗрӗр те тепӗр хут тытӑнӑр.",
   "Sign in with a Minecraft account first.": "Малтан Minecraft аккаунтпа кӗрӗр.",
-  "Mojang's session server is not answering. Try again later.": "Mojang сеанс серверӗ хуравламасть. Кайран тепӗр хут тытӑнса пӑхӑр.",
   "Head": "Пуҫ",
   "Back": "Каялла",
   "Nothing": "Нимӗн те",
@@ -1093,5 +1090,10 @@
   "{mode} · stopped": "{mode} · чарӑннӑ",
   "{online} of {max}": "{max} шутран {online}",
   "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
-  "This build has no configured account provider.": "This build has no configured account provider."
+  "This build has no configured account provider.": "This build has no configured account provider.",
+  "Java Edition owner required": "Java Edition хуҫи кирлӗ",
+  "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Mojang илмелӗхсем тата Java Edition тӗпписем валли Minecraft: Java Edition хуҫи пулакан Microsoft аккаунт кирлӗ.",
+  "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Ely.by аккаунтсем Ely.by йышӑнакан серверсем ҫинче Horizon Client вылян пултараҫҫӗ, анчах Mojang илмелӗхсем тата Java Edition тӗпписем ҫилене пултараймаҫҫӗ.",
+  "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Ку тӑвӑмра Microsoft кӗрес лартӑман. Ely.by аккаунтсем Horizon Client вылян пултараҫҫӗ, анчах Java Edition тытаканлӑхӗ палӑртӑми.",
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Microsoft хуҫи аккаунтсӑр, пур Minecraft 26.3 лартӑвӗ усӑ курӑр."
 }

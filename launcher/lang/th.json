@@ -396,7 +396,6 @@
   "When it starts": "เมื่อมันเริ่มต้น",
   "{name}'s skin": "ผิวของ{name}",
   "Start": "เริ่ม",
-  "No Minecraft install needed: Horizon downloads it from Mojang for your account.": "ไม่จำเป็นต้องติดตั้ง Minecraft: Horizon ดาวน์โหลดจาก Mojang สำหรับบัญชีของคุณ",
   "Logs": "บันทึก",
   "On": "เปิด",
   "{program} said: {output}": "{program} กล่าวว่า: {output}",
@@ -536,7 +535,6 @@
   "After the game": "หลังจบเกม",
   "Game arguments": "ข้อโต้แย้งของเกม",
   "Default": "ค่าเริ่มต้น",
-  "Horizon needs a Microsoft account that owns Minecraft: Java Edition, like other launchers.": "Horizon ต้องการบัญชี Microsoft ที่เป็นเจ้าของ Minecraft: Java Edition เช่นเดียวกับตัวเรียกใช้งานอื่นๆ",
   "Follow": "ติดตาม",
   "Not in your desktop's menu.": "ไม่อยู่ในเมนูบนเดสก์ท็อปของคุณ",
   "Port {count} mods": "พอร์ต {count} ม็อด",
@@ -922,7 +920,6 @@
   "Horizon's cosmetics service had a problem. Try again later.": "บริการเครื่องสำอางของ Horizon มีปัญหา ลองอีกครั้งในภายหลัง",
   "Mojang could not confirm your account. Sign in again and retry.": "Mojang ไม่สามารถยืนยันบัญชีของคุณได้ ลงชื่อเข้าใช้อีกครั้งแล้วลองอีกครั้ง",
   "Sign in with a Minecraft account first.": "ลงชื่อเข้าใช้ด้วยบัญชี Minecraft ก่อน",
-  "Mojang's session server is not answering. Try again later.": "เซิร์ฟเวอร์เซสชั่นของ Mojang ไม่ตอบสนอง ลองอีกครั้งในภายหลัง",
   "Head": "หัว",
   "Back": "กลับ",
   "Nothing": "ไม่มีอะไร",
@@ -1093,5 +1090,10 @@
   "Its mods made for Minecraft {from} stay in its folder; some may not load in {to}.": "ม็อดสำหรับ Minecraft {from} ยังอยู่ในโฟลเดอร์ บางตัวอาจโหลดไม่ได้ใน {to}",
   "Its worlds were saved by Minecraft {from}: {to} upgrades them for good, and can't open them if it is older.": "โลกถูกบันทึกโดย Minecraft {from}: {to} จะอัปเกรดโลกเหล่านั้นอย่างถาวร และเปิดไม่ได้หากเป็นเวอร์ชันที่เก่ากว่า",
   "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
-  "This build has no configured account provider.": "This build has no configured account provider."
+  "This build has no configured account provider.": "This build has no configured account provider.",
+  "Java Edition owner required": "จำเป็นต้องมีเจ้าของ Java Edition",
+  "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "สำหรับการดาวน์โหลดจาก Mojang และอินสแตนซ์ Java Edition จำเป็นต้องมีบัญชี Microsoft ที่เป็นเจ้าของ Minecraft: Java Edition.",
+  "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "บัญชี Ely.by สามารถเล่น Horizon Client บนเซิร์ฟเวอร์ที่รับ Ely.by ได้ แต่ไม่สามารถอนุมัติการดาวน์โหลดจาก Mojang หรืออินสแตนซ์ Java Edition ได้",
+  "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "บิลด์นี้ไม่มีการเข้าสู่ระบบ Microsoft ที่ตั้งค่าไว้ บัญชี Ely.by สามารถเล่น Horizon Client ได้ แต่ไม่สามารถยืนยันความเป็นเจ้าของ Java Edition ได้",
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "หากไม่มีบัญชี Microsoft ที่เป็นเจ้าของเกม ให้ใช้การติดตั้ง Minecraft 26.3 ที่มีอยู่แล้ว"
 }

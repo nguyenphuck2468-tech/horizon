@@ -396,7 +396,6 @@
   "When it starts": "Quand comença",
   "{name}'s skin": "la pèl de {name}",
   "Start": "Començar",
-  "No Minecraft install needed: Horizon downloads it from Mojang for your account.": "Pas d'installacion Minecraft necessària : Horizon lo telecarga dempuèi Mojang per vòstre compte.",
   "Logs": "Registres",
   "On": "Sus",
   "{program} said: {output}": "{program} diguèt: {output}",
@@ -536,7 +535,6 @@
   "After the game": "Après la partida",
   "Game arguments": "Arguments de jòc",
   "Default": "Per defaut",
-  "Horizon needs a Microsoft account that owns Minecraft: Java Edition, like other launchers.": "Horizon a besonh d'un compte Microsoft que possedís Minecraft: Java Edicion, coma d'autres lançaires.",
   "Follow": "Seguir",
   "Not in your desktop's menu.": "Pas dins lo menú de vòstre burèu.",
   "Port {count} mods": "Pòrt {count} mods",
@@ -922,7 +920,6 @@
   "Horizon's cosmetics service had a problem. Try again later.": "Lo servici de cosmetica de Horizon aguèt un problèma. Tornatz ensajar mai tard.",
   "Mojang could not confirm your account. Sign in again and retry.": "Mojang a pas pogut confirmar vòstre compte. Connectatz-vos tornarmai e ensajatz tornarmai.",
   "Sign in with a Minecraft account first.": "Connectatz-vos d'en primièr amb un compte Minecraft.",
-  "Mojang's session server is not answering. Try again later.": "Lo servidor de sesilha de Mojang respond pas. Tornatz ensajar mai tard.",
   "Head": "Cap",
   "Back": "Enrè",
   "Nothing": "Res",
@@ -1093,5 +1090,10 @@
   "Save changes switches it. Nothing in its folder is deleted.": "« Enregistrar las modificacions » lo càmbia. Res dins son dorsièr es pas suprimit.",
   "What this change can't keep": "Çò que aqueste cambiament pòt pas gardar",
   "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
-  "This build has no configured account provider.": "This build has no configured account provider."
+  "This build has no configured account provider.": "This build has no configured account provider.",
+  "Java Edition owner required": "Un proprietari de Java Edition es requerit",
+  "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Per los telecargaments de Mojang e las instances de Java Edition, es requerit un compte Microsoft que possedís Minecraft: Java Edition.",
+  "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Los comptes Ely.by pòdon jogar Horizon Client sus de servidors qu'acceptan Ely.by, mas pòdon pas autorizar los telecargaments de Mojang ni las instances de Java Edition.",
+  "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Aquesta compilacion n'a pas cap de connexion Microsoft configurada. Los comptes Ely.by pòdon jogar Horizon Client, mas pòdon pas confirmar la proprietat de la Java Edition.",
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Sense compte Microsoft que possedís lo jòc, utilizatz una installacion de Minecraft 26.3 qu'existís ja."
 }

@@ -395,7 +395,6 @@
   "When it starts": "Pan fydd yn dechrau",
   "{name}'s skin": "croen {name}",
   "Start": "Cychwyn",
-  "No Minecraft install needed: Horizon downloads it from Mojang for your account.": "Nid oes angen gosod Minecraft: Horizon mae'n ei lawrlwytho o Mojang ar gyfer eich cyfrif.",
   "Logs": "Logiau",
   "On": "Ar",
   "{program} said: {output}": "Dywedodd {program}: {output}",
@@ -534,7 +533,6 @@
   "After the game": "Ar ôl y gêm",
   "Game arguments": "Dadleuon gêm",
   "Default": "Diofyn",
-  "Horizon needs a Microsoft account that owns Minecraft: Java Edition, like other launchers.": "Mae Horizon angen cyfrif Microsoft sy'n berchen ar Minecraft: Java Edition, fel lanswyr eraill.",
   "Follow": "Dilyn",
   "Not in your desktop's menu.": "Ddim yn newislen eich bwrdd gwaith.",
   "Port {count} mods": "Porthladd {count} mods",
@@ -920,7 +918,6 @@
   "Horizon's cosmetics service had a problem. Try again later.": "Roedd gan wasanaeth colur Horizon broblem. Ceisiwch eto yn nes ymlaen.",
   "Mojang could not confirm your account. Sign in again and retry.": "Ni allai Mojang gadarnhau eich cyfrif. Mewngofnodwch eto a cheisiwch eto.",
   "Sign in with a Minecraft account first.": "Mewngofnodwch gyda chyfrif Minecraft yn gyntaf.",
-  "Mojang's session server is not answering. Try again later.": "Nid yw gweinydd sesiwn Mojang yn ateb. Ceisiwch eto yn nes ymlaen.",
   "Head": "Pen",
   "Back": "Yn ol",
   "Nothing": "Dim byd",
@@ -1093,5 +1090,10 @@
   "{value} px": "{value} px",
   "{value}%": "{value}%",
   "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
-  "This build has no configured account provider.": "This build has no configured account provider."
+  "This build has no configured account provider.": "This build has no configured account provider.",
+  "Java Edition owner required": "Angen perchennog Java Edition",
+  "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Mae angen cyfrif Microsoft sy'n berchen ar Minecraft: Java Edition ar gyfer lawrlwythiadau Mojang ac enghreifftiau Java Edition.",
+  "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Gall cyfrifon Ely.by chwarae Horizon Client ar weinyddion sy'n derbyn Ely.by, ond ni allant awdurdodi lawrlwythiadau Mojang na enghreifftiau Java Edition.",
+  "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Nid oes mewngofnodi Microsoft wedi'i ffurfweddu yn y build hwn. Gall cyfrifon Ely.by chwarae Horizon Client, ond ni allant gadarnhau perchenogaeth Java Edition.",
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Heb gyfrif Microsoft sy'n berchen ar y gêm, defnyddiwch osodiad Minecraft 26.3 sy'n bodoli'n barod."
 }

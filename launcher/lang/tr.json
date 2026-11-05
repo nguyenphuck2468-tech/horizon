@@ -163,7 +163,6 @@
   "Horizon needs a Microsoft account that owns Minecraft: Java Edition, like other launchers. It also plays online servers with your name and skin.": "Horizon, diğer başlatıcılar gibi Minecraft: Java Edition'a sahip bir Microsoft hesabına ihtiyaç duyar. Ayrıca çevrimiçi sunucularda adınız ve dış görünümünüzle oynamanızı sağlar.",
   "Sign in with Microsoft": "Microsoft ile oturum aç",
   "Not now": "Şimdi değil",
-  "Horizon needs a Microsoft account that owns Minecraft: Java Edition, like other launchers.": "Horizon, diğer başlatıcılar gibi Minecraft: Java Edition'a sahip bir Microsoft hesabına ihtiyaç duyar.",
   "Your worlds, offline names and settings stay where they are.": "Dünyalarınız, çevrimdışı adlarınız ve ayarlarınız olduğu yerde kalır.",
   "Open {link} in your browser and enter this code:": "Tarayıcınızda {link} adresini açın ve şu kodu girin:",
   "From my install": "Kurulumumdan",
@@ -212,7 +211,6 @@
   "Play downloads the game from Mojang for your account the first time, with the Java it needs.": "Oyna düğmesi, ilk seferde gereksinim duyduğu Java ile birlikte oyunu hesabınız için Mojang'dan indirir.",
   "Mojang's version list isn't here yet.": "Mojang'ın sürüm listesi henüz burada değil.",
   "Sign in to play": "Oynamak için oturum aç",
-  "No Minecraft install needed: Horizon downloads it from Mojang for your account.": "Minecraft kurulumu gerekmez: Horizon, hesabınız için onu Mojang'dan indirir.",
   "Waiting for Microsoft… the window goes on by itself.": "Microsoft bekleniyor… pencere kendiliğinden ilerleyecek.",
   "Downloading Minecraft {version} from Mojang · {done} of {total} files": "Minecraft {version} Mojang'dan indiriliyor · {total} dosyanın {done} tanesi tamamlandı",
   "Downloading from Mojang · {done} of {total} files": "Mojang'dan indiriliyor · {total} dosyanın {done} tanesi tamamlandı",
@@ -922,7 +920,6 @@
   "Horizon's cosmetics service had a problem. Try again later.": "Horizon'un kozmetik hizmetinde bir sorun oluştu. Daha sonra tekrar dene.",
   "Mojang could not confirm your account. Sign in again and retry.": "Mojang hesabını doğrulayamadı. Yeniden giriş yapıp tekrar dene.",
   "Sign in with a Minecraft account first.": "Önce bir Minecraft hesabıyla giriş yap.",
-  "Mojang's session server is not answering. Try again later.": "Mojang'ın oturum sunucusu yanıt vermiyor. Daha sonra tekrar dene.",
   "Head": "Kafa",
   "Back": "Sırt",
   "Nothing": "Hiçbiri",
@@ -1093,5 +1090,10 @@
   "Its mods made for Minecraft {from} stay in its folder; some may not load in {to}.": "Minecraft {from} için yapılmış modları klasöründe kalır; bazıları {to} sürümünde yüklenmeyebilir.",
   "Its worlds were saved by Minecraft {from}: {to} upgrades them for good, and can't open them if it is older.": "Dünyaları Minecraft {from} ile kaydedildi: {to} onları kalıcı olarak yükseltir, daha eskiyse açamaz.",
   "Ely.by account · servers that accept Ely.by": "Ely.by hesabı · Ely.by kabul eden sunucular",
-  "This build has no configured account provider.": "Bu derlemede yapılandırılmış bir hesap sağlayıcısı yok."
+  "This build has no configured account provider.": "Bu derlemede yapılandırılmış bir hesap sağlayıcısı yok.",
+  "Java Edition owner required": "Java Edition sahibi gerekli",
+  "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Mojang indirmeleri ve Java Edition örnekleri için Minecraft: Java Edition'a sahip bir Microsoft hesabı gerekir.",
+  "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Ely.by hesapları Ely.by kabul eden sunucularda Horizon Client oynayabilir, ancak Mojang indirmelerini veya Java Edition örneklerini yetkilendiremez.",
+  "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Bu derlemede yapılandırılmış bir Microsoft oturum açma yok. Ely.by hesapları Horizon Client oynayabilir, ancak Java Edition sahipliğini doğrulayamaz.",
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Oyunun sahibi bir Microsoft hesabınız yoksa, var olan bir Minecraft 26.3 kurulumunu kullanın."
 }

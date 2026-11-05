@@ -396,7 +396,6 @@
   "When it starts": "Al iniciar",
   "{name}'s skin": "Aspecto de {name}",
   "Start": "Iniciar",
-  "No Minecraft install needed: Horizon downloads it from Mojang for your account.": "No hace falta tener Minecraft instalado: Horizon lo descarga de Mojang para tu cuenta.",
   "Logs": "Registros",
   "On": "Activado",
   "{program} said: {output}": "{program} respondió: {output}",
@@ -536,7 +535,6 @@
   "After the game": "Después del juego",
   "Game arguments": "Argumentos del juego",
   "Default": "Por defecto",
-  "Horizon needs a Microsoft account that owns Minecraft: Java Edition, like other launchers.": "Horizon necesita una cuenta de Microsoft que posea Minecraft: Java Edition, como otros lanzadores.",
   "Follow": "Seguir",
   "Not in your desktop's menu.": "No está en el menú de tu escritorio.",
   "Port {count} mods": "Portar {count} mods",
@@ -922,7 +920,6 @@
   "Horizon's cosmetics service had a problem. Try again later.": "El servicio de cosméticos de Horizon tuvo un problema. Inténtalo más tarde.",
   "Mojang could not confirm your account. Sign in again and retry.": "Mojang no pudo confirmar tu cuenta. Vuelve a iniciar sesión e inténtalo de nuevo.",
   "Sign in with a Minecraft account first.": "Primero inicia sesión con una cuenta de Minecraft.",
-  "Mojang's session server is not answering. Try again later.": "El servidor de sesiones de Mojang no responde. Inténtalo más tarde.",
   "Head": "Cabeza",
   "Back": "Espalda",
   "Nothing": "Nada",
@@ -1093,5 +1090,10 @@
   "Its mods made for Minecraft {from} stay in its folder; some may not load in {to}.": "Sus mods hechos para Minecraft {from} se quedan en su carpeta; puede que algunos no carguen en {to}.",
   "Its worlds were saved by Minecraft {from}: {to} upgrades them for good, and can't open them if it is older.": "Sus mundos se guardaron con Minecraft {from}: {to} los actualiza para siempre y no puede abrirlos si es más antiguo.",
   "Ely.by account · servers that accept Ely.by": "Cuenta de Ely.by · servidores que aceptan Ely.by",
-  "This build has no configured account provider.": "Esta compilación no tiene un proveedor de cuentas configurado."
+  "This build has no configured account provider.": "Esta compilación no tiene un proveedor de cuentas configurado.",
+  "Java Edition owner required": "Se necesita un propietario de Java Edition",
+  "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Para las descargas de Mojang y las instancias de Java Edition se necesita una cuenta de Microsoft que posea Minecraft: Java Edition.",
+  "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Las cuentas de Ely.by pueden jugar a Horizon Client en servidores que acepten Ely.by, pero no pueden autorizar descargas de Mojang ni instancias de Java Edition.",
+  "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Esta build no tiene configurado el inicio de sesión de Microsoft. Las cuentas de Ely.by pueden jugar a Horizon Client, pero no pueden confirmar la propiedad de Java Edition.",
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Sin una cuenta de Microsoft que posea el juego, usa una instalación ya existente de Minecraft 26.3."
 }

@@ -395,7 +395,6 @@
   "When it starts": "Kad tas sākas",
   "{name}'s skin": "{name} āda",
   "Start": "Sākt",
-  "No Minecraft install needed: Horizon downloads it from Mojang for your account.": "Minecraft instalēšana nav nepieciešama: Horizon to lejupielādē no Mojang jūsu kontam.",
   "Logs": "Baļķi",
   "On": "Ieslēgts",
   "{program} said: {output}": "{program} teica: {output}",
@@ -534,7 +533,6 @@
   "After the game": "Pēc spēles",
   "Game arguments": "Spēles argumenti",
   "Default": "Noklusējums",
-  "Horizon needs a Microsoft account that owns Minecraft: Java Edition, like other launchers.": "Horizon ir nepieciešams Microsoft konts, kuram pieder Minecraft: Java Edition, tāpat kā citiem palaišanas līdzekļiem.",
   "Follow": "Sekojiet",
   "Not in your desktop's menu.": "Nav jūsu darbvirsmas izvēlnē.",
   "Port {count} mods": "Porta {count} modifikācijas",
@@ -920,7 +918,6 @@
   "Horizon's cosmetics service had a problem. Try again later.": "Horizon kosmētikas servisā radās problēma. Vēlāk mēģiniet vēlreiz.",
   "Mojang could not confirm your account. Sign in again and retry.": "Mojang nevarēja apstiprināt jūsu kontu. Pierakstieties vēlreiz un mēģiniet vēlreiz.",
   "Sign in with a Minecraft account first.": "Vispirms pierakstieties, izmantojot Minecraft kontu.",
-  "Mojang's session server is not answering. Try again later.": "Mojang sesijas serveris neatbild. Vēlāk mēģiniet vēlreiz.",
   "Head": "Galva",
   "Back": "Atpakaļ",
   "Nothing": "Nekas",
@@ -1093,5 +1090,10 @@
   "{value} px": "{value} px",
   "{value}%": "{value}%",
   "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
-  "This build has no configured account provider.": "This build has no configured account provider."
+  "This build has no configured account provider.": "This build has no configured account provider.",
+  "Java Edition owner required": "Nepieciešams Java Edition īpašnieks",
+  "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Mojang lejupielādēm un Java Edition kopijām nepieciešams Microsoft konts, kuram pieder Minecraft: Java Edition.",
+  "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Ely.by konti var spēlēt Horizon Client serveros, kas pieņem Ely.by, bet nevar ļaut Mojang lejupielādes vai Java Edition kopijas.",
+  "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Šajā reversānav konfigurēta Microsoft pieteikšanās. Ely.by konti var spēlēt Horizon Client, bet nevar apstiprināt Java Edition īpašumu.",
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Bez Microsoft īpašnieka konta izmantojiet esošo Minecraft 26.3 instalāciju."
 }

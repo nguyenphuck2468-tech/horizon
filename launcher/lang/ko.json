@@ -396,7 +396,6 @@
   "When it starts": "시작할 때",
   "{name}'s skin": "{name}의 스킨",
   "Start": "시작",
-  "No Minecraft install needed: Horizon downloads it from Mojang for your account.": "Minecraft를 별도로 설치할 필요가 없습니다. Horizon이 계정에 맞게 Mojang에서 다운로드합니다.",
   "Logs": "로그",
   "On": "켜기",
   "{program} said: {output}": "{program} 출력: {output}",
@@ -536,7 +535,6 @@
   "After the game": "게임 종료 후",
   "Game arguments": "게임 인수",
   "Default": "기본값",
-  "Horizon needs a Microsoft account that owns Minecraft: Java Edition, like other launchers.": "Horizon은 다른 런처와 마찬가지로 Minecraft: Java Edition을 소유한 Microsoft 계정이 필요합니다.",
   "Follow": "팔로우",
   "Not in your desktop's menu.": "데스크톱 메뉴에 없습니다.",
   "Port {count} mods": "모드 {count}개 포팅",
@@ -922,7 +920,6 @@
   "Horizon's cosmetics service had a problem. Try again later.": "Horizon 코스메틱 서비스에 문제가 생겼습니다. 나중에 다시 시도하세요.",
   "Mojang could not confirm your account. Sign in again and retry.": "Mojang이 계정을 확인하지 못했습니다. 다시 로그인한 뒤 재시도하세요.",
   "Sign in with a Minecraft account first.": "먼저 Minecraft 계정으로 로그인하세요.",
-  "Mojang's session server is not answering. Try again later.": "Mojang 세션 서버가 응답하지 않습니다. 나중에 다시 시도하세요.",
   "Head": "머리",
   "Back": "등",
   "Nothing": "없음",
@@ -1093,5 +1090,10 @@
   "Its mods made for Minecraft {from} stay in its folder; some may not load in {to}.": "Minecraft {from}용 모드는 폴더에 남습니다. 일부는 {to}에서 로드되지 않을 수 있습니다.",
   "Its worlds were saved by Minecraft {from}: {to} upgrades them for good, and can't open them if it is older.": "월드는 Minecraft {from}에서 저장되었습니다: {to}은(는) 이를 영구적으로 업그레이드하며, 더 오래된 버전이면 열 수 없습니다.",
   "Ely.by account · servers that accept Ely.by": "Ely.by 계정 · Ely.by를 허용하는 서버",
-  "This build has no configured account provider.": "이 빌드에는 구성된 계정 제공자가 없습니다."
+  "This build has no configured account provider.": "이 빌드에는 구성된 계정 제공자가 없습니다.",
+  "Java Edition owner required": "Java Edition 소유자가 필요합니다",
+  "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Mojang 다운로드와 Java Edition 인스턴스에는 Minecraft: Java Edition을 소유한 Microsoft 계정이 필요합니다.",
+  "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Ely.by 계정은 Ely.by를 수락하는 서버에서 Horizon Client을(를) 플레이할 수 있지만, Mojang 다운로드나 Java Edition 인스턴스를 승인할 수는 없습니다.",
+  "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "이 빌드에는 Microsoft 로그인이 설정되어 있지 않습니다. Ely.by 계정은 Horizon Client을(를) 플레이할 수 있지만 Java Edition 소유권을 확인할 수 없습니다.",
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Microsoft 소유자 계정이 없으면 기존의 Minecraft 26.3 설치를 사용하세요."
 }

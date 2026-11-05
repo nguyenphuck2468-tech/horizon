@@ -396,7 +396,6 @@
   "When it starts": "Když to začne",
   "{name}'s skin": "Kůže {name}",
   "Start": "Začněte",
-  "No Minecraft install needed: Horizon downloads it from Mojang for your account.": "Není potřeba žádná instalace Minecraftu: Horizon si jej stáhne z Mojangu pro váš účet.",
   "Logs": "Protokoly",
   "On": "Zapnuto",
   "{program} said: {output}": "{program} řekl: {output}",
@@ -536,7 +535,6 @@
   "After the game": "Po hře",
   "Game arguments": "Herní argumenty",
   "Default": "Výchozí",
-  "Horizon needs a Microsoft account that owns Minecraft: Java Edition, like other launchers.": "Horizon potřebuje účet Microsoft, který vlastní Minecraft: Java Edition, stejně jako ostatní launchery.",
   "Follow": "Sledujte",
   "Not in your desktop's menu.": "Ne v nabídce na ploše.",
   "Port {count} mods": "Mody portu {count}",
@@ -922,7 +920,6 @@
   "Horizon's cosmetics service had a problem. Try again later.": "Kosmetická služba Horizon měla problém. Zkuste to znovu později.",
   "Mojang could not confirm your account. Sign in again and retry.": "Mojang nemohl potvrdit váš účet. Znovu se přihlaste a zkuste to znovu.",
   "Sign in with a Minecraft account first.": "Nejprve se přihlaste pomocí účtu Minecraft.",
-  "Mojang's session server is not answering. Try again later.": "Server relace Mojang neodpovídá. Zkuste to znovu později.",
   "Head": "Hlava",
   "Back": "Zpět",
   "Nothing": "Nic",
@@ -1093,5 +1090,10 @@
   "Its mods made for Minecraft {from} stay in its folder; some may not load in {to}.": "Její módy pro Minecraft {from} zůstanou v její složce; některé se v {to} možná nenačtou.",
   "Its worlds were saved by Minecraft {from}: {to} upgrades them for good, and can't open them if it is older.": "Její světy uložil Minecraft {from}: {to} je natrvalo aktualizuje, a pokud je starší, nedokáže je otevřít.",
   "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
-  "This build has no configured account provider.": "This build has no configured account provider."
+  "This build has no configured account provider.": "This build has no configured account provider.",
+  "Java Edition owner required": "Vyžaduje se vlastník Java Edition",
+  "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Pro stahování z Mojang a instance Java Edition je potřeba účet Microsoft, který vlastní Minecraft: Java Edition.",
+  "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Účty Ely.by mohou hrát Horizon Client na serverech, které přijímají Ely.by, ale nemohou povolit stahování z Mojang ani instance Java Edition.",
+  "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Toto sestavení nemá nastavené přihlášení k Microsoftu. Účty Ely.by mohou hrát Horizon Client, ale nemohou potvrdit vlastnictví Java Edition.",
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Bez vlastnického účtu Microsoftu použijte existující instalaci Minecraft 26.3."
 }

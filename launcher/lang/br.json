@@ -395,7 +395,6 @@
   "When it starts": "Pa grogo",
   "{name}'s skin": "kroc'hen {name}",
   "Start": "Kregiñ",
-  "No Minecraft install needed: Horizon downloads it from Mojang for your account.": "N'eus ket ezhomm da staliañ Minecraft : Horizon a bellgarg anezhañ eus Mojang evit ho kont.",
   "Logs": "Marilhoù",
   "On": "War",
   "{program} said: {output}": "{program} a lavaras : {output}",
@@ -534,7 +533,6 @@
   "After the game": "Goude ar c'hoari",
   "Game arguments": "Arguzennoù ar c'hoari",
   "Default": "Dre ziouer",
-  "Horizon needs a Microsoft account that owns Minecraft: Java Edition, like other launchers.": "Horizon en deus ezhomm eus ur gont Microsoft a zo perc'henn war Minecraft: Java Embannadur, evel al lañserien all.",
   "Follow": "Heuliañ",
   "Not in your desktop's menu.": "N'emañ ket e roll ho burev.",
   "Port {count} mods": "Modoù porzh {count}",
@@ -920,7 +918,6 @@
   "Horizon's cosmetics service had a problem. Try again later.": "Ur gudenn en deus bet servij kosmetikoù Horizon. Klaskit en-dro diwezhatoc'h.",
   "Mojang could not confirm your account. Sign in again and retry.": "Mojang n'hall ket kadarnaat ho kont. En em lugañ en-dro ha klask en-dro.",
   "Sign in with a Minecraft account first.": "En em lugañ gant ur gont Minecraft da gentañ.",
-  "Mojang's session server is not answering. Try again later.": "Ne respont ket dafariad dalc'h Mojang. Klaskit en-dro diwezhatoc'h.",
   "Head": "Penn",
   "Back": "En-dro",
   "Nothing": "Netra",
@@ -1093,5 +1090,10 @@
   "{mode} · stopped": "{mode} · paouezet",
   "{online} of {max}": "{online} diwar {max}",
   "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
-  "This build has no configured account provider.": "This build has no configured account provider."
+  "This build has no configured account provider.": "This build has no configured account provider.",
+  "Java Edition owner required": "Ret eo kaout ur perc'henner war Java Edition",
+  "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Evit pellgargoù Mojang hag aweniadurioù Java Edition eo ret ur gont Microsoft zo perc'hennez war Minecraft: Java Edition.",
+  "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Kontoù Ely.by a c'hall c'hoari Horizon Client war servijerien a zegemer Ely.by, met ne c'hallont ket aotreañ pellgargoù Mojang na aweniadurioù Java Edition.",
+  "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "N'eus kevregadenn Microsoft kefluniet ebet er sevel-mañ. Kontoù Ely.by a c'hall c'hoari Horizon Client, met ne c'hallont ket kadarnaat perc'hennedigezh Java Edition.",
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Hep ur gont Microsoft perc'hennez war ar c'hoari, implijit ur staliadur Minecraft 26.3 a zo endeo."
 }

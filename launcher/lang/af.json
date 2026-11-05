@@ -395,7 +395,6 @@
   "When it starts": "Wanneer dit begin",
   "{name}'s skin": "{name} se vel",
   "Start": "Begin",
-  "No Minecraft install needed: Horizon downloads it from Mojang for your account.": "Geen Minecraft-installasie nodig nie: Horizon laai dit van Mojang af vir jou rekening.",
   "Logs": "Logs",
   "On": "Aan",
   "{program} said: {output}": "{program} het gesê: {output}",
@@ -534,7 +533,6 @@
   "After the game": "Na die wedstryd",
   "Game arguments": "Spelargumente",
   "Default": "Verstek",
-  "Horizon needs a Microsoft account that owns Minecraft: Java Edition, like other launchers.": "Horizon benodig 'n Microsoft-rekening wat Minecraft: Java Edition besit, soos ander lanseerders.",
   "Follow": "Volg",
   "Not in your desktop's menu.": "Nie in jou lessenaar se spyskaart nie.",
   "Port {count} mods": "Port {count} mods",
@@ -920,7 +918,6 @@
   "Horizon's cosmetics service had a problem. Try again later.": "Horizon se skoonheidsmiddelsdiens het 'n probleem gehad. Probeer later weer.",
   "Mojang could not confirm your account. Sign in again and retry.": "Mojang kon nie jou rekening bevestig nie. Meld weer aan en probeer weer.",
   "Sign in with a Minecraft account first.": "Meld eers aan met 'n Minecraft-rekening.",
-  "Mojang's session server is not answering. Try again later.": "Mojang se sessiebediener antwoord nie. Probeer later weer.",
   "Head": "Hoof",
   "Back": "Terug",
   "Nothing": "Niks nie",
@@ -1093,5 +1090,10 @@
   "{value} px": "{value} px",
   "{value}%": "{value}%",
   "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
-  "This build has no configured account provider.": "This build has no configured account provider."
+  "This build has no configured account provider.": "This build has no configured account provider.",
+  "Java Edition owner required": "Java Edition-eienaar word vereis",
+  "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "'n Microsoft-rekening wat Minecraft: Java Edition besit is nodig vir Mojang-aflaaiings en Java Edition-instansies.",
+  "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Ely.by-rekeninge kan Horizon Client speel op bedieners wat Ely.by aanvaar, maar kan nie Mojang-aflaaiings of Java Edition-instansies magtig nie.",
+  "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Hierdie weergawe het geen opgestelde Microsoft-aanmelding nie. Ely.by-rekeninge kan Horizon Client speel, maar kan nie Java Edition-eienaarskap bevestig nie.",
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Sonder 'n Microsoft-rekening wat die spel besit, gebruik 'n bestaande Minecraft 26.3-installasie."
 }

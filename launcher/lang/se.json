@@ -396,7 +396,6 @@
   "When it starts": "Go dat álgá",
   "{name}'s skin": "{name} ivdni",
   "Start": "Álggos",
-  "No Minecraft install needed: Horizon downloads it from Mojang for your account.": "Ii dárbbaš installeret Minecraft: Horizon viežžá dan Mojang:s du kontui.",
   "Logs": "Logut",
   "On": "Ál",
   "{program} said: {output}": "{program} dajai: {output}",
@@ -536,7 +535,6 @@
   "After the game": "Maŋŋel spealu",
   "Game arguments": "Spealu ákkat",
   "Default": "Dábálaš",
-  "Horizon needs a Microsoft account that owns Minecraft: Java Edition, like other launchers.": "Horizon dárbbaša Microsoft-kontu mii oamasta Minecraft: Java-veršuvnna, nugo eará álggaheaddjit.",
   "Follow": "Čuovo",
   "Not in your desktop's menu.": "Ii du dihtora menys.",
   "Port {count} mods": "Port {count} mods",
@@ -922,7 +920,6 @@
   "Horizon's cosmetics service had a problem. Try again later.": "Horizon kosmetihkkabálvalusas lei váttisvuohta. Geahččal fas maŋŋelabbos.",
   "Mojang could not confirm your account. Sign in again and retry.": "Mojang ii sáhttán duođaštit du konttu. Logge sisa fas ja geahččal fas.",
   "Sign in with a Minecraft account first.": "Logge sisa Minecraft-kontuin vuos.",
-  "Mojang's session server is not answering. Try again later.": "Mojang sešuvdnabálvaleaddji ii vástit. Geahččal fas maŋŋelabbos.",
   "Head": "Oaivi",
   "Back": "Ruovttoluotta",
   "Nothing": "Ii mihkkege",
@@ -1093,5 +1090,10 @@
   "Its mods made for Minecraft {from} stay in its folder; some may not load in {to}.": "Dan moddat mat leat dahkkon Minecraft {from} ovddas bissot dan máppas; muhtimat eai soaitte lasta {to}.",
   "Its worlds were saved by Minecraft {from}: {to} upgrades them for good, and can't open them if it is older.": "Dan máilmmit leat gádjon Minecraft {from} bokte: {to} ođasmahttá daid buorrin, ja ii sáhte rahpat daid jus lea boarráset.",
   "Ely.by account · servers that accept Ely.by": "Ely.by account · servers that accept Ely.by",
-  "This build has no configured account provider.": "This build has no configured account provider."
+  "This build has no configured account provider.": "This build has no configured account provider.",
+  "Java Edition owner required": "Dárbbaša Java Edition oamasteaddji",
+  "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Mojang luđemiid ja Java Edition-doaimmaid várás dárbbaša Microsoft-kontu mii oamasta Minecraft: Java-veršuvnna.",
+  "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Ely.by-kontut speallit Horizon Client neahttabálvalusain main lea Ely.by, muhto eai sáhte duddjo Mojang luđemiid dahje Java Edition-doaimmaid.",
+  "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Dán huksenis ii leat Microsoft-sisaš heivehuvvon. Ely.by-kontut speallit Horizon Client, muhto eai sáhte duddjo ahte oažžu Java Edition.",
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Mas ii leat Microsoft-kontu mii oamasta spealu, geava juo dán Minecraft 26.3-installašuvnna."
 }
