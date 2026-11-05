@@ -18,7 +18,7 @@ on:
         type: boolean
         default: false
   push:
-    branches: [main]
+    branches: [main, horizon-repo-review-plan-abfc6]
     paths:
       - 'launcher/**'
       - 'crates/**'
