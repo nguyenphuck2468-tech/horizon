@@ -637,11 +637,7 @@ enum Check {
     NoAnswer(String, Secrets),
 }
 
-fn check_ely_tokens(
-    account: &Account,
-    mut secrets: Secrets,
-    tokens: crate::ely::Tokens,
-) -> Check {
+fn check_ely_tokens(account: &Account, mut secrets: Secrets, tokens: crate::ely::Tokens) -> Check {
     secrets.minecraft_token = format!("{ELY_ACCESS_PREFIX}{}", tokens.access_token);
     secrets.minecraft_expires_at = tokens.expires_at;
     if let Some(refresh) = tokens.refresh_token {
