@@ -93,12 +93,23 @@ fn backoff_poll_interval(seconds: u64) -> u64 {
     seconds.saturating_mul(2).min(MAX_POLL_INTERVAL)
 }
 
-pub fn client_id() -> Option<String> {
-    std::env::var("HORIZON_ELY_CLIENT_ID")
-        .ok()
-        .or_else(|| option_env!("HORIZON_ELY_CLIENT_ID").map(str::to_owned))
+fn choose_client_id(runtime: Option<String>, built_in: Option<&str>) -> Option<String> {
+    runtime
         .map(|value| value.trim().to_owned())
         .filter(|value| !value.is_empty())
+        .or_else(|| {
+            built_in
+                .map(str::trim)
+                .filter(|value| !value.is_empty())
+                .map(str::to_owned)
+        })
+}
+
+pub fn client_id() -> Option<String> {
+    choose_client_id(
+        std::env::var("HORIZON_ELY_CLIENT_ID").ok(),
+        option_env!("HORIZON_ELY_CLIENT_ID"),
+    )
 }
 
 fn client_secret() -> Option<String> {
@@ -648,6 +659,20 @@ fn now() -> u64 {
 mod tests {
     use super::*;
     use std::io::{Read, Write};
+
+    #[test]
+    fn empty_runtime_client_id_falls_back_to_the_embedded_public_id() {
+        assert_eq!(
+            choose_client_id(Some("  ".into()), Some(" embedded-id ")),
+            Some("embedded-id".into())
+        );
+        assert_eq!(
+            choose_client_id(Some(" runtime-id ".into()), Some("embedded-id")),
+            Some("runtime-id".into())
+        );
+        assert_eq!(choose_client_id(None, Some("embedded-id")), Some("embedded-id".into()));
+        assert_eq!(choose_client_id(Some(String::new()), None), None);
+    }
 
     #[test]
     fn device_poll_interval_is_bounded_and_backed_off() {
