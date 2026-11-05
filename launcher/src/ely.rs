@@ -109,10 +109,17 @@ pub fn device_code() -> Result<DeviceCode, String> {
                 .and_then(Value::as_u64)
                 .unwrap_or(5)
                 .max(1),
-            expires_at: now() + body.get("expires_in").and_then(Value::as_u64).unwrap_or(900),
+            expires_at: now()
+                + body
+                    .get("expires_in")
+                    .and_then(Value::as_u64)
+                    .unwrap_or(900),
             device_code,
         }),
-        _ => Err(error_message(&body, "Ely.by device sign-in is unavailable.")),
+        _ => Err(error_message(
+            &body,
+            "Ely.by device sign-in is unavailable.",
+        )),
     }
 }
 
@@ -177,9 +184,7 @@ fn poll_device(code: &DeviceCode) -> Result<DevicePoll, String> {
     match body.get("error").and_then(Value::as_str) {
         Some("authorization_pending") => return Ok(DevicePoll::Pending),
         Some("slow_down") => return Ok(DevicePoll::SlowDown),
-        Some("expired_token") => {
-            return Err("The Ely.by sign-in code expired. Start again.".into())
-        }
+        Some("expired_token") => return Err("The Ely.by sign-in code expired. Start again.".into()),
         Some("access_denied") | Some("authorization_declined") => {
             return Err("Ely.by sign-in was declined.".into())
         }
@@ -211,7 +216,10 @@ pub fn refresh(refresh_token: &str) -> Result<Tokens, RefreshError> {
     )
     .map_err(RefreshError::Unavailable)?;
     if status != 200 {
-        return Err(refresh_failure(status, error_message(&body, "Ely.by refused the sign-in.")));
+        return Err(refresh_failure(
+            status,
+            error_message(&body, "Ely.by refused the sign-in."),
+        ));
     }
     tokens(status, &body).map_err(RefreshError::Unavailable)
 }
@@ -230,13 +238,17 @@ fn tokens(status: u16, body: &Value) -> Result<Tokens, String> {
     if status != 200 {
         return Err(error_message(body, "Ely.by refused the sign-in."));
     }
-    let access_token = string_field(body, "access_token")
-        .ok_or("Ely.by returned no access token.")?;
+    let access_token =
+        string_field(body, "access_token").ok_or("Ely.by returned no access token.")?;
     let profile = profile(&access_token)?;
     Ok(Tokens {
         access_token,
         refresh_token: string_field(body, "refresh_token"),
-        expires_at: now() + body.get("expires_in").and_then(Value::as_u64).unwrap_or(86400),
+        expires_at: now()
+            + body
+                .get("expires_in")
+                .and_then(Value::as_u64)
+                .unwrap_or(86400),
         profile,
     })
 }
@@ -260,8 +272,8 @@ fn profile(token: &str) -> Result<Profile, String> {
         }
     };
     let status = response.status();
-    let body: Value = serde_json::from_str(&response.into_string().unwrap_or_default())
-        .unwrap_or(Value::Null);
+    let body: Value =
+        serde_json::from_str(&response.into_string().unwrap_or_default()).unwrap_or(Value::Null);
     if status != 200 {
         return Err(error_message(
             &body,
@@ -568,7 +580,8 @@ mod tests {
 
     #[test]
     fn error_message_prefers_the_description() {
-        let v: Value = serde_json::json!({"error": "invalid_grant", "error_description": "Expired"});
+        let v: Value =
+            serde_json::json!({"error": "invalid_grant", "error_description": "Expired"});
         assert_eq!(error_message(&v, "x"), "Expired");
         assert_eq!(error_message(&Value::Null, "fallback"), "fallback");
     }
@@ -620,7 +633,8 @@ mod tests {
             s.set_nodelay(true).unwrap();
             s.write_all(b"GET /callback?code=abc").unwrap();
             std::thread::sleep(Duration::from_millis(150));
-            s.write_all(b"&state=s1 HTTP/1.1\r\nHost: x\r\n\r\n").unwrap();
+            s.write_all(b"&state=s1 HTTP/1.1\r\nHost: x\r\n\r\n")
+                .unwrap();
             let mut out = String::new();
             let _ = s.read_to_string(&mut out);
         });
