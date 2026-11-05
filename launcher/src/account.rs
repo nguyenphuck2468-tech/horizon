@@ -1767,6 +1767,10 @@ impl Accounts {
             &account.uuid,
             &serde_json::to_string(secrets).map_err(|e| e.to_string())?,
         )?;
+        // The provider can change while the Minecraft UUID stays the same (for example,
+        // an Ely.by profile later signed in through Microsoft). Never keep a stale UI/provider
+        // classification after replacing the credential for this UUID.
+        ELY_KNOWN.lock().unwrap().retain(|(uuid, _)| uuid != &account.uuid);
         self.selected = Some(account.uuid.clone());
         match self.accounts.iter_mut().find(|a| a.uuid == account.uuid) {
             Some(a) => *a = account,
@@ -1906,6 +1910,7 @@ impl Accounts {
     pub fn remove(&mut self, store: &dyn SecretStore, uuid: &str) -> Result<(), String> {
         let _operation = session::lock(store)?;
         store.delete(uuid)?;
+        ELY_KNOWN.lock().unwrap().retain(|(known, _)| known != uuid);
         self.accounts.retain(|a| a.uuid != uuid);
         if self.selected.as_deref() == Some(uuid) {
             self.selected = None;
