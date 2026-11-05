@@ -3499,3 +3499,72 @@ fn replacing_or_removing_credentials_invalidates_the_cached_provider() {
         "signing out must invalidate the old provider cache"
     );
 }
+
+/// Simulates a sign-out/revocation between a successful refresh and the final handoff read.
+struct SwitchAfterFirstReadStore {
+    inner: MemoryStore,
+    reads: Mutex<usize>,
+    replacement: String,
+}
+
+impl SecretStore for SwitchAfterFirstReadStore {
+    fn get(&self, key: &str) -> Result<Option<String>, String> {
+        let mut reads = self.reads.lock().unwrap();
+        *reads += 1;
+        if *reads == 2 {
+            self.inner.set(key, &self.replacement)?;
+        }
+        drop(reads);
+        self.inner.get(key)
+    }
+
+    fn set(&self, key: &str, secret: &str) -> Result<(), String> {
+        self.inner.set(key, secret)
+    }
+
+    fn delete(&self, key: &str) -> Result<(), String> {
+        self.inner.delete(key)
+    }
+
+    fn persistent(&self) -> bool {
+        false
+    }
+
+    fn operations(&self) -> &Mutex<()> {
+        self.inner.operations()
+    }
+}
+
+#[test]
+fn renewed_game_handoff_rechecks_the_credential_after_refresh() {
+    let inner = MemoryStore::default();
+    signed_in(&inner, &secrets("old-minecraft", true));
+    let replacement = Secrets {
+        sign_in_required: true,
+        ..secrets("revoked-minecraft", true)
+    };
+    let store = SwitchAfterFirstReadStore {
+        inner,
+        reads: Mutex::new(0),
+        replacement: serde_json::to_string(&replacement).unwrap(),
+    };
+    let (_, ep) = mock(|_| {});
+    let dir = std::env::temp_dir().join(format!(
+        "horizon-launcher-renew-race-{}",
+        std::process::id()
+    ));
+    let _ = std::fs::remove_dir_all(&dir);
+
+    let result = session::renew_for_game_with(
+        &ep,
+        Some("test-client"),
+        &store,
+        &notch(),
+        &nowhere(),
+        &dir,
+    );
+
+    let status = result.unwrap_err();
+    assert_eq!(status.state, session::State::SignInRequired);
+    assert!(!dir.exists(), "a revoked credential must never create a session file");
+}
