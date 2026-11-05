@@ -2598,7 +2598,7 @@ fn java_player_with(
             account.name
         ));
     }
-    
+
     // Build Player from the validated credential snapshot.
     // Invariant: elyby must be false after the check above.
     Ok(crate::java_launch::Player {
