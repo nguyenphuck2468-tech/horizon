@@ -2177,7 +2177,7 @@ fn copy_to_clipboard(cx: &mut App, item: gpui::ClipboardItem) {
 #[cfg(target_os = "linux")]
 fn sync_system_clipboard(text: String) {
     use std::io::Write;
-    use std::process::{Command, Stdio};
+    use std::process::Stdio;
     const TOOLS: [(&str, &str, &[&str]); 3] = [
         ("WAYLAND_DISPLAY", "wl-copy", &[]),
         ("DISPLAY", "xclip", &["-selection", "clipboard"]),
