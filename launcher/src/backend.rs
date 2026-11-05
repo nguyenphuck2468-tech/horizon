@@ -1644,12 +1644,17 @@ fn download_for(
                 format!("\n  • Horizon tried to download {v} from Mojang for {name}, but: {e}")
             })
         }
-        // An owner by its last answer, who can't be asked now.
-        Ok(pass) => Err(format!(
-            "\n  • Downloading {v} from Mojang needs your Microsoft account, which could not be \
-             checked: {}",
-            pass.offline.unwrap_or_default()
-        )),
+        // A playable Horizon session is not necessarily a Mojang owner (Ely.by, for
+        // example). An offline Microsoft account also cannot authorize a new download until
+        // Minecraft services can confirm ownership again.
+        Ok(pass) => {
+            let reason = pass.offline.unwrap_or_else(|| {
+                "Ely.by accounts can play Horizon, but they do not establish ownership of Minecraft: Java Edition. Sign in with the Microsoft account that owns the game.".into()
+            });
+            Err(format!(
+                "\n  • Downloading {v} from Mojang needs a Microsoft account whose Minecraft ownership can be confirmed: {reason}"
+            ))
+        },
         Err(_) if signed_in => Err(
             "\n  • No signed-in account owns Minecraft: Java Edition, so Horizon can't download it."
                 .into(),
