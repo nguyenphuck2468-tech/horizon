@@ -637,6 +637,37 @@ enum Check {
     NoAnswer(String, Secrets),
 }
 
+fn check_ely_tokens(
+    account: &Account,
+    mut secrets: Secrets,
+    tokens: crate::ely::Tokens,
+) -> Check {
+    secrets.minecraft_token = format!("{ELY_ACCESS_PREFIX}{}", tokens.access_token);
+    secrets.minecraft_expires_at = tokens.expires_at;
+    if let Some(refresh) = tokens.refresh_token {
+        secrets.refresh_token = format!("{ELY_REFRESH_PREFIX}{refresh}");
+    }
+
+    // A refresh may rename the profile, but it must never move these credentials to a
+    // different account UUID. Preserve a rotated refresh token, then require sign-in again.
+    let expected = account.uuid.replace('-', "");
+    let received = tokens.profile.uuid.replace('-', "");
+    if !expected.eq_ignore_ascii_case(&received) {
+        secrets.sign_in_required = true;
+        return Check::NoAnswer(OTHER_PROFILE.into(), secrets);
+    }
+
+    Check::Owns(
+        Account {
+            uuid: account.uuid.clone(),
+            name: tokens.profile.name,
+            skin: account.skin.clone(),
+            cape: account.cape.clone(),
+        },
+        secrets,
+    )
+}
+
 fn check_ely(account: &Account, mut secrets: Secrets, progress: &dyn Fn(session::Phase)) -> Check {
     if secrets.minecraft_expires_at > now() + RENEW_BEFORE {
         return Check::Owns(account.clone(), secrets);
@@ -651,22 +682,7 @@ fn check_ely(account: &Account, mut secrets: Secrets, progress: &dyn Fn(session:
         return Check::NoAnswer(SIGN_IN_AGAIN.into(), secrets);
     }
     match crate::ely::refresh(refresh) {
-        Ok(tokens) => {
-            secrets.minecraft_token = format!("{ELY_ACCESS_PREFIX}{}", tokens.access_token);
-            secrets.minecraft_expires_at = tokens.expires_at;
-            if let Some(refresh) = tokens.refresh_token {
-                secrets.refresh_token = format!("{ELY_REFRESH_PREFIX}{refresh}");
-            }
-            Check::Owns(
-                Account {
-                    uuid: tokens.profile.uuid,
-                    name: tokens.profile.name,
-                    skin: account.skin.clone(),
-                    cape: account.cape.clone(),
-                },
-                secrets,
-            )
-        }
+        Ok(tokens) => check_ely_tokens(account, secrets, tokens),
         Err(crate::ely::RefreshError::Rejected(error)) => {
             secrets.sign_in_required = true;
             Check::NoAnswer(error, secrets)
