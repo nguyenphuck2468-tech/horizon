@@ -79,6 +79,19 @@ pub enum DevicePoll {
 
 /// How many polls in a row may fail to reach Ely.by before the sign-in gives up.
 const MAX_OFFLINE_POLLS: u32 = 6;
+const MAX_POLL_INTERVAL: u64 = 60;
+
+fn bounded_poll_interval(seconds: u64) -> u64 {
+    seconds.clamp(1, MAX_POLL_INTERVAL)
+}
+
+fn slowed_poll_interval(seconds: u64) -> u64 {
+    seconds.saturating_add(5).min(MAX_POLL_INTERVAL)
+}
+
+fn backoff_poll_interval(seconds: u64) -> u64 {
+    seconds.saturating_mul(2).min(MAX_POLL_INTERVAL)
+}
 
 pub fn client_id() -> Option<String> {
     std::env::var("HORIZON_ELY_CLIENT_ID")
@@ -118,11 +131,11 @@ pub fn device_code() -> Result<DeviceCode, String> {
             user_code,
             verification_uri: string_field(&body, "verification_uri")
                 .unwrap_or_else(|| DEVICE_VERIFICATION_URL.to_owned()),
-            interval: body
-                .get("interval")
-                .and_then(Value::as_u64)
-                .unwrap_or(5)
-                .clamp(1, 60),
+            interval: bounded_poll_interval(
+                body.get("interval")
+                    .and_then(Value::as_u64)
+                    .unwrap_or(5),
+            ),
             expires_at: now().saturating_add(
                 body.get("expires_in")
                     .and_then(Value::as_u64)
@@ -161,13 +174,13 @@ pub fn wait_for_device_code(
             DevicePoll::Pending => offline = 0,
             DevicePoll::SlowDown => {
                 offline = 0;
-                interval = interval.saturating_add(5).min(60);
+                interval = slowed_poll_interval(interval);
             }
             // RFC 8628 recommends backing off after a timeout. Treat server/network outages
             // conservatively too, while keeping the code alive for a few retries.
             DevicePoll::Offline(error) => {
                 offline += 1;
-                interval = interval.saturating_mul(2).min(60);
+                interval = backoff_poll_interval(interval);
                 if offline >= MAX_OFFLINE_POLLS {
                     return Err(error);
                 }
@@ -640,14 +653,14 @@ mod tests {
 
     #[test]
     fn device_poll_interval_is_bounded_and_backed_off() {
-        let interval = |value: u64| value.clamp(1, 60);
-        let backoff = |value: u64| value.saturating_mul(2).min(60);
-        assert_eq!(interval(0), 1);
-        assert_eq!(interval(5), 5);
-        assert_eq!(interval(u64::MAX), 60);
-        assert_eq!(backoff(5), 10);
-        assert_eq!(backoff(40), 60);
-        assert_eq!(backoff(60), 60);
+        assert_eq!(bounded_poll_interval(0), 1);
+        assert_eq!(bounded_poll_interval(5), 5);
+        assert_eq!(bounded_poll_interval(u64::MAX), 60);
+        assert_eq!(slowed_poll_interval(5), 10);
+        assert_eq!(slowed_poll_interval(60), 60);
+        assert_eq!(backoff_poll_interval(5), 10);
+        assert_eq!(backoff_poll_interval(40), 60);
+        assert_eq!(backoff_poll_interval(60), 60);
     }
 
     #[test]
