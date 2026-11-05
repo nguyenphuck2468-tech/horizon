@@ -1063,9 +1063,6 @@ impl SecretStore for FileStore {
     fn persistent(&self) -> bool {
         true
     }
-    fn lock_file(&self) -> Option<PathBuf> {
-        Some(self.path.with_file_name("account-session.lock"))
-    }
 }
 
 /// The Secret Service (GNOME Keyring, KWallet) through oo7, as gpui itself uses it.
@@ -2737,15 +2734,31 @@ fn java_player_with(
 ) -> Result<crate::java_launch::Player, String> {
     let pass = launch(ep, client_id, store, accounts).map_err(|e| e.to_string())?;
 
-    // Use the validated credential snapshot directly from Launch.
-    // This eliminates the TOCTOU window: the exact credentials validated by the ownership
-    // gate are used to construct the Player, with no second keychain read.
+    // Use the validated credential snapshot directly from Launch when the gate handed one.
+    // This eliminates the TOCTOU window between that validation and launch: the exact
+    // credentials the owner gate checked build the Player, with no second keychain read.
     // Java Edition must use a confirmed Microsoft owner, not the selected Horizon
     // session (which may legitimately be Ely.by).
-    let (account, secrets) = pass
-        .owner
-        .or(pass.session)
-        .ok_or_else(|| NoOwner.to_string())?;
+    let from_pass = pass.owner.or(pass.session);
+    // When no check could answer (no network, a build without configured sign-in), an
+    // account whose last stored answer still says "owns the game" keeps playing offline,
+    // as `launch` kept its session and its play right but handed no credential to renew.
+    // No answer never creates ownership this way (downloads re-check through `launch`
+    // itself, which needs a fresh owner), and an online server re-verifies the session
+    // through `join_server`. Secrets the provider already refused (`sign_in_required`)
+    // and Ely.by sessions (`owns_minecraft` is false) never come back this way.
+    let kept = || {
+        accounts
+            .selected
+            .iter()
+            .chain(accounts.accounts.iter())
+            .filter_map(|account| Some((account.clone(), secrets_in(store, &account.uuid)?)))
+            .find_map(|(account, secrets)| {
+                (secrets.owns_minecraft() && !secrets.sign_in_required)
+                    .then_some((account, secrets))
+            })
+    };
+    let (account, secrets) = from_pass.or_else(kept).ok_or_else(|| NoOwner.to_string())?;
 
     // Validate provider on the validated snapshot.
     // Ely.by tokens are not compatible with Mojang's Java authentication.

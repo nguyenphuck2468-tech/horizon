@@ -1330,6 +1330,48 @@ fn the_java_edition_plays_as_an_owner_even_offline() {
     );
 }
 
+#[test]
+fn a_refused_sign_in_does_not_replay_as_an_owner_offline() {
+    // The provider already said no (`sign_in_required`): no network must not hand those
+    // secrets to the game as an owner, even though the account owns the game.
+    let store = MemoryStore::default();
+    let refused = Secrets {
+        sign_in_required: true,
+        ..secrets("mc-token", true)
+    };
+    let mut accounts = signed_in(&store, &refused);
+    let pass = launch(&offline(), Some("test-client"), &store, &mut accounts).unwrap();
+    assert!(pass.owner.is_none() && pass.session.is_none());
+    assert_eq!(
+        java_player_with(&offline(), Some("test-client"), &store, &mut accounts).unwrap_err(),
+        NoOwner.to_string()
+    );
+}
+
+#[test]
+fn an_ely_session_never_replays_as_a_java_owner_offline() {
+    // Ely.by can play (its fresh token stays Confirmed offline), but it never confirms
+    // Java Edition ownership: the Java launch must refuse with the Ely-by message
+    // rather than hand an Ely.by token to the game or claim ownership from it.
+    let store = MemoryStore::default();
+    let (ely_account, ely_secrets) = finish_ely_sign_in(ely_tokens());
+    let mut accounts = Accounts::default();
+    accounts.add(&store, ely_account, &ely_secrets).unwrap();
+    accounts.selected = Some(ely_account.uuid.clone());
+
+    let pass = launch(&offline(), Some("test-client"), &store, &mut accounts).unwrap();
+    assert!(pass.owner.is_none(), "Ely.by never grants Microsoft ownership");
+    assert!(pass.session.is_some(), "Ely.by still holds the Horizon session");
+    assert_eq!(
+        java_player_with(&offline(), Some("test-client"), &store, &mut accounts).unwrap_err(),
+        format!(
+            "{} signs in through Ely.by, which Minecraft: Java Edition instances do not \
+             support yet. Play Horizon, or select a Microsoft account that owns the game.",
+            ely_account.name
+        )
+    );
+}
+
 /// A secrets file of the test's own, gone first.
 fn secrets_file(name: &str) -> PathBuf {
     let dir = std::env::temp_dir().join(format!("horizon-secrets-{name}-{}", std::process::id()));
@@ -1574,13 +1616,18 @@ fn launcher_with(keychain: &Arc<Keychain>, path: &Path) -> Layered {
 }
 
 #[test]
-fn file_store_holds_the_shared_account_session_lock() {
+fn a_direct_file_store_locks_with_its_own_file_not_a_session_lock() {
     let path = secrets_file("file-session-lock");
     let store = FileStore::new(path.clone());
-    let lock_path = path.with_file_name("account-session.lock");
 
+    // The file's own cross-process lock (`account-secrets.lock`) already serializes every
+    // read and write of the secrets file; a session lock would only add a second persistent
+    // file beside it. Only stores that cannot pair a file with their secrets (the OS
+    // keychains) take the shared session lock.
+    assert_eq!(store.lock_file(), None);
+    let lock_path = path.with_file_name("account-session.lock");
     let operation = session::lock(&store).unwrap();
-    assert!(lock_path.exists());
+    assert!(!lock_path.exists());
     drop(operation);
     remove_secrets_dir(&path);
 }
