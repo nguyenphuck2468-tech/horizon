@@ -2490,7 +2490,10 @@ fn ely_account_opens_the_gate_and_reports_ready() {
     let store = MemoryStore::default();
     let mut accounts = Accounts::default();
     accounts.add(&store, account, &secrets).unwrap();
-    assert!(accounts.has_owner(&store));
+    assert!(
+        !accounts.has_owner(&store),
+        "an Ely.by session is playable but does not establish Java ownership"
+    );
     assert!(!matches!(
         session::Status::from_secrets(Some(&secrets)).state,
         session::State::OwnershipRequired
