@@ -2526,6 +2526,26 @@ fn ely_refresh_cannot_replace_the_saved_profile_uuid() {
 }
 
 #[test]
+fn transient_ely_refresh_failure_keeps_a_rotated_refresh_token() {
+    let (_, secrets) = finish_ely_sign_in(ely_tokens());
+    let Check::NoAnswer(error, refreshed) = unavailable_ely_refresh(
+        secrets,
+        "profile lookup timed out".into(),
+        Some("rotated-after-profile-timeout".into()),
+    ) else {
+        panic!("a transient profile failure must keep the account retryable");
+    };
+
+    assert_eq!(error, "profile lookup timed out");
+    assert!(!refreshed.sign_in_required);
+    assert!(refreshed.plays());
+    assert_eq!(
+        refreshed.refresh_token,
+        format!("{ELY_REFRESH_PREFIX}rotated-after-profile-timeout")
+    );
+}
+
+#[test]
 fn forced_ely_refresh_does_not_skip_a_fresh_access_token() {
     let (account, mut secrets) = finish_ely_sign_in(ely_tokens());
     secrets.refresh_token.clear();
