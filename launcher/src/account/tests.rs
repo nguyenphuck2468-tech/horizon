@@ -2848,9 +2848,10 @@ fn session_file_writes_user_type_correctly_for_elyby() {
     // This ensures Horizon Client knows the provider type
 
     let (account, secrets) = finish_ely_sign_in(ely_tokens());
-    let dir = tempfile::tempdir().unwrap();
+    let temp_path = secrets_file("session-elyby");
+    let dir = temp_path.parent().unwrap();
 
-    let result = write_session_file(dir.path(), &account, &secrets);
+    let result = write_session_file(dir, &account, &secrets);
 
     assert!(result.is_ok(), "write_session_file should succeed");
     let path = result.unwrap();
@@ -2872,9 +2873,10 @@ fn session_file_writes_user_type_correctly_for_microsoft() {
     // Verify that session_file correctly marks Microsoft accounts
 
     let (account, secrets) = finish_ms_sign_in(ms_tokens());
-    let dir = tempfile::tempdir().unwrap();
+    let temp_path = secrets_file("session-microsoft");
+    let dir = temp_path.parent().unwrap();
 
-    let result = write_session_file(dir.path(), &account, &secrets);
+    let result = write_session_file(dir, &account, &secrets);
 
     assert!(result.is_ok(), "write_session_file should succeed");
     let path = result.unwrap();
@@ -2897,9 +2899,10 @@ fn session_file_strips_elyby_prefix_from_token() {
     // This ensures Horizon Client gets the raw token
 
     let (account, secrets) = finish_ely_sign_in(ely_tokens());
-    let dir = tempfile::tempdir().unwrap();
+    let temp_path = secrets_file("session-elyby-token");
+    let dir = temp_path.parent().unwrap();
 
-    let result = write_session_file(dir.path(), &account, &secrets);
+    let result = write_session_file(dir, &account, &secrets);
 
     assert!(result.is_ok(), "write_session_file should succeed");
     let path = result.unwrap();
@@ -3010,7 +3013,6 @@ impl SecretStore for MutatingSecretStore {
 // ============================================================================
 
 use std::collections::HashMap;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Mutex;
 
 #[test]
