@@ -967,21 +967,25 @@ impl FileStore {
 /// [`file_key`], then a random 12-byte nonce and the ciphertext with its tag.
 const SEALED: &[u8] = b"HZSECv1\n";
 
-/// The secrets file's key: this computer's identity (`/etc/machine-id` on Linux, `/etc/hostid` on
-/// FreeBSD) hashed with a constant of the launcher's. The tokens are never on disk in plain text,
-/// and a copy of the file taken off the computer (a backup, a synced home folder) can't be read
-/// elsewhere. On the computer itself, the file's mode (0600) is what keeps other users out.
-fn file_key() -> chacha20poly1305::Key {
+/// Derive a fallback-file key from a non-empty machine identity. If the OS exposes no identity,
+/// refuse to persist credentials rather than falling back to a key shared by every installation.
+fn key_for_machine_id(id: Option<&[u8]>) -> Option<chacha20poly1305::Key> {
     use sha2::Digest;
+    let id = id?.trim_ascii();
+    if id.is_empty() {
+        return None;
+    }
     let mut hash = sha2::Sha256::new();
     hash.update(b"horizon-launcher account-secrets v1");
-    if let Some(id) = ["/etc/machine-id", "/var/lib/dbus/machine-id", "/etc/hostid"]
+    hash.update(id);
+    Some(hash.finalize())
+}
+
+fn file_key() -> Option<chacha20poly1305::Key> {
+    let id = ["/etc/machine-id", "/var/lib/dbus/machine-id", "/etc/hostid"]
         .iter()
-        .find_map(|path| std::fs::read(path).ok())
-    {
-        hash.update(id.trim_ascii());
-    }
-    hash.finalize()
+        .find_map(|path| std::fs::read(path).ok())?;
+    key_for_machine_id(Some(&id))
 }
 
 /// `json` sealed for the secrets file ([`SEALED`]).
@@ -989,7 +993,11 @@ fn seal(json: &[u8]) -> Result<Vec<u8>, String> {
     use chacha20poly1305::{aead::Aead, KeyInit};
     let mut nonce = [0u8; 12];
     getrandom::fill(&mut nonce).map_err(|e| e.to_string())?;
-    let sealed = chacha20poly1305::ChaCha20Poly1305::new(&file_key())
+    let key = file_key().ok_or_else(|| {
+        "this computer has no machine identity; refusing to store credentials in the fallback file"
+            .to_string()
+    })?;
+    let sealed = chacha20poly1305::ChaCha20Poly1305::new(&key)
         .encrypt(&nonce.into(), json)
         .map_err(|_| "the secrets couldn't be sealed".to_string())?;
     Ok([SEALED, &nonce, &sealed].concat())
@@ -1002,7 +1010,8 @@ fn unseal(bytes: &[u8]) -> Option<Vec<u8>> {
     let rest = bytes.strip_prefix(SEALED)?;
     let (nonce, sealed) = rest.split_at_checked(12)?;
     let nonce: [u8; 12] = nonce.try_into().ok()?;
-    chacha20poly1305::ChaCha20Poly1305::new(&file_key())
+    let key = file_key()?;
+    chacha20poly1305::ChaCha20Poly1305::new(&key)
         .decrypt(&nonce.into(), sealed)
         .ok()
 }
