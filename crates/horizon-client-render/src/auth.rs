@@ -67,9 +67,7 @@ impl AuthSession {
             .filter(|t| !t.is_empty())
             .ok_or("the session has no access token")?;
         let elyby = field("user_type") == Some("elyby");
-        if field("user_type")
-            .is_some_and(|t| t != "msa" && t != "elyby")
-        {
+        if field("user_type").is_some_and(|t| t != "msa" && t != "elyby") {
             return Err("the session is not a supported account session".into());
         }
         Ok(Self {
