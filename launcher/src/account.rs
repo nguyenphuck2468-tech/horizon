@@ -2239,7 +2239,9 @@ impl SignIn {
 
     fn start_expected(expected: Option<Account>) -> Self {
         // Re-signing in an Ely.by account goes back to Ely.by, whatever the caller asked for.
-        if expected.as_ref().is_some_and(|a| is_ely_account(&a.uuid)) {
+        if expected.as_ref().is_some_and(|a| {
+            secrets_in(store(), &a.uuid).is_some_and(|secrets| is_ely(&secrets))
+        }) {
             return Self::start_ely_provider(expected, false);
         }
         Self::start_microsoft(expected)
