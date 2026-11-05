@@ -2203,6 +2203,30 @@ fn targeted_sign_in_rejects_another_identity_without_writing_or_selecting_it() {
 }
 
 #[test]
+fn targeted_elyby_sign_in_mismatch_names_elyby_as_the_required_provider() {
+    let store = MemoryStore::default();
+    let mut accounts = signed_in(&store, &secrets("original", true));
+    let (mut wrong, wrong_secrets) = finish_ely_sign_in(ely_tokens());
+    wrong.uuid = "11111111111111111111111111111111".into();
+    wrong.name = "OtherElyPlayer".into();
+
+    let error = accept_sign_in(
+        &mut accounts,
+        &store,
+        Some(&notch()),
+        wrong,
+        &wrong_secrets,
+        &|| false,
+        &|_| {},
+    )
+    .unwrap_err();
+
+    assert!(error.contains("Ely.by account"));
+    assert!(!error.contains("Microsoft account"));
+    assert!(store.get(UUID).unwrap().is_some());
+}
+
+#[test]
 fn targeted_sign_in_preserves_the_selected_account_or_offline_name() {
     let store = MemoryStore::default();
     let mut accounts = signed_in(&store, &secrets("old", true));
