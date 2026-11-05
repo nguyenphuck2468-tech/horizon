@@ -81,7 +81,7 @@ impl Launcher {
             .child(
                 shell::text(theme::night::TITLE, shell::c(n.ink))
                     .mb(px(4.))
-                    .child(tr("Sign in to play").to_string()),
+                    .child(tr("Java Edition owner required").to_string()),
             )
             .child(line(
                 "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.",
