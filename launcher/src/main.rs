@@ -1042,16 +1042,14 @@ impl Launcher {
                         self.auth_progress.insert(uuid, phase);
                     }
                 }
-                Msg::AccountStatus(uuid, generation, status) => {
+                Msg::AccountStatus(uuid, generation, status, has_owner) => {
                     if self.auth_busy.get(&uuid) != Some(&generation) {
                         continue;
                     }
                     self.auth_busy.remove(&uuid);
                     self.auth_progress.remove(&uuid);
                     if self.accounts.find(&uuid).is_some() {
-                        if status.state == account::session::State::Ready {
-                            self.owner = Some(true);
-                        }
+                        self.owner = Some(has_owner);
                         self.auth_status.insert(uuid, status);
                         // A refresh may have saved a new name or skin: show it now.
                         let saved = Accounts::load();
@@ -1443,15 +1441,10 @@ impl Launcher {
                     self.sign_in_target = None;
                     self.accounts = Accounts::load();
                     self.load_profile_heads();
+                    self.owner = None;
                     self.load_auth_statuses(false);
-                    // Sign-in refuses accounts that don't own the game.
-                    self.owner = Some(true);
                     self.owner_screen_open = false;
                     self.client_error = None;
-                    if !self.settings.owner_notice_seen {
-                        self.settings.owner_notice_seen = true;
-                        self.save_settings();
-                    }
                 }
                 changed = true;
             }
@@ -1801,7 +1794,8 @@ impl Launcher {
                         status = renewed;
                     }
                 }
-                let _ = tx.send(Msg::AccountStatus(account.uuid, generation, status));
+                let has_owner = Accounts::load().has_owner(store);
+                let _ = tx.send(Msg::AccountStatus(account.uuid, generation, status, has_owner));
             });
         }
     }
@@ -1817,7 +1811,8 @@ impl Launcher {
             };
             progress(account::session::Phase::Keychain);
             if let Ok(status) = account::session::refresh_with_progress(&uuid, &progress) {
-                let _ = tx.send(Msg::AccountStatus(uuid, generation, status));
+                let has_owner = Accounts::load().has_owner(account::store());
+                let _ = tx.send(Msg::AccountStatus(uuid, generation, status, has_owner));
             } else {
                 // It may have been removed through the CLI while this window was open.
                 let _ = tx.send(Msg::AccountRemoved(
