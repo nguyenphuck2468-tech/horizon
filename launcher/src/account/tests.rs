@@ -372,7 +372,7 @@ fn offline() -> Endpoints {
 #[test]
 fn refresh_only_when_the_token_runs_out() {
     let (m, ep) = mock(|_| {});
-    let Check::Owns(_, kept) = check(
+    let Check::Confirmed(_, kept) = check(
         &ep,
         Some("test-client"),
         &notch(),
@@ -387,7 +387,7 @@ fn refresh_only_when_the_token_runs_out() {
         minecraft_expires_at: now() + 60,
         ..kept.clone()
     };
-    let Check::Owns(renewed_account, renewed) = check(&ep, Some("test-client"), &notch(), stale)
+    let Check::Confirmed(renewed_account, renewed) = check(&ep, Some("test-client"), &notch(), stale)
     else {
         panic!("owns");
     };
@@ -2475,7 +2475,7 @@ fn forced_ely_refresh_does_not_skip_a_fresh_access_token() {
 
     assert!(matches!(
         check_ely(&account, secrets.clone(), false, &|_| {}),
-        Check::Owns(_, _)
+        Check::Confirmed(_, _)
     ));
     let Check::NoAnswer(error, refreshed) = check_ely(&account, secrets, true, &|_| {}) else {
         panic!("a forced refresh must not accept the cached access token");
