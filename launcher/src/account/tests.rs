@@ -1505,6 +1505,22 @@ fn launcher_with(keychain: &Arc<Keychain>, path: &Path) -> Layered {
 }
 
 #[test]
+fn layered_store_holds_the_shared_account_session_lock() {
+    let path = secrets_file("layered-session-lock");
+    let keychain = Arc::new(Keychain::default());
+    let layered = launcher_with(&keychain, &path);
+    let lock_path = path.with_file_name("account-session.lock");
+
+    let operation = session::lock(&layered).unwrap();
+    assert!(
+        lock_path.exists(),
+        "Layered must expose the same cross-process operation lock as the OS keychain"
+    );
+    drop(operation);
+    remove_secrets_dir(&path);
+}
+
+#[test]
 fn the_keychain_takes_back_what_the_file_kept_while_it_was_away() {
     let path = secrets_file("recovery");
     let keychain = Arc::new(Keychain::default());
