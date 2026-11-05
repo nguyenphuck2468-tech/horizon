@@ -2410,6 +2410,22 @@ fn ely_refresh_cannot_replace_the_saved_profile_uuid() {
 }
 
 #[test]
+fn forced_ely_refresh_does_not_skip_a_fresh_access_token() {
+    let (account, mut secrets) = finish_ely_sign_in(ely_tokens());
+    secrets.refresh_token.clear();
+
+    assert!(matches!(
+        check_ely(&account, secrets.clone(), false, &|_| {}),
+        Check::Owns(_, _)
+    ));
+    let Check::NoAnswer(error, refreshed) = check_ely(&account, secrets, true, &|_| {}) else {
+        panic!("a forced refresh must not accept the cached access token");
+    };
+    assert_eq!(error, SIGN_IN_AGAIN);
+    assert!(refreshed.sign_in_required);
+}
+
+#[test]
 fn ely_account_opens_the_gate_and_reports_ready() {
     let (account, secrets) = finish_ely_sign_in(ely_tokens());
     let store = MemoryStore::default();
