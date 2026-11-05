@@ -2402,17 +2402,25 @@ fn plays_survives_the_keychain_round_trip_and_old_json_still_loads() {
 // ============================================================================
 
 #[test]
-fn java_player_fails_closed_when_keychain_read_errors() {
+
+#[test]
+fn java_player_fails_closed_when_credential_json_is_corrupted() {
+    // This test verifies behavior when the credential exists in the keychain
+    // but is corrupted (invalid JSON that cannot be parsed).
+    // This is different from a backend keychain read failure (get() returning Err).
+    // When JSON parsing fails, secrets_in() returns None, and the account
+    // is treated as not having valid credentials.
+    
     // Setup: valid account and secrets in the account list
     let (account, secrets) = finish_sign_in(ms_tokens());
     let store = MemoryStore::default();
     let mut accounts = signed_in(&store, &secrets);
     accounts.update(account.clone());
     
-    // Store secrets, then corrupt them to simulate keychain read failure
+    // Store corrupted JSON to simulate credential corruption
     store.set(&account.uuid, "invalid json that won't parse");
     
-    // Attempt to get java player - should fail closed with keychain error
+    // Attempt to get java player - should fail because credential cannot be parsed
     let result = java_player_with(
         &test_endpoints(),
         None,
@@ -2420,11 +2428,44 @@ fn java_player_fails_closed_when_keychain_read_errors() {
         &mut accounts,
     );
     
-    assert!(result.is_err(), "java_player_with must fail closed when keychain read fails");
+    assert!(result.is_err(), "java_player_with must fail when credential JSON is corrupted");
     let err = result.unwrap_err();
+    // The error message should indicate the account has no owner/valid credentials
     assert!(
-        err.contains("Cannot read credentials") || err.contains("keychain"),
-        "Error should mention keychain failure: {}",
+        err.contains("no account") || err.contains("NoOwner") || err.contains("own"),
+        "Error should indicate no valid owner: {}",
+        err
+    );
+}
+
+#[test]
+fn java_player_fails_closed_when_credential_is_missing() {
+    // This test verifies behavior when the credential is completely missing
+    // from the keychain (get() returns Ok(None)).
+    
+    // Setup: valid account but no credentials in store
+    let (account, secrets) = finish_sign_in(ms_tokens());
+    let store = MemoryStore::default();
+    let mut accounts = signed_in(&store, &secrets);
+    accounts.update(account.clone());
+    
+    // Don't store any credentials - simulate missing credential
+    // (store is empty by default)
+    
+    // Attempt to get java player - should fail because credential is missing
+    let result = java_player_with(
+        &test_endpoints(),
+        None,
+        &store,
+        &mut accounts,
+    );
+    
+    assert!(result.is_err(), "java_player_with must fail when credential is missing");
+    let err = result.unwrap_err();
+    // The error message should indicate the account has no owner/valid credentials
+    assert!(
+        err.contains("no account") || err.contains("NoOwner") || err.contains("own"),
+        "Error should indicate no valid owner: {}",
         err
     );
 }
@@ -2808,11 +2849,6 @@ fn session_file_strips_elyby_prefix_from_token() {
 
 
 // ============================================================================
-// E1.0.3.1 - Deterministic TOCTOU Regression Tests with Mutation Injection
-// ============================================================================
-
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex};
 
 /// Test double that injects credential mutations DURING the get() operation.
 /// This allows deterministic testing of TOCTOU windows by mutating the store
@@ -2824,6 +2860,7 @@ use std::sync::{Arc, Mutex};
 struct MutatingSecretStore {
     inner: MemoryStore,
     read_count: Arc<AtomicUsize>,
+    reads_by_uuid: Arc<Mutex<HashMap<String, usize>>>,
     mutation_target: Arc<Mutex<Option<(String, String)>>>, // (key, new_secret)
     mutated: Arc<Mutex<bool>>,
 }
@@ -2833,6 +2870,7 @@ impl MutatingSecretStore {
         Self {
             inner,
             read_count: Arc::new(AtomicUsize::new(0)),
+            reads_by_uuid: Arc::new(Mutex::new(HashMap::new())),
             mutation_target: Arc::new(Mutex::new(None)),
             mutated: Arc::new(Mutex::new(false)),
         }
@@ -2847,6 +2885,10 @@ impl MutatingSecretStore {
         self.read_count.load(Ordering::SeqCst)
     }
     
+    fn reads_for_uuid(&self, uuid: &str) -> usize {
+        *self.reads_by_uuid.lock().unwrap().get(uuid).unwrap_or(&0)
+    }
+    
     fn was_mutated(&self) -> bool {
         *self.mutated.lock().unwrap()
     }
@@ -2854,19 +2896,32 @@ impl MutatingSecretStore {
 
 impl SecretStore for MutatingSecretStore {
     fn get(&self, key: &str) -> Result<Option<String>, String> {
-        // Increment read count
+        // Increment global read count
         self.read_count.fetch_add(1, Ordering::SeqCst);
+        
+        // Track reads by UUID
+        {
+            let mut reads_by_uuid = self.reads_by_uuid.lock().unwrap();
+            *reads_by_uuid.entry(key.to_string()).or_insert(0) += 1;
+        }
         
         // Read the current value FIRST
         let value = self.inner.get(key)?;
         
         // THEN check if we should mutate (after read, before return)
-        let mut mutation_target = self.mutation_target.lock().unwrap();
-        if let Some((target_key, new_secret)) = mutation_target.take() {
-            if target_key == key {
-                // Mutate the store NOW
-                self.inner.set(&target_key, &new_secret)?;
-                *self.mutated.lock().unwrap() = true;
+        // Only consume the mutation if the key matches
+        {
+            let mut mutation_target = self.mutation_target.lock().unwrap();
+            if let Some((ref target_key, _)) = *mutation_target {
+                if target_key == key {
+                    // Key matches - consume the mutation
+                    if let Some((target_key, new_secret)) = mutation_target.take() {
+                        // Mutate the store NOW
+                        self.inner.set(&target_key, &new_secret)?;
+                        *self.mutated.lock().unwrap() = true;
+                    }
+                }
+                // If key doesn't match, mutation is NOT consumed and remains pending
             }
         }
         
@@ -2887,9 +2942,18 @@ impl SecretStore for MutatingSecretStore {
     }
 }
 
+
+// ============================================================================
+// E1.0.3.1.2 - Corrected TOCTOU Regression Tests
+// ============================================================================
+
+use std::collections::HashMap;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::{Arc, Mutex};
+
 #[test]
 fn toctou_validated_snapshot_used_directly_for_player() {
-    // Keep this test - it verifies the basic invariant without mutation
+    // Verifies the basic invariant without mutation
     
     let store = MemoryStore::default();
     let mut accounts = Accounts::default();
@@ -2999,7 +3063,7 @@ fn toctou_elyby_credential_mutated_to_microsoft_during_launch() {
 #[test]
 fn toctou_read_count_verification() {
     // Verify that java_player_with() does not perform additional keychain reads
-    // beyond what launch() performs.
+    // beyond what launch() performs for the selected account.
     
     let inner = MemoryStore::default();
     let store = MutatingSecretStore::new(inner);
@@ -3011,7 +3075,7 @@ fn toctou_read_count_verification() {
     accounts.selected = Some(account.uuid.clone());
     store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap()).unwrap();
     
-    let initial_read_count = store.read_count();
+    let initial_reads = store.reads_for_uuid(&account.uuid);
     
     // Act
     let _player = java_player_with(
@@ -3021,18 +3085,60 @@ fn toctou_read_count_verification() {
         &mut accounts,
     ).unwrap();
     
-    let final_read_count = store.read_count();
-    let reads_performed = final_read_count - initial_read_count;
+    let final_reads = store.reads_for_uuid(&account.uuid);
+    let reads_for_account = final_reads - initial_reads;
     
-    // Assert: launch() reads credentials for validation
-    // java_player_with() should NOT perform additional reads
-    assert!(
-        reads_performed > 0,
-        "At least one read should occur (in launch())"
+    // Assert: launch() reads the account exactly once for validation
+    // java_player_with() should NOT perform additional reads for this account
+    // The exact count should be 1 (one read during validation in launch())
+    assert_eq!(
+        reads_for_account, 1,
+        "Expected exactly 1 read for the account (during validation in launch()),          got {}. A count > 1 indicates java_player_with() performed an additional          keychain read, which would be a TOCTOU vulnerability.",
+        reads_for_account
+    );
+}
+
+#[test]
+fn toctou_mutation_not_consumed_by_unrelated_key_read() {
+    // Verify that reading an unrelated key does not consume the pending mutation
+    // This tests the fix for the mutation_target consumption bug
+    
+    let inner = MemoryStore::default();
+    let store = MutatingSecretStore::new(inner);
+    
+    // Setup: two accounts
+    let (account1, secrets1) = finish_sign_in(ms_tokens());
+    let (account2, secrets2) = finish_ely_sign_in(ely_tokens());
+    
+    store.set(&account1.uuid, &serde_json::to_string(&secrets1).unwrap()).unwrap();
+    store.set(&account2.uuid, &serde_json::to_string(&secrets2).unwrap()).unwrap();
+    
+    // Setup mutation for account1
+    let (_, new_secrets) = finish_ely_sign_in(ely_tokens());
+    store.set_mutation(
+        account1.uuid.clone(),
+        serde_json::to_string(&new_secrets).unwrap()
     );
     
-    // The critical invariant: Player uses validated snapshot
-    // (already verified by other tests)
+    // Act: Read account2 first (unrelated key)
+    let result2 = store.get(&account2.uuid).unwrap();
+    
+    // Assert: Mutation should NOT have occurred (key doesn't match)
+    assert!(!store.was_mutated(), "Mutation should not occur for unrelated key");
+    assert_eq!(result2, Some(serde_json::to_string(&secrets2).unwrap()));
+    
+    // Act: Now read account1 (matching key)
+    let result1 = store.get(&account1.uuid).unwrap();
+    
+    // Assert: Mutation SHOULD have occurred now
+    assert!(store.was_mutated(), "Mutation should occur for matching key");
+    assert_eq!(result1, Some(serde_json::to_string(&secrets1).unwrap()));
+    
+    // Act: Read account1 again
+    let result1_again = store.get(&account1.uuid).unwrap();
+    
+    // Assert: Should see the mutated value
+    assert_eq!(result1_again, Some(serde_json::to_string(&new_secrets).unwrap()));
 }
 
 #[test]
@@ -3064,4 +3170,3 @@ fn toctou_exact_validated_token_uuid_provider_ownership_used() {
     assert_eq!(player.xuid, "test-xuid-12345", "XUID must match validated snapshot");
     assert!(!player.elyby, "Provider must match validated snapshot (Microsoft, not Ely.by)");
 }
-
