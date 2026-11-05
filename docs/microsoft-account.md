@@ -1,10 +1,13 @@
 # Microsoft account sign-in and online-mode play
 
-Horizon signs players in with their Microsoft account in the launcher and joins online-mode
-(authenticated) servers like vanilla 26.3 does. The launcher plays only with an account that owns
-Minecraft: Java Edition ([the owner gate](#the-owner-gate)); offline names, LAN and offline-mode
-servers play behind it. This note is the design, the status of each part and what Ludovic has to
-register.
+Horizon supports Microsoft and Ely.by sign-in. A Microsoft account that owns Minecraft:
+Java Edition is required for Mojang downloads, Java Edition instances and Mojang's online-mode
+authentication ([the owner gate](#the-owner-gate)). An Ely.by account can authenticate the Horizon
+Client to servers that accept Ely.by, but it does not prove Java Edition ownership and cannot
+authorize Mojang downloads or a Java Edition instance. Offline names, LAN and offline-mode servers
+remain subject to the owner gate unless the hidden developer-only offline option is enabled.
+
+This note documents both providers and the account registrations needed for release builds.
 
 ## What Ludovic registers (needs his accounts)
 
@@ -39,6 +42,32 @@ no Microsoft sign-in"); release builds have it.
      value (empty or unset = not configured).
 
 Never use another application's client ID (the official launcher's or another launcher's).
+
+## Ely.by sign-in
+
+Ely.by is a separate authentication provider, not a Microsoft or Mojang ownership check. It is
+available to the Horizon Client session path; it is deliberately not used as a Microsoft token
+for Mojang downloads or a Java Edition instance.
+
+- Register an Ely.by OAuth application and configure its **public client ID** as the GitHub
+  repository variable `HORIZON_ELY_CLIENT_ID`. The launcher release workflow embeds this public
+  value at compile time. It is not a secret.
+- For a local build, `HORIZON_ELY_CLIENT_ID` can also be supplied in the process environment;
+  a non-empty runtime value overrides the compiled value.
+- The default flow is OAuth 2.0 Device Authorization (public client): no client secret is needed.
+  It requests `account_info offline_access minecraft_server_session`, shows the user code and
+  verification URL, and polls the token endpoint. The refresh token is kept in the OS keychain
+  (or the launcher's encrypted fallback store where supported).
+- An optional confidential Authorization Code callback exists only when
+  `HORIZON_ELY_CLIENT_SECRET` is supplied at runtime as well as the public client ID. Do not put
+  this secret in the repository, a release workflow variable, or a shipped binary. Device Code
+  remains the default and needs no secret.
+- Ely.by sessions are written to the Horizon Client's short-lived, owner-readable session file
+  with `user_type: "elyby"`. The client sends those tokens only to Ely.by's session service;
+  it does not send them to Minecraft Services. A server must accept Ely.by authentication for
+  online-mode play to succeed.
+
+The public client ID must belong to this project. Never borrow another application's ID.
 
 ## Flow (launcher)
 
