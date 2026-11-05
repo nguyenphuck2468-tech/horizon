@@ -122,7 +122,7 @@ pub fn device_code() -> Result<DeviceCode, String> {
                 .get("interval")
                 .and_then(Value::as_u64)
                 .unwrap_or(5)
-                .max(1),
+                .clamp(1, 60),
             expires_at: now().saturating_add(
                 body.get("expires_in")
                     .and_then(Value::as_u64)
@@ -161,11 +161,13 @@ pub fn wait_for_device_code(
             DevicePoll::Pending => offline = 0,
             DevicePoll::SlowDown => {
                 offline = 0;
-                interval = interval.saturating_add(5);
+                interval = interval.saturating_add(5).min(60);
             }
-            // One dropped request must not end a sign-in the player is still completing.
+            // RFC 8628 recommends backing off after a timeout. Treat server/network outages
+            // conservatively too, while keeping the code alive for a few retries.
             DevicePoll::Offline(error) => {
                 offline += 1;
+                interval = interval.saturating_mul(2).min(60);
                 if offline >= MAX_OFFLINE_POLLS {
                     return Err(error);
                 }
@@ -635,6 +637,18 @@ fn now() -> u64 {
 mod tests {
     use super::*;
     use std::io::{Read, Write};
+
+    #[test]
+    fn device_poll_interval_is_bounded_and_backed_off() {
+        let interval = |value: u64| value.clamp(1, 60);
+        let backoff = |value: u64| value.saturating_mul(2).min(60);
+        assert_eq!(interval(0), 1);
+        assert_eq!(interval(5), 5);
+        assert_eq!(interval(u64::MAX), 60);
+        assert_eq!(backoff(5), 10);
+        assert_eq!(backoff(40), 60);
+        assert_eq!(backoff(60), 60);
+    }
 
     #[test]
     fn initial_authorization_requires_a_refresh_token() {
