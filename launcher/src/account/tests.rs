@@ -2902,6 +2902,7 @@ fn session_file_writes_user_type_correctly_for_elyby() {
     );
     assert_eq!(json["name"], account.name);
     assert_eq!(json["uuid"], account.uuid);
+    remove_secrets_dir(&temp_path);
 }
 
 #[test]
@@ -2927,6 +2928,7 @@ fn session_file_writes_user_type_correctly_for_microsoft() {
     );
     assert_eq!(json["name"], account.name);
     assert_eq!(json["uuid"], account.uuid);
+    remove_secrets_dir(&temp_path);
 }
 
 #[test]
@@ -2953,6 +2955,7 @@ fn session_file_strips_elyby_prefix_from_token() {
         "access_token should not have 'elyby:' prefix: {}",
         access_token
     );
+    remove_secrets_dir(&temp_path);
 }
 
 // ============================================================================
