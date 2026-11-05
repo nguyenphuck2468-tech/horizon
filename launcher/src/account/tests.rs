@@ -2401,8 +2401,8 @@ fn ely_sign_in_plays_but_never_claims_minecraft_ownership() {
 fn ely_account_opens_the_gate_and_reports_ready() {
     let (account, secrets) = finish_ely_sign_in(ely_tokens());
     let store = MemoryStore::default();
-    let mut accounts = signed_in(&store, &secrets);
-    accounts.update(account);
+    let mut accounts = Accounts::default();
+    accounts.add(&store, account, &secrets).unwrap();
     assert!(accounts.has_owner(&store));
     assert!(!matches!(
         session::Status::from_secrets(Some(&secrets)).state,
@@ -2541,7 +2541,10 @@ fn java_player_uses_fresh_credential_not_cached_elyby() {
     );
     let player = result.unwrap();
     assert!(!player.elyby, "Player should not be marked as Ely.by");
-    assert_eq!(player.name, ely_account.name);
+    assert_eq!(
+        player.name, "Notch",
+        "the refreshed Microsoft profile supplies the Java player name"
+    );
 }
 
 #[test]
