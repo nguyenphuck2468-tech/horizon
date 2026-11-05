@@ -1355,9 +1355,11 @@ fn an_ely_session_never_replays_as_a_java_owner_offline() {
     // rather than hand an Ely.by token to the game or claim ownership from it.
     let store = MemoryStore::default();
     let (ely_account, ely_secrets) = finish_ely_sign_in(ely_tokens());
+    let ely_name = ely_account.name.clone();
+    let ely_uuid = ely_account.uuid.clone();
     let mut accounts = Accounts::default();
     accounts.add(&store, ely_account, &ely_secrets).unwrap();
-    accounts.selected = Some(ely_account.uuid.clone());
+    accounts.selected = Some(ely_uuid);
 
     let pass = launch(&offline(), Some("test-client"), &store, &mut accounts).unwrap();
     assert!(
@@ -1373,7 +1375,7 @@ fn an_ely_session_never_replays_as_a_java_owner_offline() {
         format!(
             "{} signs in through Ely.by, which Minecraft: Java Edition instances do not \
              support yet. Play Horizon, or select a Microsoft account that owns the game.",
-            ely_account.name
+            ely_name
         )
     );
 }

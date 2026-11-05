@@ -2749,13 +2749,18 @@ fn java_player_with(
     // and Ely.by sessions (`owns_minecraft` is false) never come back this way.
     let kept = || {
         accounts
-            .selected
-            .iter()
-            .chain(accounts.accounts.iter())
-            .filter_map(|account| Some((account.clone(), secrets_in(store, &account.uuid)?)))
-            .find_map(|(account, secrets)| {
+            .selected()
+            .into_iter()
+            .chain(
+                accounts
+                    .accounts
+                    .iter()
+                    .filter(|a| Some(*a) != accounts.selected()),
+            )
+            .find_map(|a| {
+                let secrets = secrets_in(store, &a.uuid)?;
                 (secrets.owns_minecraft() && !secrets.sign_in_required)
-                    .then_some((account, secrets))
+                    .then_some((a.clone(), secrets))
             })
     };
     let (account, secrets) = from_pass.or_else(kept).ok_or_else(|| NoOwner.to_string())?;
