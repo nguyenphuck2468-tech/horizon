@@ -1649,7 +1649,7 @@ fn download_for(
         // Minecraft services can confirm ownership again.
         Ok(pass) => {
             let reason = pass.offline.unwrap_or_else(|| {
-                "Ely.by accounts can play Horizon, but they do not establish ownership of Minecraft: Java Edition. Sign in with the Microsoft account that owns the game.".into()
+                "A playable Horizon session does not prove ownership of Minecraft: Java Edition. Sign in with the Microsoft account that owns the game.".into()
             });
             Err(format!(
                 "\n  • Downloading {v} from Mojang needs a Microsoft account whose Minecraft ownership can be confirmed: {reason}"
