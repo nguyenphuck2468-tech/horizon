@@ -3156,8 +3156,8 @@ pub enum Msg {
     Keychain(Option<String>),
     /// Whether an account in the launcher owned the game at its last check (the owner gate).
     Owner(bool),
-    /// Credential-free result and refreshed global Java-owner gate from a background operation.
-    AccountStatus(String, u64, crate::account::session::Status, bool),
+    /// Credential-free account status from a background operation.
+    AccountStatus(String, u64, crate::account::session::Status),
     AccountProgress(String, u64, crate::account::session::Phase),
     AccountHead(String, Option<String>, Option<Vec<[u8; 4]>>, bool),
     AccountRemoved(String, u64, Result<bool, String>),
