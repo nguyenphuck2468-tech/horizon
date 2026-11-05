@@ -24,12 +24,26 @@ pub struct Profile {
     pub name: String,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct Tokens {
     pub access_token: String,
     pub refresh_token: Option<String>,
     pub expires_at: u64,
     pub profile: Profile,
+}
+
+impl std::fmt::Debug for Tokens {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Tokens")
+            .field("access_token", &"<hidden>")
+            .field(
+                "refresh_token",
+                &self.refresh_token.as_ref().map(|_| "<hidden>"),
+            )
+            .field("expires_at", &self.expires_at)
+            .field("profile", &self.profile)
+            .finish()
+    }
 }
 
 /// Public information shown while waiting for device authorization.
