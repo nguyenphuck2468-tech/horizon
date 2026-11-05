@@ -1507,20 +1507,23 @@ impl Layered {
 
 impl SecretStore for Layered {
     fn get(&self, key: &str) -> Result<Option<String>, String> {
-        match self.file.entry(key)? {
-            Some(secret) if secret == SIGNED_OUT => return Ok(None),
-            Some(secret) => {
-                self.parked.lock().unwrap().insert(key.into());
-                return Ok(Some(secret));
+        // Coordinate reads with hand-over, refresh writes and sign-outs in other processes.
+        self.keychain_writes(|| {
+            match self.file.entry(key)? {
+                Some(secret) if secret == SIGNED_OUT => return Ok(None),
+                Some(secret) => {
+                    self.parked.lock().unwrap().insert(key.into());
+                    return Ok(Some(secret));
+                }
+                None => {}
             }
-            None => {}
-        }
-        // Seen in the file and gone from it: another process handed it to the keychain, which
-        // answers again.
-        if self.is_away() && self.parked.lock().unwrap().remove(key) {
-            self.away.store(false, std::sync::atomic::Ordering::Relaxed);
-        }
-        self.ask(|keychain| keychain.get(key))
+            // Seen in the file and gone from it: another process handed it to the keychain,
+            // which answers again.
+            if self.is_away() && self.parked.lock().unwrap().remove(key) {
+                self.away.store(false, std::sync::atomic::Ordering::Relaxed);
+            }
+            self.ask(|keychain| keychain.get(key))
+        })
     }
     fn set(&self, key: &str, secret: &str) -> Result<(), String> {
         if self.is_away() {
