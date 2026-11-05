@@ -2348,6 +2348,8 @@ impl SignIn {
 /// What the game about to start gets from the accounts.
 #[derive(Debug, Default)]
 pub struct GameSession {
+    /// Whether a Microsoft account was confirmed to own Minecraft: Java Edition.
+    pub owner: bool,
     /// The playing account's session (`--session-file`); none: offline.
     pub file: Option<PathBuf>,
     /// Why the account plays offline this time, if it does.
@@ -2437,6 +2439,7 @@ fn launch_as(
 /// The game's session files for a launch that passed the gate.
 fn session_file(game_home: &Path, pass: Launch, env: Vec<(&'static str, String)>) -> GameSession {
     let mut out = GameSession {
+        owner: pass.owner.is_some(),
         env,
         offline: pass.offline,
         ..GameSession::default()
