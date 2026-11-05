@@ -358,7 +358,9 @@ pub(super) fn renew_for_game_with(
     let secrets = read(store, &account.uuid)
         .map_err(|e| Status::failed(&e))?
         .ok_or_else(|| Status::from_secrets(None))?;
-    write_session_file(dir, account, &secrets).map_err(|e| Status::failed(&e))
+    // This is still a one-shot handoff: track it with ordinary launch session files so a
+    // client that never consumes it cannot leave a live access token on disk indefinitely.
+    write_launch_session_file(dir, account, &secrets).map_err(|e| Status::failed(&e))
 }
 
 /// Mojang's session server: what an online-mode server asks to check that a player is who they
