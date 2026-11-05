@@ -52,6 +52,8 @@ pub enum State {
 #[derive(Clone, Debug, serde::Serialize)]
 pub struct Status {
     pub state: State,
+    /// Last confirmed Minecraft: Java Edition ownership; Ely.by playability is separate.
+    pub owns_minecraft: bool,
     pub expires_at: Option<u64>,
     pub message: String,
 }
@@ -76,6 +78,7 @@ impl Status {
             } else {
                 State::Retry
             },
+            owns_minecraft: false,
             expires_at: None,
             message: message.into(),
         }
@@ -91,6 +94,7 @@ impl Status {
         };
         let mut status = Self {
             state,
+            owns_minecraft: secrets.is_some_and(|s| s.owns_minecraft() && !s.sign_in_required),
             expires_at: secrets.map(|s| s.minecraft_expires_at),
             message: String::new(),
         };
