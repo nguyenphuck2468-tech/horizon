@@ -435,14 +435,14 @@ pub(super) fn join_server_with(
             "Ely.by's session server",
         )
     } else {
-        (session, "/session/minecraft/join", "Mojang's session server")
+        (
+            session,
+            "/session/minecraft/join",
+            "Mojang's session server",
+        )
     };
     let url = format!("{session}{path}");
-    match send(
-        request_to("POST", &url),
-        Some(Body::Json(body)),
-        service,
-    )? {
+    match send(request_to("POST", &url), Some(Body::Json(body)), service)? {
         (200..=299, _) => Ok(()),
         (403, _) => Err(format!(
             "{service} could not confirm your account. Sign in again and retry."
