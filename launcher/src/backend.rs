@@ -3665,6 +3665,41 @@ mod tests {
         }
         assert!(asked.lock().unwrap().is_empty());
         assert!(!dir.exists());
+
+        // A playable Horizon session without a confirmed Java owner must not authorize
+        // any Mojang download. This is the Launch shape used for an Ely.by account.
+        let ely = account::Account {
+            uuid: "11111111111111111111111111111111".into(),
+            name: "ElyPlayer".into(),
+            skin: None,
+            cape: None,
+        };
+        let ely_secrets: account::Secrets = serde_json::from_value(serde_json::json!({
+            "refresh_token": "fixture-refresh",
+            "minecraft_token": "fixture-access",
+            "minecraft_expires_at": 9999999999u64,
+            "owns": false,
+            "plays": true
+        }))
+        .unwrap();
+        let playable_without_owner = Ok(account::Launch {
+            session: Some((ely, ely_secrets)),
+            ..Default::default()
+        });
+        assert!(download_for(
+            &pins,
+            &dir,
+            playable_without_owner,
+            true,
+            &fetch,
+            &log
+        )
+        .is_err());
+        assert!(
+            asked.lock().unwrap().is_empty(),
+            "a playable session must never authorize a Mojang download"
+        );
+
         // An owner: Mojang is asked (and the download fails here, without network).
         let owner = account::Account {
             uuid: "069a79f444e94726a5befca90e38aaf5".into(),
