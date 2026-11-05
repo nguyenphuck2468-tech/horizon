@@ -236,6 +236,16 @@ fn test_endpoints() -> Endpoints {
 }
 
 #[test]
+fn fallback_file_key_requires_a_nonempty_machine_identity() {
+    assert!(key_for_machine_id(None).is_none());
+    assert!(key_for_machine_id(Some(b" \n")).is_none());
+
+    let first = key_for_machine_id(Some(b"machine-one")).unwrap();
+    let second = key_for_machine_id(Some(b"machine-two")).unwrap();
+    assert_ne!(first.as_slice(), second.as_slice());
+}
+
+#[test]
 fn the_whole_chain() {
     let (m, ep) = mock(|m| m.pending = 2);
     let code = device_code(&ep, "test-client").unwrap();
