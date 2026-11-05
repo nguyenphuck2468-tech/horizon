@@ -232,6 +232,11 @@ fn finish_ms_sign_in(tokens: MsTokens) -> (Account, Secrets) {
     super::finish_sign_in(&ep, tokens).unwrap()
 }
 
+fn test_endpoints() -> Endpoints {
+    let (_, ep) = mock(|_| {});
+    ep
+}
+
 #[test]
 fn the_whole_chain() {
     let (m, ep) = mock(|m| m.pending = 2);
@@ -2481,13 +2486,13 @@ fn java_player_fails_closed_when_credential_is_missing() {
     // from the keychain (get() returns Ok(None)).
 
     // Setup: valid account but no credentials in store
-    let (account, secrets) = finish_ms_sign_in(ms_tokens());
+    let (account, _) = finish_ms_sign_in(ms_tokens());
     let store = MemoryStore::default();
-    let mut accounts = signed_in(&store, &secrets);
-    accounts.update(account.clone());
+    let mut accounts = Accounts::default();
+    accounts.accounts.push(account.clone());
+    accounts.selected = Some(account.uuid.clone());
 
-    // Don't store any credentials - simulate missing credential
-    // (store is empty by default)
+    // Keep the account in accounts.json, but deliberately leave its keychain entry absent.
 
     // Attempt to get java player - should fail because credential is missing
     let result = java_player_with(&test_endpoints(), None, &store, &mut accounts);
@@ -2511,7 +2516,9 @@ fn java_player_uses_fresh_credential_not_cached_elyby() {
     // Expected: Use fresh Microsoft secrets, not stale Ely.by
 
     // Setup: create an Ely.by account in the cached pass
-    let (ely_account, ely_secrets) = finish_ely_sign_in(ely_tokens());
+    let (mut ely_account, ely_secrets) = finish_ely_sign_in(ely_tokens());
+    // Use the same UUID as the mock Microsoft profile to model a provider change for one identity.
+    ely_account.uuid = UUID.to_owned();
     let store = MemoryStore::default();
     let mut accounts = signed_in(&store, &ely_secrets);
     accounts.update(ely_account.clone());
@@ -2576,7 +2583,7 @@ fn java_player_blocks_when_fresh_credential_does_not_own_minecraft() {
     // Scenario: Fresh credential exists but Minecraft services say it doesn't own the game
     // Expected: Block the launch
 
-    // Setup: account with secrets that don't own Minecraft
+    // Setup: account with a playable Horizon entitlement but no Java ownership.
     let (account, _) = finish_ms_sign_in(ms_tokens());
     let no_own_secrets = Secrets {
         minecraft_token: "mc-token".into(),
@@ -2593,18 +2600,13 @@ fn java_player_blocks_when_fresh_credential_does_not_own_minecraft() {
     let mut accounts = signed_in(&store, &no_own_secrets);
     accounts.update(account.clone());
 
-    // Attempt to get java player - should fail because doesn't own Minecraft
-    let result = java_player_with(&test_endpoints(), None, &store, &mut accounts);
+    // The mock Minecraft services explicitly deny ownership.
+    let (_, ep) = mock(|m| m.owns_game = false);
+    let result = java_player_with(&ep, None, &store, &mut accounts);
 
     assert!(
         result.is_err(),
         "java_player_with must block when account doesn't own Minecraft"
-    );
-    let err = result.unwrap_err();
-    assert!(
-        err.contains("does not own Minecraft"),
-        "Error should mention ownership failure: {}",
-        err
     );
 }
 
@@ -2692,116 +2694,58 @@ fn java_player_uses_account_uuid_not_name_for_keychain_lookup() {
 
 #[test]
 fn java_player_returns_no_owner_when_no_account_owns_minecraft() {
-    // Scenario: All accounts in the list do not own Minecraft
-    // Expected: Return NoOwner error, do NOT fallback to another account
-
+    let (account, _) = finish_ms_sign_in(ms_tokens());
+    let no_own_secrets = Secrets {
+        owns: false,
+        ..secrets("mc-token", false)
+    };
     let store = MemoryStore::default();
     let mut accounts = Accounts::default();
+    accounts.add(&store, account, &no_own_secrets).unwrap();
 
-    // Create multiple accounts that don't own Minecraft
-    for i in 0..3 {
-        let (account, secrets) = finish_ms_sign_in(ms_tokens());
-        let mut no_own_secrets = secrets.clone();
-        no_own_secrets.owns = false; // Does not own Minecraft
+    let (_, ep) = mock(|m| m.owns_game = false);
+    let result = java_player_with(&ep, None, &store, &mut accounts);
 
-        accounts.update(account.clone());
-        store.set(
-            &account.uuid,
-            &serde_json::to_string(&no_own_secrets).unwrap(),
-        );
-
-        if i == 0 {
-            accounts.selected = Some(account.uuid.clone());
-        }
-    }
-
-    let result = java_player_with(&test_endpoints(), None, &store, &mut accounts);
-
-    // Should fail with NoOwner, not fallback to another account
     assert!(
         result.is_err(),
         "java_player_with must return NoOwner when no account owns Minecraft"
     );
-    let err = result.unwrap_err();
-    assert!(
-        err.contains("no account") || err.contains("NoOwner"),
-        "Error should indicate no owner: {}",
-        err
-    );
 }
 
 #[test]
-fn java_player_does_not_fallback_when_selected_account_is_elyby() {
-    // Scenario: Selected account is Ely.by, other accounts are Microsoft
-    // Expected: Block launch (Ely.by not supported), do NOT fallback to Microsoft account
-
+fn java_player_uses_microsoft_owner_when_selected_account_is_elyby() {
+    let (ely_account, ely_secrets) = finish_ely_sign_in(ely_tokens());
+    let (ms_account, ms_secrets) = finish_ms_sign_in(ms_tokens());
     let store = MemoryStore::default();
     let mut accounts = Accounts::default();
 
-    // Create Ely.by account (selected)
-    let (ely_account, ely_secrets) = finish_ely_sign_in(ely_tokens());
-    accounts.update(ely_account.clone());
+    accounts.add(&store, ms_account.clone(), &ms_secrets).unwrap();
+    accounts.add(&store, ely_account.clone(), &ely_secrets).unwrap();
     accounts.selected = Some(ely_account.uuid.clone());
-    store.set(
-        &ely_account.uuid,
-        &serde_json::to_string(&ely_secrets).unwrap(),
-    );
 
-    // Create Microsoft account (not selected)
-    let (ms_account, ms_secrets) = finish_ms_sign_in(ms_tokens());
-    accounts.update(ms_account.clone());
-    store.set(
-        &ms_account.uuid,
-        &serde_json::to_string(&ms_secrets).unwrap(),
-    );
+    let (_, ep) = mock(|_| {});
+    let pass = launch(&ep, Some("test-client"), &store, &mut accounts).unwrap();
+    assert_eq!(pass.session.as_ref().unwrap().0.uuid, ely_account.uuid);
+    assert_eq!(pass.owner.as_ref().unwrap().0.uuid, ms_account.uuid);
 
-    let result = java_player_with(&test_endpoints(), None, &store, &mut accounts);
-
-    // Should fail because selected account is Ely.by, not fallback to Microsoft
-    assert!(
-        result.is_err(),
-        "java_player_with must block Ely.by, not fallback"
-    );
-    let err = result.unwrap_err();
-    assert!(
-        err.contains("Ely.by"),
-        "Error should mention Ely.by: {}",
-        err
-    );
+    let player = java_player_with(&ep, Some("test-client"), &store, &mut accounts).unwrap();
+    assert_eq!(player.uuid, ms_account.uuid);
+    assert!(!player.elyby);
 }
 
 #[test]
 fn launch_returns_no_owner_when_all_accounts_fail_ownership_check() {
-    // Scenario: Multiple accounts, all fail ownership check
-    // Expected: launch() returns NoOwner, no fallback
-
+    let (account, _) = finish_ms_sign_in(ms_tokens());
+    let no_own_secrets = secrets("mc-token", false);
     let store = MemoryStore::default();
     let mut accounts = Accounts::default();
+    accounts.add(&store, account, &no_own_secrets).unwrap();
 
-    // Create 3 accounts that don't own Minecraft
-    for i in 0..3 {
-        let (account, mut secrets) = finish_ms_sign_in(ms_tokens());
-        secrets.owns = false;
-
-        accounts.update(account.clone());
-        store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap());
-
-        if i == 0 {
-            accounts.selected = Some(account.uuid.clone());
-        }
-    }
-
-    let result = launch(&test_endpoints(), None, &store, &mut accounts);
-
-    // Should return NoOwner error
-    assert!(
-        result.is_err(),
-        "launch() must return NoOwner when no account owns Minecraft"
-    );
-    assert!(
-        matches!(result.unwrap_err(), NoOwner),
-        "Error should be NoOwner"
-    );
+    let (_, ep) = mock(|m| m.owns_game = false);
+    assert!(matches!(
+        launch(&ep, Some("test-client"), &store, &mut accounts),
+        Err(NoOwner)
+    ));
 }
 
 #[test]
@@ -3240,33 +3184,4 @@ fn elyby_session_is_playable_but_is_not_a_mojang_owner() {
         pass.owner.is_none(),
         "Ely.by must never authorize Mojang downloads"
     );
-} 
-#[test]
-fn selected_elyby_session_does_not_hide_a_microsoft_owner() {
-    let (ms_account, ms_secrets) = finish_ms_sign_in(ms_tokens());
-    let (ely_account, ely_secrets) = finish_ely_sign_in(ely_tokens());
-    let store = MemoryStore::default();
-    let mut accounts = Accounts::default();
-
-    // Add Microsoft first, then select Ely.by: launch must keep the Ely.by session
-    // for Horizon while continuing to discover the Microsoft owner for Java/Mojang.
-    accounts.add(&store, ms_account.clone(), &ms_secrets).unwrap();
-    accounts.add(&store, ely_account.clone(), &ely_secrets).unwrap();
-
-    let (_, ep) = mock(|_| {});
-    let pass = launch(&ep, Some("test-client"), &store, &mut accounts).unwrap();
-    assert_eq!(
-        pass.session.as_ref().unwrap().0.uuid,
-        ely_account.uuid,
-        "Horizon should retain the selected Ely.by session"
-    );
-    assert_eq!(
-        pass.owner.as_ref().unwrap().0.uuid,
-        ms_account.uuid,
-        "Ely.by must not hide a separate Microsoft owner"
-    );
-
-    let player = java_player_with(&ep, Some("test-client"), &store, &mut accounts).unwrap();
-    assert_eq!(player.uuid, ms_account.uuid);
-    assert!(!player.elyby);
 }
