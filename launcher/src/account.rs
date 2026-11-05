@@ -1000,10 +1000,12 @@ fn key_for_machine_id(id: Option<&[u8]>) -> Option<chacha20poly1305::Key> {
 }
 
 fn file_key() -> Option<chacha20poly1305::Key> {
-    let id = ["/etc/machine-id", "/var/lib/dbus/machine-id", "/etc/hostid"]
+    ["/etc/machine-id", "/var/lib/dbus/machine-id", "/etc/hostid"]
         .iter()
-        .find_map(|path| std::fs::read(path).ok())?;
-    key_for_machine_id(Some(&id))
+        .find_map(|path| {
+            let id = std::fs::read(path).ok()?;
+            key_for_machine_id(Some(&id))
+        })
 }
 
 /// `json` sealed for the secrets file ([`SEALED`]).
