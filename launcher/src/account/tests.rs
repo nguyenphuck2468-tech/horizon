@@ -738,6 +738,28 @@ fn offline_names_play_only_beside_an_owner() {
 }
 
 #[test]
+fn an_elyby_account_does_not_unlock_a_saved_offline_name() {
+    let store = MemoryStore::default();
+    let mut accounts = signed_in(&store, &secrets("mc-token", true));
+    let (ely_account, ely_secrets) = finish_ely_sign_in(ely_tokens());
+    accounts.add(&store, ely_account, &ely_secrets).unwrap();
+
+    accounts
+        .play_as(&store, Player::Offline("Builder_1".into()))
+        .unwrap();
+    accounts.remove(&store, UUID).unwrap();
+
+    assert_eq!(accounts.player(), Player::Offline("Builder_1".into()));
+    assert!(!accounts.has_owner(&store));
+    let (_, ep) = mock(|_| {});
+    assert_eq!(
+        launch(&ep, Some("test-client"), &store, &mut accounts).unwrap_err(),
+        NoOwner,
+        "an Ely.by account must not replace the Microsoft owner required by offline names"
+    );
+}
+
+#[test]
 fn the_developer_option_off_is_the_owner_gate() {
     let store = MemoryStore::default();
     let mut accounts = Accounts::default();
