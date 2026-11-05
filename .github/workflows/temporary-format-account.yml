@@ -1,15 +1,17 @@
 name: Format touched Rust files
 
 on:
-  push:
+  pull_request:
     branches:
-      - horizon-repo-review-plan-abfc6
+      - elyby-on-upstream
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: write
 
 jobs:
   format:
+    if: github.event.pull_request.head.ref == 'horizon-repo-review-plan-abfc6'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
