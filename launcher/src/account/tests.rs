@@ -2412,9 +2412,7 @@ fn splitscreen_rechecks_the_credential_lock_before_handing_off_a_cached_session(
         skin: None,
         cape: None,
     };
-    accounts
-        .add(&store, other, &secrets("split-token", true))
-        .unwrap();
+    accounts.add(&store, other, &secrets("split-token", true)).unwrap();
     accounts.selected = Some(UUID.into());
 
     let dir = std::env::temp_dir().join(format!("hz-split-lock-{}", std::process::id()));
