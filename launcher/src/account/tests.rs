@@ -2403,6 +2403,46 @@ fn a_launch_as_another_account_leaves_the_selected_one() {
 }
 
 #[test]
+fn splitscreen_rechecks_the_credential_lock_before_handing_off_a_cached_session() {
+    let store = MemoryStore::default();
+    let mut accounts = signed_in(&store, &secrets("owner-token", true));
+    let other = Account {
+        uuid: "c".into(),
+        name: "Cal".into(),
+        skin: None,
+        cape: None,
+    };
+    accounts
+        .add(&store, other, &secrets("split-token", true))
+        .unwrap();
+    accounts.selected = Some(UUID.into());
+
+    let dir = std::env::temp_dir().join(format!("hz-split-lock-{}", std::process::id()));
+    let held = session::lock(&store).unwrap();
+    let env = account_sessions_until(
+        &offline(),
+        Some("test-client"),
+        &store,
+        &dir,
+        &mut accounts,
+        std::time::Instant::now(),
+    );
+    drop(held);
+
+    let list: Vec<Value> = serde_json::from_str(&env[0].1).unwrap();
+    assert_eq!(list.len(), 1);
+    assert_eq!(list[0]["name"], "Cal");
+    assert!(list[0].get("file").is_none());
+    assert!(list[0]["skipped"].is_string());
+    assert_eq!(
+        std::fs::read_dir(&dir).map_or(0, |entries| entries.count()),
+        0,
+        "a cached token must not be handed off without reacquiring the account lock"
+    );
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
 fn splitscreen_stops_renewing_other_accounts_once_out_of_time() {
     // A sign-in service that never answers: any request would hang the test.
     let silent = TcpListener::bind("127.0.0.1:0").unwrap();
