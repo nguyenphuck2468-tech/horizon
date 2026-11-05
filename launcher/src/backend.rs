@@ -1944,7 +1944,7 @@ pub fn preparer(
             };
             return Ok((Preparer::InProcess(options), minecraft));
         }
-        let mut cmd = Command::new(binary);
+        let mut cmd = crate::process::command(binary);
         with_java(&mut cmd, &java_home);
         cmd.current_dir(&dir).arg("--root").arg(&dir);
         if !reused {
@@ -1953,7 +1953,7 @@ pub fn preparer(
         cmd.arg("--minecraft-dir").arg(&minecraft);
         return Ok((Preparer::Process(cmd), minecraft));
     }
-    let mut cmd = Command::new(python.unwrap());
+    let mut cmd = crate::process::command(python.unwrap());
     with_java(&mut cmd, &java_home);
     cmd.current_dir(&dir)
         .args(["-u", "tools/prepare_native_client.py"]);
@@ -2391,7 +2391,7 @@ fn stale_versions(installed: &[String], keep: usize, protected: &[String]) -> Ve
 #[cfg(unix)]
 fn in_use(tag: &str) -> bool {
     let dir = format!("{}/", version_dir(tag).display());
-    Command::new("ps")
+    crate::process::command("ps")
         .args(["-A", "-ww", "-o", "args="])
         .output()
         .ok()
