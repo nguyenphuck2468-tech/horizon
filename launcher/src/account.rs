@@ -2096,7 +2096,13 @@ pub fn write_session_file(
         "user_type": if is_ely(secrets) { "elyby" } else { "msa" },
         "xuid": secrets.xuid,
     });
-    std::io::Write::write_all(&mut file, body.to_string().as_bytes()).map_err(|e| e.to_string())?;
+    if let Err(error) = std::io::Write::write_all(&mut file, body.to_string().as_bytes()) {
+        // A short/failed write may already have put part of the access token on disk.
+        // Remove that partial hand-off immediately; it was never registered as unread.
+        drop(file);
+        let _ = std::fs::remove_file(&path);
+        return Err(error.to_string());
+    }
     Ok(path)
 }
 
