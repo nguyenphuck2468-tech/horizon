@@ -117,11 +117,6 @@ jobs:
     timeout-minutes: ${{ matrix.mac && 60 || 40 }}
     env:
       RUSTFLAGS: ${{ matrix.rustflags }}
-      # Public OAuth client IDs are configuration, not secrets. Embed them in every shipped build so
-      # Microsoft and Ely.by sign-in are available in official binaries; the Ely.by client secret is
-      # deliberately never supplied to this build (Device Code is the public-client flow).
-      HORIZON_MSA_CLIENT_ID: ${{ vars.HORIZON_MSA_CLIENT_ID }}
-      HORIZON_ELY_CLIENT_ID: ${{ vars.HORIZON_ELY_CLIENT_ID }}
       # The release's version, built in (horizon_core::release): --version, user agents, crash reports and
       # telemetry say it. No version-bump commits.
       HORIZON_VERSION: ${{ inputs.version }}
