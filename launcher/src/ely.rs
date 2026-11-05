@@ -452,7 +452,9 @@ fn initial_tokens(status: u16, body: &Value) -> Result<Tokens, String> {
         return Err(error_message(body, "Ely.by refused the sign-in."));
     }
     if !string_field(body, "refresh_token").is_some_and(|token| !token.is_empty()) {
-        return Err("Ely.by did not return a refresh token. Check that offline_access is enabled.".into());
+        return Err(
+            "Ely.by did not return a refresh token. Check that offline_access is enabled.".into(),
+        );
     }
     tokens(status, body)
 }
