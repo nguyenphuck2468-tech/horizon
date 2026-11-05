@@ -1442,7 +1442,7 @@ impl Layered {
         // run asks the keychain for it again.
         layered.parked.lock().unwrap().extend(keys.iter().cloned());
         for key in keys {
-            let handed = layered.keychain_writes(|| {
+            let handed = layered.keychain_access(|| {
                 let Some(secret) = layered.file.entry(&key)? else {
                     return Ok(());
                 };
@@ -1459,8 +1459,8 @@ impl Layered {
         layered
     }
 
-    /// Runs `f`, a write to the keychain and what it reads first, holding the keychain's lock.
-    fn keychain_writes<T>(&self, f: impl FnOnce() -> Result<T, String>) -> Result<T, String> {
+    /// Serializes keychain reads, hand-over and writes across processes.
+    fn keychain_access<T>(&self, f: impl FnOnce() -> Result<T, String>) -> Result<T, String> {
         self.file.holding("keychain.lock", f)
     }
 
@@ -1508,7 +1508,7 @@ impl Layered {
 impl SecretStore for Layered {
     fn get(&self, key: &str) -> Result<Option<String>, String> {
         // Coordinate reads with hand-over, refresh writes and sign-outs in other processes.
-        self.keychain_writes(|| {
+        self.keychain_access(|| {
             match self.file.entry(key)? {
                 Some(secret) if secret == SIGNED_OUT => return Ok(None),
                 Some(secret) => {
@@ -1529,7 +1529,7 @@ impl SecretStore for Layered {
         if self.is_away() {
             return self.park(key, secret);
         }
-        self.keychain_writes(|| {
+        self.keychain_access(|| {
             let before = self.file.entry(key)?;
             match self.ask(|keychain| keychain.set(key, secret)) {
                 Ok(()) => self.unpark(key, before),
@@ -1542,7 +1542,7 @@ impl SecretStore for Layered {
         if self.is_away() {
             return self.park(key, SIGNED_OUT);
         }
-        self.keychain_writes(|| {
+        self.keychain_access(|| {
             let before = self.file.entry(key)?;
             match self.ask(|keychain| keychain.delete(key)) {
                 Ok(()) => self.unpark(key, before),
