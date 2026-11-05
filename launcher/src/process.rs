@@ -62,10 +62,12 @@ mod tests {
         }] {
             assert!(removed(&command, "HORIZON_ELY_CLIENT_SECRET"));
             assert!(removed(&command, "HORIZON_GITHUB_TOKEN"));
+            assert!(removed(&command, "HORIZON_CURSEFORGE_API_KEY"));
         }
         let mut direct = Command::new("true");
         scrub_secrets(&mut direct);
         assert!(removed(&direct, "HORIZON_ELY_CLIENT_SECRET"));
         assert!(removed(&direct, "HORIZON_GITHUB_TOKEN"));
+        assert!(removed(&direct, "HORIZON_CURSEFORGE_API_KEY"));
     }
 }
