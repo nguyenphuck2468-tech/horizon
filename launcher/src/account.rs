@@ -2402,7 +2402,7 @@ pub fn session_for_game(
     if let Err(e) = accounts.save() {
         eprintln!("Horizon: the accounts are not saved: {e}");
     }
-    Ok(session_file(game_home, pass, env))
+    Ok(session_file(game_home, pass, env, store()))
 }
 
 /// [`session_for_game`] for one launch as `who` (`play --account`, a signed-in account): who
@@ -2430,7 +2430,7 @@ pub fn session_for_game_as(game_home: &Path, who: &Player) -> Result<GameSession
     if let Err(e) = accounts.save() {
         eprintln!("Horizon: the accounts are not saved: {e}");
     }
-    Ok(session_file(game_home, pass, env))
+    Ok(session_file(game_home, pass, env, store()))
 }
 
 /// The owner gate as `who`, on `accounts`, which keeps its choice of player.
@@ -2458,7 +2458,12 @@ fn launch_as(
 }
 
 /// The game's session files for a launch that passed the gate.
-fn session_file(game_home: &Path, pass: Launch, env: Vec<(&'static str, String)>) -> GameSession {
+fn session_file(
+    game_home: &Path,
+    pass: Launch,
+    env: Vec<(&'static str, String)>,
+    store: &dyn SecretStore,
+) -> GameSession {
     let mut out = GameSession {
         owner: pass.owner.is_some(),
         env,
@@ -2466,7 +2471,26 @@ fn session_file(game_home: &Path, pass: Launch, env: Vec<(&'static str, String)>
         ..GameSession::default()
     };
     if let Some((account, secrets)) = pass.session {
-        match write_launch_session_file(&game_home.join("sessions"), &account, &secrets) {
+        let handoff = (|| {
+            // launch() checked this snapshot earlier. Re-read it under the same operation lock
+            // immediately before writing the token-bearing session file: sign-out or reauth in
+            // another process must not hand the old credential to a newly starting client.
+            let _operation = session::lock(store)?;
+            let text = store
+                .get(&account.uuid)?
+                .ok_or_else(|| "The account was signed out while the game was starting.".to_string())?;
+            let current: Secrets = serde_json::from_str(&text)
+                .map_err(|_| "The saved sign-in is damaged.".to_string())?;
+            let expected = serde_json::to_string(&secrets)
+                .map_err(|_| "Could not validate the sign-in for this launch.".to_string())?;
+            let actual = serde_json::to_string(&current)
+                .map_err(|_| "Could not validate the saved sign-in.".to_string())?;
+            if actual != expected {
+                return Err("The account changed while the game was starting. Start it again.".into());
+            }
+            write_launch_session_file(&game_home.join("sessions"), &account, &secrets)
+        })();
+        match handoff {
             Ok(file) => out.file = Some(file),
             Err(e) => out.offline = Some(e),
         }
