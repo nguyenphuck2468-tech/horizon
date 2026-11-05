@@ -75,10 +75,7 @@ fn user_type_never_calls_an_elyby_sign_in_msa() {
     let java = dir.join("java");
     let extra = Vec::new();
     let build = |elyby| {
-        let p = Player {
-            elyby,
-            ..player()
-        };
+        let p = Player { elyby, ..player() };
         let cmd = command(
             &modern(),
             &Launch {
@@ -102,7 +99,11 @@ fn user_type_never_calls_an_elyby_sign_in_msa() {
     assert_eq!(msa[i + 1], "msa");
     let ely = build(true);
     let i = ely.iter().position(|a| a == "--userType").unwrap();
-    assert_ne!(ely[i + 1], "msa", "an Ely.by token must not claim a Microsoft purchase");
+    assert_ne!(
+        ely[i + 1],
+        "msa",
+        "an Ely.by token must not claim a Microsoft purchase"
+    );
     let _ = fs::remove_dir_all(&dir);
 }
 
