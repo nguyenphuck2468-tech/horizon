@@ -3686,15 +3686,7 @@ mod tests {
             session: Some((ely, ely_secrets)),
             ..Default::default()
         });
-        assert!(download_for(
-            &pins,
-            &dir,
-            playable_without_owner,
-            true,
-            &fetch,
-            &log
-        )
-        .is_err());
+        assert!(download_for(&pins, &dir, playable_without_owner, true, &fetch, &log).is_err());
         assert!(
             asked.lock().unwrap().is_empty(),
             "a playable session must never authorize a Mojang download"
