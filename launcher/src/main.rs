@@ -4319,14 +4319,16 @@ impl Launcher {
                     .flex()
                     .gap(px(4.))
                     .when(!user_code.is_empty(), |d| {
-                        d.child(button("sign-in-copy", "Copy code", Kind::Secondary, &t).on_click(
-                            move |_, _, cx| {
-                                copy_to_clipboard(
-                                    cx,
-                                    gpui::ClipboardItem::new_string(user_code.clone()),
-                                )
-                            },
-                        ))
+                        d.child(
+                            button("sign-in-copy", "Copy code", Kind::Secondary, &t).on_click(
+                                move |_, _, cx| {
+                                    copy_to_clipboard(
+                                        cx,
+                                        gpui::ClipboardItem::new_string(user_code.clone()),
+                                    )
+                                },
+                            ),
+                        )
                     })
                     .child(
                         button("sign-in-open", "Open link", Kind::Secondary, &t)
@@ -4357,23 +4359,24 @@ impl Launcher {
             let mut actions = div().flex().gap(px(4.));
             if targeted {
                 actions = actions.child(
-                    button("sign-in", "Sign in again", Kind::Secondary, &t).on_click(
-                        cx.listener(move |this, _: &ClickEvent, _, cx| {
+                    button("sign-in", "Sign in again", Kind::Secondary, &t).on_click(cx.listener(
+                        move |this, _: &ClickEvent, _, cx| {
                             if let Some(uuid) = &target {
                                 this.re_sign_in(uuid);
                             }
                             cx.notify();
-                        }),
-                    ),
+                        },
+                    )),
                 );
             } else {
                 if account::client_id().is_some() {
-                    actions = actions.child(microsoft::sign_in_button("sign-in-microsoft", &t).on_click(
-                        cx.listener(|this, _: &ClickEvent, _, cx| {
-                            this.start_sign_in();
-                            cx.notify();
-                        }),
-                    ));
+                    actions =
+                        actions.child(microsoft::sign_in_button("sign-in-microsoft", &t).on_click(
+                            cx.listener(|this, _: &ClickEvent, _, cx| {
+                                this.start_sign_in();
+                                cx.notify();
+                            }),
+                        ));
                 }
                 if account::ely_configured() {
                     actions = actions.child(
