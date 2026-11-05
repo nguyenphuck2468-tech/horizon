@@ -58,10 +58,12 @@ for Mojang downloads or a Java Edition instance.
   It requests `account_info offline_access minecraft_server_session`, shows the user code and
   verification URL, and polls the token endpoint. The refresh token is kept in the OS keychain
   (or the launcher's encrypted fallback store where supported).
-- An optional confidential Authorization Code callback exists only when
-  `HORIZON_ELY_CLIENT_SECRET` is supplied at runtime as well as the public client ID. Do not put
-  this secret in the repository, a release workflow variable, or a shipped binary. Device Code
-  remains the default and needs no secret.
+- An experimental local Authorization Code callback exists in code but is not wired into
+  the normal account UI. It requires `HORIZON_ELY_CLIENT_SECRET` and an exact loopback redirect
+  URI registered for this application (use a fixed callback port). The supported user-facing
+  flow is Device Code and needs no secret. Do not set `HORIZON_ELY_CLIENT_SECRET` for normal
+  launches: child game processes inherit the launcher's environment. If the callback is enabled
+  later, move its secret to protected storage and explicitly remove it from child environments.
 - Ely.by sessions are written to the Horizon Client's short-lived, owner-readable session file
   with `user_type: "elyby"`. The client sends those tokens only to Ely.by's session service;
   it does not send them to Minecraft Services. A server must accept Ely.by authentication for
