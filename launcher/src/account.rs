@@ -1939,7 +1939,8 @@ pub fn take_unsaved() -> Option<String> {
 /// Microsoft account confirmed by Minecraft services is separately required for Mojang downloads
 /// and Java Edition. Check the selected account first, then keep looking for a real owner even
 /// after an Ely.by account has supplied the Horizon session. An account with no answer keeps its
-/// last play entitlement for Horizon. The caller saves `accounts` (renewed names and skins).
+/// last play entitlement for the Horizon gate, but its stale session is not handed to the client.
+/// The caller saves `accounts` (renewed names and skins).
 pub fn launch(
     ep: &Endpoints,
     client_id: Option<&str>,
