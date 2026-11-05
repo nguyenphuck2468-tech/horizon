@@ -3318,3 +3318,26 @@ fn elyby_session_is_playable_but_is_not_a_mojang_owner() {
         "Ely.by must never authorize Mojang downloads"
     );
 }
+
+#[test]
+fn replacing_or_removing_credentials_invalidates_the_cached_provider() {
+    let store = MemoryStore::default();
+    let mut accounts = Accounts::default();
+    let (account, secrets) = finish_ms_sign_in(ms_tokens());
+    let uuid = account.uuid.clone();
+
+    ELY_KNOWN.lock().unwrap().retain(|(known, _)| known != &uuid);
+    ELY_KNOWN.lock().unwrap().push((uuid.clone(), true));
+    accounts.add(&store, account, &secrets).unwrap();
+    assert!(
+        !ELY_KNOWN.lock().unwrap().iter().any(|(known, _)| known == &uuid),
+        "saving a replacement credential must invalidate the old provider cache"
+    );
+
+    ELY_KNOWN.lock().unwrap().push((uuid.clone(), true));
+    accounts.remove(&store, &uuid).unwrap();
+    assert!(
+        !ELY_KNOWN.lock().unwrap().iter().any(|(known, _)| known == &uuid),
+        "signing out must invalidate the old provider cache"
+    );
+}
