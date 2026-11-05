@@ -1360,8 +1360,14 @@ fn an_ely_session_never_replays_as_a_java_owner_offline() {
     accounts.selected = Some(ely_account.uuid.clone());
 
     let pass = launch(&offline(), Some("test-client"), &store, &mut accounts).unwrap();
-    assert!(pass.owner.is_none(), "Ely.by never grants Microsoft ownership");
-    assert!(pass.session.is_some(), "Ely.by still holds the Horizon session");
+    assert!(
+        pass.owner.is_none(),
+        "Ely.by never grants Microsoft ownership"
+    );
+    assert!(
+        pass.session.is_some(),
+        "Ely.by still holds the Horizon session"
+    );
     assert_eq!(
         java_player_with(&offline(), Some("test-client"), &store, &mut accounts).unwrap_err(),
         format!(
