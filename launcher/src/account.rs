@@ -629,8 +629,8 @@ impl Secrets {
 
 /// What asking the Minecraft services again found for one account.
 enum Check {
-    /// It owns the game: its profile as it is now (the name may have changed) and its tokens.
-    Owns(Account, Secrets),
+    /// The provider confirmed a usable session; Java ownership is derived separately.
+    Confirmed(Account, Secrets),
     /// The services said it doesn't own the game (or has no profile any more).
     DoesNot(Secrets),
     /// No answer (no network, a sign-in that can't be renewed): the last answer stands.
@@ -653,7 +653,7 @@ fn check_ely_tokens(account: &Account, mut secrets: Secrets, tokens: crate::ely:
         return Check::NoAnswer(OTHER_PROFILE.into(), secrets);
     }
 
-    Check::Owns(
+    Check::Confirmed(
         Account {
             uuid: account.uuid.clone(),
             name: tokens.profile.name,
@@ -671,7 +671,7 @@ fn check_ely(
     progress: &dyn Fn(session::Phase),
 ) -> Check {
     if !force && secrets.minecraft_expires_at > now() + RENEW_BEFORE {
-        return Check::Owns(account.clone(), secrets);
+        return Check::Confirmed(account.clone(), secrets);
     }
     progress(session::Phase::ElyBy);
     let refresh = secrets
@@ -758,7 +758,7 @@ fn check_with(
                 ..secrets
             },
         ),
-        Ok(Some(p)) => Check::Owns(
+        Ok(Some(p)) => Check::Confirmed(
             p,
             Secrets {
                 owns: true,
@@ -1984,7 +1984,7 @@ pub fn launch(
             Err(e) => Check::NoAnswer(e.clone(), secrets),
         };
         let (said, secrets) = match checked {
-            Check::Owns(renewed, secrets) => {
+            Check::Confirmed(renewed, secrets) => {
                 accounts.update(renewed.clone());
                 if plays {
                     pass.session = Some((renewed.clone(), secrets.clone()));
@@ -2547,7 +2547,7 @@ fn account_sessions_until(
             // Out of time: its token while it holds, else Sign in again.
             false if late => (holds(&secrets, 60).then_some(account), secrets),
             false => match check(ep, client_id, &account, secrets) {
-                Check::Owns(renewed, secrets) => {
+                Check::Confirmed(renewed, secrets) => {
                     accounts.update(renewed.clone());
                     (Some(renewed), secrets)
                 }
