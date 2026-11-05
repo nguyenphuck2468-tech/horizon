@@ -313,13 +313,26 @@ fn profile(token: &str) -> Result<Profile, String> {
             "Ely.by could not provide the account profile.",
         ));
     }
-    Ok(Profile {
-        uuid: string_field(&body, "uuid")
-            .ok_or("Ely.by returned no account UUID.")?
-            .replace('-', "")
-            .to_lowercase(),
-        name: string_field(&body, "username").ok_or("Ely.by returned no username.")?,
-    })
+    parse_profile(&body)
+}
+
+fn parse_profile(body: &Value) -> Result<Profile, String> {
+    let uuid = string_field(body, "uuid")
+        .ok_or("Ely.by returned no account UUID.")?
+        .replace('-', "")
+        .to_lowercase();
+    if uuid.len() != 32 || !uuid.bytes().all(|byte| byte.is_ascii_hexdigit()) {
+        return Err("Ely.by returned an invalid account UUID.".into());
+    }
+    let name = string_field(body, "username").ok_or("Ely.by returned no username.")?;
+    if !(3..=16).contains(&name.chars().count())
+        || !name
+            .chars()
+            .all(|character| character.is_ascii_alphanumeric() || character == '_')
+    {
+        return Err("Ely.by returned an invalid Minecraft profile name.".into());
+    }
+    Ok(Profile { uuid, name })
 }
 
 /// A loopback callback for installations that explicitly configure a
@@ -608,6 +621,30 @@ fn now() -> u64 {
 mod tests {
     use super::*;
     use std::io::{Read, Write};
+
+    #[test]
+    fn profile_parser_rejects_invalid_minecraft_identity_fields() {
+        let valid = serde_json::json!({
+            "uuid": "11111111-1111-1111-1111-111111111111",
+            "username": "Valid_Player"
+        });
+        let parsed = parse_profile(&valid).unwrap();
+        assert_eq!(parsed.uuid, "11111111111111111111111111111111");
+        assert_eq!(parsed.name, "Valid_Player");
+
+        let bad_uuid = serde_json::json!({"uuid": "not-a-uuid", "username": "Valid_Player"});
+        assert!(parse_profile(&bad_uuid).is_err());
+        let bad_name = serde_json::json!({
+            "uuid": "11111111111111111111111111111111",
+            "username": "name with spaces"
+        });
+        assert!(parse_profile(&bad_name).is_err());
+        let too_long = serde_json::json!({
+            "uuid": "11111111111111111111111111111111",
+            "username": "ThisNameIsMuchTooLong"
+        });
+        assert!(parse_profile(&too_long).is_err());
+    }
 
     #[test]
     fn callback_response_escapes_untrusted_error_text() {
