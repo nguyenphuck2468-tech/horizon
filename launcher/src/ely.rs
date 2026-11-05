@@ -204,7 +204,7 @@ fn poll_device(code: &DeviceCode) -> Result<DevicePoll, String> {
         }
         _ => {}
     }
-    tokens(status, &body).map(DevicePoll::Done)
+    initial_tokens(status, &body).map(DevicePoll::Done)
 }
 
 /// Why a refresh failed: Ely.by refused the token (sign in again), or could not be asked
@@ -442,7 +442,19 @@ fn exchange(redirect_uri: &str, code: &str) -> Result<Tokens, String> {
             ("code", &code.to_owned()),
         ],
     )?;
-    tokens(status, &body)
+    initial_tokens(status, &body)
+}
+
+/// Initial authorization must grant a refresh token: without offline_access the account would
+/// work only until the first access-token expiry and then silently become unusable.
+fn initial_tokens(status: u16, body: &Value) -> Result<Tokens, String> {
+    if status != 200 {
+        return Err(error_message(body, "Ely.by refused the sign-in."));
+    }
+    if !string_field(body, "refresh_token").is_some_and(|token| !token.is_empty()) {
+        return Err("Ely.by did not return a refresh token. Check that offline_access is enabled.".into());
+    }
+    tokens(status, body)
 }
 
 fn post_form(url: &str, fields: &[(&str, &String)]) -> Result<(u16, Value), String> {
@@ -621,6 +633,16 @@ fn now() -> u64 {
 mod tests {
     use super::*;
     use std::io::{Read, Write};
+
+    #[test]
+    fn initial_authorization_requires_a_refresh_token() {
+        let body = serde_json::json!({"access_token": "access-only"});
+        assert_eq!(
+            initial_tokens(200, &body).unwrap_err(),
+            "Ely.by did not return a refresh token. Check that offline_access is enabled."
+        );
+        assert!(initial_tokens(401, &body).is_err());
+    }
 
     #[test]
     fn profile_parser_rejects_invalid_minecraft_identity_fields() {
