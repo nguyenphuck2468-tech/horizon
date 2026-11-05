@@ -2631,7 +2631,7 @@ fn session_file_handoff_rejects_changed_or_removed_credentials() {
         .offline
         .as_deref()
         .is_some_and(|message| message.contains("signed out")));
-    assert_eq!(std::fs::read_dir(dir).unwrap().count(), 0);
+    assert!(!dir.join("sessions").exists());
     remove_secrets_dir(&path);
 }
 
