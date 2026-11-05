@@ -2010,6 +2010,12 @@ fn a_running_game_gets_a_renewed_session_only_when_ready() {
     let handed: Value = serde_json::from_str(&std::fs::read_to_string(&file).unwrap()).unwrap();
     assert_eq!(handed["uuid"], UUID);
     assert_eq!(handed["access_token"], "mc-token");
+    assert!(
+        UNREAD.lock().unwrap().iter().any(|path| path == &file),
+        "renewed session files must be tracked for expiry cleanup"
+    );
+    // Remove only this test's registration; other concurrently running tests keep theirs.
+    UNREAD.lock().unwrap().retain(|path| path != &file);
     // A refused refresh hands over nothing and says to sign in again.
     signed_in(
         &store,
