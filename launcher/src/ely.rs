@@ -253,9 +253,8 @@ pub fn refresh(refresh_token: &str) -> Result<Tokens, RefreshError> {
         ));
     }
     let rotated_refresh = string_field(&body, "refresh_token");
-    tokens(status, &body).map_err(|error| {
-        RefreshError::UnavailableWithRefresh(error, rotated_refresh)
-    })
+    tokens(status, &body)
+        .map_err(|error| RefreshError::UnavailableWithRefresh(error, rotated_refresh))
 }
 
 /// A refresh that did not give tokens: only a real refusal (4xx other than "too many requests"
