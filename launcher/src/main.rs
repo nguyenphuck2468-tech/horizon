@@ -2192,7 +2192,7 @@ fn sync_system_clipboard(text: String) {
             if std::env::var_os(session).is_none() {
                 continue;
             }
-            let Ok(mut child) = crate::process::command(tool)
+            let Ok(mut child) = horizon_launcher::process::command(tool)
                 .args(args)
                 .stdin(Stdio::piped())
                 .stdout(Stdio::null())
