@@ -2928,7 +2928,9 @@ fn java_player_defense_in_depth_elyby_field_always_false() {
     let store = MemoryStore::default();
     let mut accounts = signed_in(&store, &secrets);
     accounts.update(account.clone());
-    store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap()).unwrap();
+    store
+        .set(&account.uuid, &serde_json::to_string(&secrets).unwrap())
+        .unwrap();
 
     let player = java_player_with(&test_endpoints(), None, &store, &mut accounts).unwrap();
 
