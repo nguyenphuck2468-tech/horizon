@@ -664,6 +664,17 @@ fn check_ely_tokens(account: &Account, mut secrets: Secrets, tokens: crate::ely:
     )
 }
 
+fn unavailable_ely_refresh(
+    mut secrets: Secrets,
+    error: String,
+    rotated_refresh: Option<String>,
+) -> Check {
+    if let Some(refresh) = rotated_refresh {
+        secrets.refresh_token = format!("{ELY_REFRESH_PREFIX}{refresh}");
+    }
+    Check::NoAnswer(error, secrets)
+}
+
 fn check_ely(
     account: &Account,
     mut secrets: Secrets,
@@ -689,14 +700,13 @@ fn check_ely(
             Check::NoAnswer(error, secrets)
         }
         // Network or server trouble: keep the sign-in, try again later.
-        Err(crate::ely::RefreshError::Unavailable(error)) => Check::NoAnswer(error, secrets),
+        Err(crate::ely::RefreshError::Unavailable(error)) => {
+            unavailable_ely_refresh(secrets, error, None)
+        }
         // The refresh endpoint may rotate its refresh token before profile lookup fails.
         // Persist that replacement even though this attempt cannot safely hand off a session.
         Err(crate::ely::RefreshError::UnavailableWithRefresh(error, refresh)) => {
-            if let Some(refresh) = refresh {
-                secrets.refresh_token = format!("{ELY_REFRESH_PREFIX}{refresh}");
-            }
-            Check::NoAnswer(error, secrets)
+            unavailable_ely_refresh(secrets, error, refresh)
         }
     }
 }
