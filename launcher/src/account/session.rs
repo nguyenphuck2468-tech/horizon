@@ -428,23 +428,21 @@ pub(super) fn join_server_with(
         "selectedProfile": account.uuid,
         "serverId": server_id,
     });
-    let session = if super::is_ely(&secrets) {
-        ELY_SESSION_SERVER
+    let (session, path, service) = if super::is_ely(&secrets) {
+        (ELY_SESSION_SERVER, "/session/join", "Ely.by's session server")
     } else {
-        session
+        (session, "/session/minecraft/join", "Mojang's session server")
     };
-    let url = if super::is_ely(&secrets) {
-        format!("{session}/session/join")
-    } else {
-        format!("{session}/session/minecraft/join")
-    };
+    let url = format!("{session}{path}");
     match send(
         request_to("POST", &url),
         Some(Body::Json(body)),
-        "Mojang's session server",
+        service,
     )? {
         (200..=299, _) => Ok(()),
-        (403, _) => Err("Mojang could not confirm your account. Sign in again and retry.".into()),
-        _ => Err("Mojang's session server is not answering. Try again later.".into()),
+        (403, _) => Err(format!(
+            "{service} could not confirm your account. Sign in again and retry."
+        )),
+        _ => Err(format!("{service} is not answering. Try again later.")),
     }
 }
