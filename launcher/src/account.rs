@@ -1788,7 +1788,10 @@ impl Accounts {
         // The provider can change while the Minecraft UUID stays the same (for example,
         // an Ely.by profile later signed in through Microsoft). Never keep a stale UI/provider
         // classification after replacing the credential for this UUID.
-        ELY_KNOWN.lock().unwrap().retain(|(uuid, _)| uuid != &account.uuid);
+        ELY_KNOWN
+            .lock()
+            .unwrap()
+            .retain(|(uuid, _)| uuid != &account.uuid);
         self.selected = Some(account.uuid.clone());
         match self.accounts.iter_mut().find(|a| a.uuid == account.uuid) {
             Some(a) => *a = account,
@@ -2187,8 +2190,8 @@ fn write_launch_session_file_if_current(
     let text = store
         .get(&account.uuid)?
         .ok_or_else(|| "The account was signed out while the game was starting.".to_string())?;
-    let current: Secrets = serde_json::from_str(&text)
-        .map_err(|_| "The saved sign-in is damaged.".to_string())?;
+    let current: Secrets =
+        serde_json::from_str(&text).map_err(|_| "The saved sign-in is damaged.".to_string())?;
     let expected = serde_json::to_string(secrets)
         .map_err(|_| "Could not validate the sign-in for this launch.".to_string())?;
     let actual = serde_json::to_string(&current)
@@ -2290,9 +2293,10 @@ impl SignIn {
 
     fn start_expected(expected: Option<Account>) -> Self {
         // Re-signing in an Ely.by account goes back to Ely.by, whatever the caller asked for.
-        if expected.as_ref().is_some_and(|a| {
-            secrets_in(store(), &a.uuid).is_some_and(|secrets| is_ely(&secrets))
-        }) {
+        if expected
+            .as_ref()
+            .is_some_and(|a| secrets_in(store(), &a.uuid).is_some_and(|secrets| is_ely(&secrets)))
+        {
             return Self::start_ely_provider(expected, false);
         }
         Self::start_microsoft(expected)
