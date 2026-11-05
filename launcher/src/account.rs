@@ -1038,6 +1038,9 @@ impl SecretStore for FileStore {
     fn persistent(&self) -> bool {
         true
     }
+    fn lock_file(&self) -> Option<PathBuf> {
+        Some(self.path.with_file_name("account-session.lock"))
+    }
 }
 
 /// The Secret Service (GNOME Keyring, KWallet) through oo7, as gpui itself uses it.
