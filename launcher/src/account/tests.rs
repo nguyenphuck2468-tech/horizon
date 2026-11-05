@@ -3159,3 +3159,20 @@ fn toctou_exact_validated_token_uuid_provider_ownership_used() {
     assert_eq!(player.xuid, "test-xuid-12345", "XUID must match validated snapshot");
     assert!(!player.elyby, "Provider must match validated snapshot (Microsoft, not Ely.by)");
 }
+
+#[test]
+fn elyby_session_is_playable_but_is_not_a_mojang_owner() {
+    let store = MemoryStore::default();
+    let mut accounts = Accounts::default();
+    let (account, secrets) = finish_ely_sign_in(ely_tokens());
+    accounts.update(account.clone());
+    accounts.selected = Some(account.uuid.clone());
+    store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap());
+
+    let pass = launch(&test_endpoints(), None, &store, &mut accounts).unwrap();
+
+    assert!(pass.session.as_ref().is_some_and(|(a, s)| {
+        a.uuid == account.uuid && is_ely(s) && s.plays()
+    }));
+    assert!(pass.owner.is_none(), "Ely.by must never authorize Mojang downloads");
+}
