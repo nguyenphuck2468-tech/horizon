@@ -1945,7 +1945,12 @@ pub fn launch(
                 if plays {
                     pass.session = Some((renewed.clone(), secrets.clone()));
                 }
-                pass.owner = Some((renewed, secrets.clone()));
+                // Only a Microsoft credential confirmed by Minecraft services is an
+                // owner for Mojang downloads. Ely.by can be playable in Horizon
+                // (secrets.plays()), but it cannot establish Java Edition ownership.
+                if secrets.owns_minecraft() {
+                    pass.owner = Some((renewed.clone(), secrets.clone()));
+                }
                 (None, secrets)
             }
             Check::DoesNot(secrets) => (Some(DOES_NOT_OWN.to_string()), secrets),
