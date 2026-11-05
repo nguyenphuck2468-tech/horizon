@@ -2394,7 +2394,6 @@ fn plays_survives_the_keychain_round_trip_and_old_json_still_loads() {
     assert!(old.plays() && old.owns_minecraft());
 }
 
-
 // ============================================================================
 // Regression tests for TOCTOU fix in java_player_with
 // These tests verify that the function uses a single source of truth (fresh
@@ -2570,7 +2569,6 @@ fn java_player_blocks_when_fresh_credential_does_not_own_minecraft() {
     );
 }
 
-
 // ============================================================================
 // Additional regression tests for credential flow audit
 // ============================================================================
@@ -2651,7 +2649,6 @@ fn java_player_uses_account_uuid_not_name_for_keychain_lookup() {
     let player = result.unwrap();
     assert_eq!(player.uuid, original_uuid, "Player should have the original UUID");
 }
-
 
 // ============================================================================
 // Tests proving no fallback needed and session_file boundary
@@ -2845,9 +2842,6 @@ fn session_file_strips_elyby_prefix_from_token() {
     );
 }
 
-
-
-
 // ============================================================================
 
 /// Test double that injects credential mutations DURING the get() operation.
@@ -2859,7 +2853,7 @@ fn session_file_strips_elyby_prefix_from_token() {
 /// see the original value.
 struct MutatingSecretStore {
     inner: MemoryStore,
-    read_count: Arc<AtomicUsize>,
+
     reads_by_uuid: Arc<Mutex<HashMap<String, usize>>>,
     mutation_target: Arc<Mutex<Option<(String, String)>>>, // (key, new_secret)
     mutated: Arc<Mutex<bool>>,
@@ -2869,7 +2863,7 @@ impl MutatingSecretStore {
     fn new(inner: MemoryStore) -> Self {
         Self {
             inner,
-            read_count: Arc::new(AtomicUsize::new(0)),
+
             reads_by_uuid: Arc::new(Mutex::new(HashMap::new())),
             mutation_target: Arc::new(Mutex::new(None)),
             mutated: Arc::new(Mutex::new(false)),
@@ -2881,8 +2875,7 @@ impl MutatingSecretStore {
         *self.mutation_target.lock().unwrap() = Some((key, new_secret));
     }
     
-    fn read_count(&self) -> usize {
-        self.read_count.load(Ordering::SeqCst)
+
     }
     
     fn reads_for_uuid(&self, uuid: &str) -> usize {
@@ -2897,7 +2890,7 @@ impl MutatingSecretStore {
 impl SecretStore for MutatingSecretStore {
     fn get(&self, key: &str) -> Result<Option<String>, String> {
         // Increment global read count
-        self.read_count.fetch_add(1, Ordering::SeqCst);
+
         
         // Track reads by UUID
         {
@@ -2942,14 +2935,13 @@ impl SecretStore for MutatingSecretStore {
     }
 }
 
-
 // ============================================================================
 // E1.0.3.1.2 - Corrected TOCTOU Regression Tests
 // ============================================================================
 
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 
 #[test]
 fn toctou_validated_snapshot_used_directly_for_player() {
