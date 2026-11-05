@@ -1774,15 +1774,15 @@ impl Accounts {
         }
         Ok(())
     }
-    /// Whether an account here owned the game at its last check (the keychain's answer, no
-    /// request): what Play and offline names need.
+    /// Whether any account here was confirmed to own Minecraft: Java Edition at its last
+    /// check (the keychain's answer, no request): what Mojang downloads and Java launch need.
     pub fn has_owner(&self, store: &dyn SecretStore) -> bool {
         // The selected account first: it owning the game ends the search after one account's
         // item — every account's item read can ask for the keychain (macOS, #4912).
         self.selected()
             .into_iter()
             .chain(self.accounts.iter().filter(|a| Some(*a) != self.selected()))
-            .any(|a| secrets_in(store, &a.uuid).is_some_and(|s| s.plays()))
+            .any(|a| secrets_in(store, &a.uuid).is_some_and(|s| s.owns_minecraft()))
     }
 
     /// Who plays now.
