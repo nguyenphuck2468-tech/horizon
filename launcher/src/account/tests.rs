@@ -1082,6 +1082,17 @@ impl SecretStore for Reading<'_> {
 }
 
 #[test]
+fn has_owner_excludes_credentials_that_require_sign_in() {
+    let (account, mut secrets) = finish_ms_sign_in(ms_tokens());
+    secrets.sign_in_required = true;
+    let store = MemoryStore::default();
+    let mut accounts = Accounts::default();
+    accounts.add(&store, account, &secrets).unwrap();
+
+    assert!(!accounts.has_owner(&store));
+}
+
+#[test]
 fn has_owner_asks_the_selected_account_first() {
     let store = MemoryStore::default();
     // The owner is second in the list but selected: its item alone is read.
