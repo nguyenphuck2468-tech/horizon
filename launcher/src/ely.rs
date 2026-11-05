@@ -494,10 +494,18 @@ fn read_callback(stream: &mut TcpStream) -> Result<CallbackRequest, String> {
 
 fn respond(stream: &mut TcpStream, message: &str) {
     use std::io::Write;
+    // Callback error descriptions originate outside the launcher. Render them as text,
+    // never as HTML, even though the callback is bound to loopback.
+    let message = message
+        .replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('"', "&quot;")
+        .replace('\'', "&#39;");
     let body = format!("<!doctype html><title>Horizon</title><p>{message}</p>");
     let _ = write!(
         stream,
-        "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+        "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nX-Content-Type-Options: nosniff\r\nContent-Security-Policy: default-src 'none'; style-src 'none'\r\nConnection: close\r\n\r\n{}",
         body.len(),
         body
     );
@@ -581,6 +589,26 @@ fn now() -> u64 {
 mod tests {
     use super::*;
     use std::io::{Read, Write};
+
+    #[test]
+    fn callback_response_escapes_untrusted_error_text() {
+        let listener = TcpListener::bind(("127.0.0.1", 0)).unwrap();
+        let port = listener.local_addr().unwrap().port();
+        let client = std::thread::spawn(move || {
+            let mut stream = TcpStream::connect(("127.0.0.1", port)).unwrap();
+            let mut response = String::new();
+            stream.read_to_string(&mut response).unwrap();
+            response
+        });
+        let (mut stream, _) = listener.accept().unwrap();
+        respond(&mut stream, "<script>alert(1)</script> & \"quoted\"");
+        drop(stream);
+        let response = client.join().unwrap();
+        assert!(response.contains("&lt;script&gt;alert(1)&lt;/script&gt;"));
+        assert!(response.contains("&amp; &quot;quoted&quot;"));
+        assert!(!response.contains("<script>"));
+        assert!(response.contains("Content-Security-Policy: default-src 'none'"));
+    }
 
     #[test]
     fn encode_and_decode_round_trip() {
