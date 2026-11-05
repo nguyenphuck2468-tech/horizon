@@ -132,9 +132,7 @@ pub fn device_code() -> Result<DeviceCode, String> {
             verification_uri: string_field(&body, "verification_uri")
                 .unwrap_or_else(|| DEVICE_VERIFICATION_URL.to_owned()),
             interval: bounded_poll_interval(
-                body.get("interval")
-                    .and_then(Value::as_u64)
-                    .unwrap_or(5),
+                body.get("interval").and_then(Value::as_u64).unwrap_or(5),
             ),
             expires_at: now().saturating_add(
                 body.get("expires_in")
