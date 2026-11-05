@@ -2584,6 +2584,58 @@ fn game_session_owner_flag_does_not_follow_elyby_playability() {
 }
 
 #[test]
+fn session_file_handoff_rejects_changed_or_removed_credentials() {
+    let (account, secrets) = finish_ely_sign_in(ely_tokens());
+    let path = secrets_file("session-handoff-toctou");
+    let dir = path.parent().unwrap();
+    let store = MemoryStore::default();
+    store
+        .set(&account.uuid, &serde_json::to_string(&secrets).unwrap())
+        .unwrap();
+
+    let mut replacement = secrets.clone();
+    replacement.minecraft_token = format!("{ELY_ACCESS_PREFIX}replacement-token");
+    store
+        .set(&account.uuid, &serde_json::to_string(&replacement).unwrap())
+        .unwrap();
+    let changed = session_file(
+        dir,
+        Launch {
+            session: Some((account.clone(), secrets.clone())),
+            ..Default::default()
+        },
+        Vec::new(),
+        &store,
+    );
+    assert!(changed.file.is_none());
+    assert!(changed
+        .offline
+        .as_deref()
+        .is_some_and(|message| message.contains("account changed")));
+
+    store
+        .set(&account.uuid, &serde_json::to_string(&secrets).unwrap())
+        .unwrap();
+    store.delete(&account.uuid).unwrap();
+    let removed = session_file(
+        dir,
+        Launch {
+            session: Some((account, secrets)),
+            ..Default::default()
+        },
+        Vec::new(),
+        &store,
+    );
+    assert!(removed.file.is_none());
+    assert!(removed
+        .offline
+        .as_deref()
+        .is_some_and(|message| message.contains("signed out")));
+    assert_eq!(std::fs::read_dir(dir).unwrap().count(), 0);
+    remove_secrets_dir(&path);
+}
+
+#[test]
 fn ely_account_opens_the_gate_and_reports_ready() {
     let (account, secrets) = finish_ely_sign_in(ely_tokens());
     let store = MemoryStore::default();
