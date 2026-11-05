@@ -62,8 +62,8 @@ for Mojang downloads or a Java Edition instance.
   the normal account UI. It requires `HORIZON_ELY_CLIENT_SECRET` and an exact loopback redirect
   URI registered for this application (use a fixed callback port). The supported user-facing
   flow is Device Code and needs no secret. Do not set `HORIZON_ELY_CLIENT_SECRET` for normal
-  launches: child game processes inherit the launcher's environment. If the callback is enabled
-  later, move its secret to protected storage and explicitly remove it from child environments.
+  launches. The launcher explicitly strips it from child game processes, but it remains available
+  to the launcher process itself and should not be placed in a global or shared environment.
 - Ely.by sessions are written to the Horizon Client's short-lived, owner-readable session file
   with `user_type: "elyby"`. The client sends those tokens only to Ely.by's session service;
   it does not send them to Minecraft Services. A server must accept Ely.by authentication for
