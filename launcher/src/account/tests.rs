@@ -879,6 +879,31 @@ fn long_secrets_split_into_keychain_sized_pieces() {
     assert_eq!(split_secret("short"), vec!["short"]);
 }
 
+/// A keychain whose current value cannot be read. A writer must not overwrite it blindly.
+struct RefusedReads(Mutex<usize>);
+impl Items for RefusedReads {
+    fn read(&self, _: &str) -> Result<Option<String>, String> {
+        Err("keychain read failed".into())
+    }
+    fn write(&self, _: &str, _: &str) -> Result<(), String> {
+        *self.0.lock().unwrap() += 1;
+        Ok(())
+    }
+    fn remove(&self, _: &str) -> Result<bool, String> {
+        Ok(false)
+    }
+}
+
+#[test]
+fn a_failed_keychain_read_prevents_a_credential_write() {
+    let items = RefusedReads(Mutex::new(0));
+    assert_eq!(
+        set_pieces(&items, UUID, "replacement").unwrap_err(),
+        "keychain read failed"
+    );
+    assert_eq!(*items.0.lock().unwrap(), 0);
+}
+
 /// Keychain items in memory; writes fail once `room` items are kept, as a full Credential Manager
 /// refuses new items while it still overwrites the ones it has.
 struct FullItems {
