@@ -1093,5 +1093,9 @@
   "Its mods made for Minecraft {from} stay in its folder; some may not load in {to}.": "Các mod làm cho Minecraft {from} vẫn ở trong thư mục của nó; một số có thể không tải được trong {to}.",
   "Its worlds were saved by Minecraft {from}: {to} upgrades them for good, and can't open them if it is older.": "Các thế giới của nó được lưu bởi Minecraft {from}: {to} nâng cấp chúng vĩnh viễn, và không mở được nếu là bản cũ hơn.",
   "Ely.by account · servers that accept Ely.by": "Tài khoản Ely.by · các máy chủ chấp nhận Ely.by",
-  "This build has no configured account provider.": "Bản dựng này không có nhà cung cấp tài khoản nào được cấu hình."
+  "This build has no configured account provider.": "Bản dựng này không có nhà cung cấp tài khoản nào được cấu hình.",
+  "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Bản dựng này chưa cấu hình đăng nhập Microsoft. Tài khoản Ely.by vẫn chơi được Horizon Client, nhưng không thể xác nhận quyền sở hữu Minecraft: Java Edition.",
+  "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Cần tài khoản Microsoft sở hữu Minecraft: Java Edition để tải trò chơi từ Mojang và chạy các phiên bản Java Edition.",
+  "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Tài khoản Ely.by có thể chơi Horizon Client trên máy chủ chấp nhận Ely.by, nhưng không thể cấp quyền tải trò chơi từ Mojang hoặc chạy phiên bản Java Edition.",
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Nếu không có tài khoản Microsoft sở hữu trò chơi, hãy dùng bản cài Minecraft 26.3 hiện có."
 }
