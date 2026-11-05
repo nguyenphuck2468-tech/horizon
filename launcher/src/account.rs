@@ -668,8 +668,13 @@ fn check_ely_tokens(
     )
 }
 
-fn check_ely(account: &Account, mut secrets: Secrets, progress: &dyn Fn(session::Phase)) -> Check {
-    if secrets.minecraft_expires_at > now() + RENEW_BEFORE {
+fn check_ely(
+    account: &Account,
+    mut secrets: Secrets,
+    force: bool,
+    progress: &dyn Fn(session::Phase),
+) -> Check {
+    if !force && secrets.minecraft_expires_at > now() + RENEW_BEFORE {
         return Check::Owns(account.clone(), secrets);
     }
     progress(session::Phase::ElyBy);
@@ -710,7 +715,7 @@ fn check_with(
         return Check::NoAnswer(SIGN_IN_AGAIN.into(), secrets);
     }
     if is_ely(&secrets) {
-        return check_ely(account, secrets, progress);
+        return check_ely(account, secrets, force, progress);
     }
     if force || secrets.minecraft_expires_at <= now() + RENEW_BEFORE {
         progress(session::Phase::Microsoft);
