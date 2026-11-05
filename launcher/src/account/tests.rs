@@ -1542,6 +1542,18 @@ fn file_store_holds_the_shared_account_session_lock() {
 }
 
 #[test]
+fn layered_keychain_reads_use_the_shared_keychain_lock() {
+    let path = secrets_file("layered-keychain-lock");
+    let keychain = Arc::new(Keychain::default());
+    let layered = launcher_with(&keychain, &path);
+    let lock_path = path.with_extension("keychain.lock");
+
+    assert_eq!(layered.get("missing").unwrap(), None);
+    assert!(lock_path.exists());
+    remove_secrets_dir(&path);
+}
+
+#[test]
 fn layered_store_holds_the_shared_account_session_lock() {
     let path = secrets_file("layered-session-lock");
     let keychain = Arc::new(Keychain::default());
