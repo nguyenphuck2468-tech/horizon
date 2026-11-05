@@ -387,7 +387,8 @@ fn refresh_only_when_the_token_runs_out() {
         minecraft_expires_at: now() + 60,
         ..kept.clone()
     };
-    let Check::Confirmed(renewed_account, renewed) = check(&ep, Some("test-client"), &notch(), stale)
+    let Check::Confirmed(renewed_account, renewed) =
+        check(&ep, Some("test-client"), &notch(), stale)
     else {
         panic!("owns");
     };
@@ -3452,18 +3453,29 @@ fn replacing_or_removing_credentials_invalidates_the_cached_provider() {
     let (account, secrets) = finish_ms_sign_in(ms_tokens());
     let uuid = account.uuid.clone();
 
-    ELY_KNOWN.lock().unwrap().retain(|(known, _)| known != &uuid);
+    ELY_KNOWN
+        .lock()
+        .unwrap()
+        .retain(|(known, _)| known != &uuid);
     ELY_KNOWN.lock().unwrap().push((uuid.clone(), true));
     accounts.add(&store, account, &secrets).unwrap();
     assert!(
-        !ELY_KNOWN.lock().unwrap().iter().any(|(known, _)| known == &uuid),
+        !ELY_KNOWN
+            .lock()
+            .unwrap()
+            .iter()
+            .any(|(known, _)| known == &uuid),
         "saving a replacement credential must invalidate the old provider cache"
     );
 
     ELY_KNOWN.lock().unwrap().push((uuid.clone(), true));
     accounts.remove(&store, &uuid).unwrap();
     assert!(
-        !ELY_KNOWN.lock().unwrap().iter().any(|(known, _)| known == &uuid),
+        !ELY_KNOWN
+            .lock()
+            .unwrap()
+            .iter()
+            .any(|(known, _)| known == &uuid),
         "signing out must invalidate the old provider cache"
     );
 }
