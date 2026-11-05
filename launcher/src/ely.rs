@@ -670,7 +670,10 @@ mod tests {
             choose_client_id(Some(" runtime-id ".into()), Some("embedded-id")),
             Some("runtime-id".into())
         );
-        assert_eq!(choose_client_id(None, Some("embedded-id")), Some("embedded-id".into()));
+        assert_eq!(
+            choose_client_id(None, Some("embedded-id")),
+            Some("embedded-id".into())
+        );
         assert_eq!(choose_client_id(Some(String::new()), None), None);
     }
 
