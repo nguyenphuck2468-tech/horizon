@@ -15,7 +15,7 @@
 //! build time, or at run time to override it. Without one, sign-in says it is not configured.
 pub mod session;
 
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, OnceLock};
@@ -969,7 +969,7 @@ fn file_key() -> chacha20poly1305::Key {
 
 /// `json` sealed for the secrets file ([`SEALED`]).
 fn seal(json: &[u8]) -> Result<Vec<u8>, String> {
-    use chacha20poly1305::{KeyInit, aead::Aead};
+    use chacha20poly1305::{aead::Aead, KeyInit};
     let mut nonce = [0u8; 12];
     getrandom::fill(&mut nonce).map_err(|e| e.to_string())?;
     let sealed = chacha20poly1305::ChaCha20Poly1305::new(&file_key())
@@ -981,7 +981,7 @@ fn seal(json: &[u8]) -> Result<Vec<u8>, String> {
 /// What [`seal`] sealed, or `None` for a file in another format, changed, or sealed on another
 /// computer.
 fn unseal(bytes: &[u8]) -> Option<Vec<u8>> {
-    use chacha20poly1305::{KeyInit, aead::Aead};
+    use chacha20poly1305::{aead::Aead, KeyInit};
     let rest = bytes.strip_prefix(SEALED)?;
     let (nonce, sealed) = rest.split_at_checked(12)?;
     let nonce: [u8; 12] = nonce.try_into().ok()?;
@@ -2083,16 +2083,14 @@ fn write_launch_session_file(
         // as it ends starts the next).
         let _ = std::thread::Builder::new()
             .name("Session files".into())
-            .spawn(|| {
-                loop {
-                    std::thread::sleep(Duration::from_secs(5));
-                    let Ok(mut unread) = UNREAD.lock() else {
-                        return;
-                    };
-                    reap(&mut unread, SESSION_FILE_LIFE);
-                    if unread.is_empty() {
-                        return;
-                    }
+            .spawn(|| loop {
+                std::thread::sleep(Duration::from_secs(5));
+                let Ok(mut unread) = UNREAD.lock() else {
+                    return;
+                };
+                reap(&mut unread, SESSION_FILE_LIFE);
+                if unread.is_empty() {
+                    return;
                 }
             });
     }
