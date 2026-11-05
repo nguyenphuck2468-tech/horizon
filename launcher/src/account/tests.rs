@@ -220,6 +220,18 @@ fn mock(f: impl FnOnce(&mut Mock)) -> (Arc<Mutex<Mock>>, Endpoints) {
     (m, ep)
 }
 
+fn ms_tokens() -> MsTokens {
+    MsTokens {
+        access: "ms-access-1".into(),
+        refresh: "ms-refresh-1".into(),
+    }
+}
+
+fn finish_ms_sign_in(tokens: MsTokens) -> (Account, Secrets) {
+    let (_, ep) = mock(|_| {});
+    super::finish_sign_in(&ep, tokens).unwrap()
+}
+
 #[test]
 fn the_whole_chain() {
     let (m, ep) = mock(|m| m.pending = 2);
@@ -2439,7 +2451,7 @@ fn java_player_fails_closed_when_credential_json_is_corrupted() {
     // is treated as not having valid credentials.
 
     // Setup: valid account and secrets in the account list
-    let (account, secrets) = finish_sign_in(ms_tokens());
+    let (account, secrets) = finish_ms_sign_in(ms_tokens());
     let store = MemoryStore::default();
     let mut accounts = signed_in(&store, &secrets);
     accounts.update(account.clone());
@@ -2469,7 +2481,7 @@ fn java_player_fails_closed_when_credential_is_missing() {
     // from the keychain (get() returns Ok(None)).
 
     // Setup: valid account but no credentials in store
-    let (account, secrets) = finish_sign_in(ms_tokens());
+    let (account, secrets) = finish_ms_sign_in(ms_tokens());
     let store = MemoryStore::default();
     let mut accounts = signed_in(&store, &secrets);
     accounts.update(account.clone());
@@ -2506,7 +2518,7 @@ fn java_player_uses_fresh_credential_not_cached_elyby() {
 
     // Now update the keychain to have Microsoft secrets for the same UUID
     // (simulating user changed account type or re-authenticated)
-    let (_, ms_secrets) = finish_sign_in(ms_tokens());
+    let (_, ms_secrets) = finish_ms_sign_in(ms_tokens());
     store.set(
         &ely_account.uuid,
         &serde_json::to_string(&ms_secrets).unwrap(),
@@ -2531,7 +2543,7 @@ fn java_player_blocks_when_fresh_credential_is_elyby() {
     // Expected: Block the launch (Ely.by not supported for Java)
 
     // Setup: create a Microsoft account in the cached pass
-    let (ms_account, ms_secrets) = finish_sign_in(ms_tokens());
+    let (ms_account, ms_secrets) = finish_ms_sign_in(ms_tokens());
     let store = MemoryStore::default();
     let mut accounts = signed_in(&store, &ms_secrets);
     accounts.update(ms_account.clone());
@@ -2565,7 +2577,7 @@ fn java_player_blocks_when_fresh_credential_does_not_own_minecraft() {
     // Expected: Block the launch
 
     // Setup: account with secrets that don't own Minecraft
-    let (account, _) = finish_sign_in(ms_tokens());
+    let (account, _) = finish_ms_sign_in(ms_tokens());
     let no_own_secrets = Secrets {
         minecraft_token: "mc-token".into(),
         owns: false, // Does not own
@@ -2605,7 +2617,7 @@ fn java_player_succeeds_when_cache_and_keychain_both_microsoft() {
     // Scenario: Both cached and fresh credentials are Microsoft
     // Expected: Launch normally
 
-    let (account, secrets) = finish_sign_in(ms_tokens());
+    let (account, secrets) = finish_ms_sign_in(ms_tokens());
     let store = MemoryStore::default();
     let mut accounts = signed_in(&store, &secrets);
     accounts.update(account.clone());
@@ -2630,7 +2642,7 @@ fn java_player_defense_in_depth_elyby_field_always_false() {
     // Verify the invariant: after the Ely.by check, elyby field must be false
     // This test documents the expected behavior
 
-    let (account, secrets) = finish_sign_in(ms_tokens());
+    let (account, secrets) = finish_ms_sign_in(ms_tokens());
     let store = MemoryStore::default();
     let mut accounts = signed_in(&store, &secrets);
     accounts.update(account.clone());
@@ -2650,7 +2662,7 @@ fn java_player_uses_account_uuid_not_name_for_keychain_lookup() {
     // Verify that keychain lookup uses UUID, not account name
     // This ensures correct credential retrieval even if name changes
 
-    let (mut account, secrets) = finish_sign_in(ms_tokens());
+    let (mut account, secrets) = finish_ms_sign_in(ms_tokens());
     let original_uuid = account.uuid.clone();
     account.name = "ChangedName".to_string(); // Name changed
 
@@ -2688,7 +2700,7 @@ fn java_player_returns_no_owner_when_no_account_owns_minecraft() {
 
     // Create multiple accounts that don't own Minecraft
     for i in 0..3 {
-        let (account, secrets) = finish_sign_in(ms_tokens());
+        let (account, secrets) = finish_ms_sign_in(ms_tokens());
         let mut no_own_secrets = secrets.clone();
         no_own_secrets.owns = false; // Does not own Minecraft
 
@@ -2736,7 +2748,7 @@ fn java_player_does_not_fallback_when_selected_account_is_elyby() {
     );
 
     // Create Microsoft account (not selected)
-    let (ms_account, ms_secrets) = finish_sign_in(ms_tokens());
+    let (ms_account, ms_secrets) = finish_ms_sign_in(ms_tokens());
     accounts.update(ms_account.clone());
     store.set(
         &ms_account.uuid,
@@ -2768,7 +2780,7 @@ fn launch_returns_no_owner_when_all_accounts_fail_ownership_check() {
 
     // Create 3 accounts that don't own Minecraft
     for i in 0..3 {
-        let (account, mut secrets) = finish_sign_in(ms_tokens());
+        let (account, mut secrets) = finish_ms_sign_in(ms_tokens());
         secrets.owns = false;
 
         accounts.update(account.clone());
@@ -2821,7 +2833,7 @@ fn session_file_writes_user_type_correctly_for_elyby() {
 fn session_file_writes_user_type_correctly_for_microsoft() {
     // Verify that session_file correctly marks Microsoft accounts
 
-    let (account, secrets) = finish_sign_in(ms_tokens());
+    let (account, secrets) = finish_ms_sign_in(ms_tokens());
     let dir = tempfile::tempdir().unwrap();
 
     let result = write_session_file(dir.path(), &account, &secrets);
@@ -2970,7 +2982,7 @@ fn toctou_validated_snapshot_used_directly_for_player() {
     let store = MemoryStore::default();
     let mut accounts = Accounts::default();
 
-    let (account, secrets) = finish_sign_in(ms_tokens());
+    let (account, secrets) = finish_ms_sign_in(ms_tokens());
     accounts.update(account.clone());
     accounts.selected = Some(account.uuid.clone());
     store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap());
@@ -2999,7 +3011,7 @@ fn toctou_microsoft_credential_mutated_to_elyby_during_launch() {
     let mut accounts = Accounts::default();
 
     // Setup: valid Microsoft credential
-    let (account, ms_secrets) = finish_sign_in(ms_tokens());
+    let (account, ms_secrets) = finish_ms_sign_in(ms_tokens());
     accounts.update(account.clone());
     accounts.selected = Some(account.uuid.clone());
     store
@@ -3052,7 +3064,7 @@ fn toctou_elyby_credential_mutated_to_microsoft_during_launch() {
         .unwrap();
 
     // Setup mutation: after first read, change to Microsoft
-    let (_, ms_secrets) = finish_sign_in(ms_tokens());
+    let (_, ms_secrets) = finish_ms_sign_in(ms_tokens());
     store.set_mutation(
         account.uuid.clone(),
         serde_json::to_string(&ms_secrets).unwrap(),
@@ -3087,7 +3099,7 @@ fn toctou_read_count_verification() {
     let mut accounts = Accounts::default();
 
     // Setup: single valid Microsoft account
-    let (account, secrets) = finish_sign_in(ms_tokens());
+    let (account, secrets) = finish_ms_sign_in(ms_tokens());
     accounts.update(account.clone());
     accounts.selected = Some(account.uuid.clone());
     store
@@ -3121,7 +3133,7 @@ fn toctou_mutation_not_consumed_by_unrelated_key_read() {
     let store = MutatingSecretStore::new(inner);
 
     // Setup: two accounts
-    let (account1, secrets1) = finish_sign_in(ms_tokens());
+    let (account1, secrets1) = finish_ms_sign_in(ms_tokens());
     let (account2, secrets2) = finish_ely_sign_in(ely_tokens());
 
     store
@@ -3176,7 +3188,7 @@ fn toctou_exact_validated_token_uuid_provider_ownership_used() {
     let store = MemoryStore::default();
     let mut accounts = Accounts::default();
 
-    let (account, mut secrets) = finish_sign_in(ms_tokens());
+    let (account, mut secrets) = finish_ms_sign_in(ms_tokens());
     secrets.xuid = Some("test-xuid-12345".to_string());
 
     accounts.update(account.clone());
@@ -3228,4 +3240,33 @@ fn elyby_session_is_playable_but_is_not_a_mojang_owner() {
         pass.owner.is_none(),
         "Ely.by must never authorize Mojang downloads"
     );
+} 
+#[test]
+fn selected_elyby_session_does_not_hide_a_microsoft_owner() {
+    let (ms_account, ms_secrets) = finish_ms_sign_in(ms_tokens());
+    let (ely_account, ely_secrets) = finish_ely_sign_in(ely_tokens());
+    let store = MemoryStore::default();
+    let mut accounts = Accounts::default();
+
+    // Add Microsoft first, then select Ely.by: launch must keep the Ely.by session
+    // for Horizon while continuing to discover the Microsoft owner for Java/Mojang.
+    accounts.add(&store, ms_account.clone(), &ms_secrets).unwrap();
+    accounts.add(&store, ely_account.clone(), &ely_secrets).unwrap();
+
+    let (_, ep) = mock(|_| {});
+    let pass = launch(&ep, Some("test-client"), &store, &mut accounts).unwrap();
+    assert_eq!(
+        pass.session.as_ref().unwrap().0.uuid,
+        ely_account.uuid,
+        "Horizon should retain the selected Ely.by session"
+    );
+    assert_eq!(
+        pass.owner.as_ref().unwrap().0.uuid,
+        ms_account.uuid,
+        "Ely.by must not hide a separate Microsoft owner"
+    );
+
+    let player = java_player_with(&ep, Some("test-client"), &store, &mut accounts).unwrap();
+    assert_eq!(player.uuid, ms_account.uuid);
+    assert!(!player.elyby);
 }
