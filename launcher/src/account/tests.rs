@@ -65,10 +65,12 @@ fn route(mock: &mut Mock, method: &str, path: &str, auth: &str, body: &str) -> (
         },
         ("POST", "/xbl") => {
             let v: Value = serde_json::from_str(body).unwrap();
-            assert!(v["Properties"]["RpsTicket"]
-                .as_str()
-                .unwrap()
-                .starts_with("d=ms-access-"));
+            assert!(
+                v["Properties"]["RpsTicket"]
+                    .as_str()
+                    .unwrap()
+                    .starts_with("d=ms-access-")
+            );
             assert_eq!(v["RelyingParty"], "http://auth.xboxlive.com");
             reply(
                 200,
@@ -436,10 +438,12 @@ fn splitscreen_gets_the_other_accounts_that_still_hold() {
     assert_eq!(list.len(), 3);
     assert_eq!(list[0]["name"], "Bea");
     assert_eq!(list[1]["name"], "Cal");
-    assert!(list[1]["skipped"]
-        .as_str()
-        .unwrap()
-        .contains("Sign in again"));
+    assert!(
+        list[1]["skipped"]
+            .as_str()
+            .unwrap()
+            .contains("Sign in again")
+    );
     assert!(list[1].get("file").is_none());
     assert_eq!(list[2]["name"], "Dan");
     assert!(list[2]["skipped"].as_str().unwrap().contains("ownership"));
@@ -515,10 +519,12 @@ fn splitscreen_never_hands_over_an_account_sent_back_to_sign_in() {
         assert_eq!(list.len(), 1);
         assert_eq!(list[0]["name"], "Eve");
         assert!(list[0].get("file").is_none());
-        assert!(list[0]["skipped"]
-            .as_str()
-            .unwrap()
-            .contains("Sign in again"));
+        assert!(
+            list[0]["skipped"]
+                .as_str()
+                .unwrap()
+                .contains("Sign in again")
+        );
     }
     let written = std::fs::read_dir(&dir).map_or(0, |d| d.count());
     assert_eq!(written, 0, "no session file for it");
@@ -672,10 +678,11 @@ fn any_owner_opens_the_gate_and_the_one_who_plays_brings_the_session() {
     accounts.selected = Some("other".into());
     let pass = launch(&ep, Some("test-client"), &store, &mut accounts).unwrap();
     assert!(pass.session.is_none());
-    assert!(pass
-        .offline
-        .unwrap()
-        .starts_with("Alex is no longer signed in"));
+    assert!(
+        pass.offline
+            .unwrap()
+            .starts_with("Alex is no longer signed in")
+    );
     assert_eq!(pass.owner.unwrap().0.name, "Notch");
     // An offline name plays: Notch is asked, and no session goes to the game.
     accounts.selected = None;
@@ -705,9 +712,11 @@ fn offline_names_play_only_beside_an_owner() {
     assert!(!accounts.has_owner(&store));
     let (_, ep) = mock(|_| {});
     assert!(launch(&ep, Some("test-client"), &store, &mut accounts).is_err());
-    assert!(accounts
-        .play_as(&store, Player::Offline("Builder_2".into()))
-        .is_err());
+    assert!(
+        accounts
+            .play_as(&store, Player::Offline("Builder_2".into()))
+            .is_err()
+    );
 }
 
 #[test]
@@ -762,19 +771,25 @@ fn refusals_have_messages() {
         refresh: "r".into(),
     };
     let (_, ep) = mock(|m| m.xerr = Some(2148916233));
-    assert!(finish_sign_in(&ep, tokens())
-        .unwrap_err()
-        .contains("no Xbox profile"));
+    assert!(
+        finish_sign_in(&ep, tokens())
+            .unwrap_err()
+            .contains("no Xbox profile")
+    );
     let (_, ep) = mock(|m| m.xerr = Some(2148916238));
-    assert!(finish_sign_in(&ep, tokens())
-        .unwrap_err()
-        .contains("child account"));
+    assert!(
+        finish_sign_in(&ep, tokens())
+            .unwrap_err()
+            .contains("child account")
+    );
     let (_, ep) = mock(|m| m.owns_game = false);
     assert_eq!(finish_sign_in(&ep, tokens()).unwrap_err(), DOES_NOT_OWN);
     let (_, ep) = mock(|m| m.no_profile = true);
-    assert!(finish_sign_in(&ep, tokens())
-        .unwrap_err()
-        .contains("no Minecraft profile"));
+    assert!(
+        finish_sign_in(&ep, tokens())
+            .unwrap_err()
+            .contains("no Minecraft profile")
+    );
     assert_eq!(
         oauth_error(&json!({"error": "authorization_declined"})),
         "Sign-in was declined in the browser."
@@ -1282,9 +1297,11 @@ fn the_secrets_file_keeps_sign_ins_across_starts() {
         (signed_in.minecraft_token, signed_in.refresh_token, true)
     );
     // Never in accounts.json.
-    assert!(!serde_json::to_string(&accounts)
-        .unwrap()
-        .contains("mc-secret"));
+    assert!(
+        !serde_json::to_string(&accounts)
+            .unwrap()
+            .contains("mc-secret")
+    );
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
@@ -1976,10 +1993,12 @@ fn expiry_is_refreshable_and_a_missing_credential_needs_sign_in() {
         session::State::NeedsRefresh
     );
     let (_, ep) = mock(|_| {});
-    assert!(launch(&ep, Some("test-client"), &store, &mut accounts)
-        .unwrap()
-        .session
-        .is_some());
+    assert!(
+        launch(&ep, Some("test-client"), &store, &mut accounts)
+            .unwrap()
+            .session
+            .is_some()
+    );
     assert_eq!(session::status(&store, UUID).state, session::State::Ready);
 }
 
@@ -2019,9 +2038,11 @@ fn a_damaged_saved_sign_in_is_not_overwritten_or_exposed() {
         store.get(UUID).unwrap().as_deref(),
         Some("damaged-secret-contents")
     );
-    assert!(!serde_json::to_string(&status)
-        .unwrap()
-        .contains("damaged-secret-contents"));
+    assert!(
+        !serde_json::to_string(&status)
+            .unwrap()
+            .contains("damaged-secret-contents")
+    );
 }
 
 #[test]
@@ -2119,28 +2140,32 @@ fn cancelled_or_removed_targeted_sign_in_keeps_credentials_unchanged() {
     let store = MemoryStore::default();
     let mut accounts = signed_in(&store, &secrets("original", true));
     let before = store.get(UUID).unwrap();
-    assert!(accept_sign_in(
-        &mut accounts,
-        &store,
-        Some(&notch()),
-        notch(),
-        &secrets("new", true),
-        &|| true,
-        &|_| {}
-    )
-    .is_err());
+    assert!(
+        accept_sign_in(
+            &mut accounts,
+            &store,
+            Some(&notch()),
+            notch(),
+            &secrets("new", true),
+            &|| true,
+            &|_| {}
+        )
+        .is_err()
+    );
     assert_eq!(store.get(UUID).unwrap(), before);
     accounts.accounts.clear();
-    assert!(accept_sign_in(
-        &mut accounts,
-        &store,
-        Some(&notch()),
-        notch(),
-        &secrets("new", true),
-        &|| false,
-        &|_| {}
-    )
-    .is_err());
+    assert!(
+        accept_sign_in(
+            &mut accounts,
+            &store,
+            Some(&notch()),
+            notch(),
+            &secrets("new", true),
+            &|| false,
+            &|_| {}
+        )
+        .is_err()
+    );
     assert_eq!(store.get(UUID).unwrap(), before);
 }
 
@@ -2162,7 +2187,9 @@ fn refresh_reports_real_service_steps_in_order() {
     assert_eq!(status.state, session::State::Ready);
     assert_eq!(
         *phases.borrow(),
-        [Queued, Keychain, Microsoft, Xbox, Minecraft, Ownership, Profile, Saving]
+        [
+            Queued, Keychain, Microsoft, Xbox, Minecraft, Ownership, Profile, Saving
+        ]
     );
     let mut accounts = signed_in(&store, &secrets("old", true));
     let (account, secrets) = finish_sign_in_with_progress(
@@ -2229,10 +2256,11 @@ fn a_launch_as_another_account_leaves_the_selected_one() {
     )
     .unwrap();
     assert!(pass.session.is_none());
-    assert!(pass
-        .offline
-        .unwrap()
-        .starts_with("Alex is no longer signed in"));
+    assert!(
+        pass.offline
+            .unwrap()
+            .starts_with("Alex is no longer signed in")
+    );
     assert_eq!(accounts.player(), Player::Microsoft(UUID.into()));
     // An account that isn't in the launcher is refused, and changes nothing either.
     let gone = launch_as(
@@ -2286,10 +2314,12 @@ fn splitscreen_stops_renewing_other_accounts_once_out_of_time() {
         "no request started"
     );
     let list: Vec<Value> = serde_json::from_str(&env[0].1).unwrap();
-    assert!(list[0]["skipped"]
-        .as_str()
-        .unwrap()
-        .contains("Sign in again"));
+    assert!(
+        list[0]["skipped"]
+            .as_str()
+            .unwrap()
+            .contains("Sign in again")
+    );
     let _ = std::fs::remove_dir_all(&dir);
 }
 
@@ -2407,25 +2437,23 @@ fn java_player_fails_closed_when_credential_json_is_corrupted() {
     // This is different from a backend keychain read failure (get() returning Err).
     // When JSON parsing fails, secrets_in() returns None, and the account
     // is treated as not having valid credentials.
-    
+
     // Setup: valid account and secrets in the account list
     let (account, secrets) = finish_sign_in(ms_tokens());
     let store = MemoryStore::default();
     let mut accounts = signed_in(&store, &secrets);
     accounts.update(account.clone());
-    
+
     // Store corrupted JSON to simulate credential corruption
     store.set(&account.uuid, "invalid json that won't parse");
-    
+
     // Attempt to get java player - should fail because credential cannot be parsed
-    let result = java_player_with(
-        &test_endpoints(),
-        None,
-        &store,
-        &mut accounts,
+    let result = java_player_with(&test_endpoints(), None, &store, &mut accounts);
+
+    assert!(
+        result.is_err(),
+        "java_player_with must fail when credential JSON is corrupted"
     );
-    
-    assert!(result.is_err(), "java_player_with must fail when credential JSON is corrupted");
     let err = result.unwrap_err();
     // The error message should indicate the account has no owner/valid credentials
     assert!(
@@ -2439,25 +2467,23 @@ fn java_player_fails_closed_when_credential_json_is_corrupted() {
 fn java_player_fails_closed_when_credential_is_missing() {
     // This test verifies behavior when the credential is completely missing
     // from the keychain (get() returns Ok(None)).
-    
+
     // Setup: valid account but no credentials in store
     let (account, secrets) = finish_sign_in(ms_tokens());
     let store = MemoryStore::default();
     let mut accounts = signed_in(&store, &secrets);
     accounts.update(account.clone());
-    
+
     // Don't store any credentials - simulate missing credential
     // (store is empty by default)
-    
+
     // Attempt to get java player - should fail because credential is missing
-    let result = java_player_with(
-        &test_endpoints(),
-        None,
-        &store,
-        &mut accounts,
+    let result = java_player_with(&test_endpoints(), None, &store, &mut accounts);
+
+    assert!(
+        result.is_err(),
+        "java_player_with must fail when credential is missing"
     );
-    
-    assert!(result.is_err(), "java_player_with must fail when credential is missing");
     let err = result.unwrap_err();
     // The error message should indicate the account has no owner/valid credentials
     assert!(
@@ -2471,28 +2497,29 @@ fn java_player_fails_closed_when_credential_is_missing() {
 fn java_player_uses_fresh_credential_not_cached_elyby() {
     // Scenario: pass.session contains stale Ely.by secrets, but keychain has fresh Microsoft secrets
     // Expected: Use fresh Microsoft secrets, not stale Ely.by
-    
+
     // Setup: create an Ely.by account in the cached pass
     let (ely_account, ely_secrets) = finish_ely_sign_in(ely_tokens());
     let store = MemoryStore::default();
     let mut accounts = signed_in(&store, &ely_secrets);
     accounts.update(ely_account.clone());
-    
+
     // Now update the keychain to have Microsoft secrets for the same UUID
     // (simulating user changed account type or re-authenticated)
     let (_, ms_secrets) = finish_sign_in(ms_tokens());
-    store.set(&ely_account.uuid, &serde_json::to_string(&ms_secrets).unwrap());
-    
-    // Attempt to get java player - should use fresh Microsoft secrets
-    let result = java_player_with(
-        &test_endpoints(),
-        None,
-        &store,
-        &mut accounts,
+    store.set(
+        &ely_account.uuid,
+        &serde_json::to_string(&ms_secrets).unwrap(),
     );
-    
+
+    // Attempt to get java player - should use fresh Microsoft secrets
+    let result = java_player_with(&test_endpoints(), None, &store, &mut accounts);
+
     // Should succeed with Microsoft credentials
-    assert!(result.is_ok(), "java_player_with should succeed with fresh Microsoft credentials");
+    assert!(
+        result.is_ok(),
+        "java_player_with should succeed with fresh Microsoft credentials"
+    );
     let player = result.unwrap();
     assert!(!player.elyby, "Player should not be marked as Ely.by");
     assert_eq!(player.name, ely_account.name);
@@ -2502,27 +2529,28 @@ fn java_player_uses_fresh_credential_not_cached_elyby() {
 fn java_player_blocks_when_fresh_credential_is_elyby() {
     // Scenario: pass.session contains stale Microsoft secrets, but keychain has fresh Ely.by secrets
     // Expected: Block the launch (Ely.by not supported for Java)
-    
+
     // Setup: create a Microsoft account in the cached pass
     let (ms_account, ms_secrets) = finish_sign_in(ms_tokens());
     let store = MemoryStore::default();
     let mut accounts = signed_in(&store, &ms_secrets);
     accounts.update(ms_account.clone());
-    
+
     // Now update the keychain to have Ely.by secrets for the same UUID
     let (_, ely_secrets) = finish_ely_sign_in(ely_tokens());
-    store.set(&ms_account.uuid, &serde_json::to_string(&ely_secrets).unwrap());
-    
-    // Attempt to get java player - should fail because fresh credential is Ely.by
-    let result = java_player_with(
-        &test_endpoints(),
-        None,
-        &store,
-        &mut accounts,
+    store.set(
+        &ms_account.uuid,
+        &serde_json::to_string(&ely_secrets).unwrap(),
     );
-    
+
+    // Attempt to get java player - should fail because fresh credential is Ely.by
+    let result = java_player_with(&test_endpoints(), None, &store, &mut accounts);
+
     // Should fail with Ely.by error
-    assert!(result.is_err(), "java_player_with must block when fresh credential is Ely.by");
+    assert!(
+        result.is_err(),
+        "java_player_with must block when fresh credential is Ely.by"
+    );
     let err = result.unwrap_err();
     assert!(
         err.contains("Ely.by") && err.contains("do not support"),
@@ -2535,30 +2563,31 @@ fn java_player_blocks_when_fresh_credential_is_elyby() {
 fn java_player_blocks_when_fresh_credential_does_not_own_minecraft() {
     // Scenario: Fresh credential exists but Minecraft services say it doesn't own the game
     // Expected: Block the launch
-    
+
     // Setup: account with secrets that don't own Minecraft
     let (account, _) = finish_sign_in(ms_tokens());
     let no_own_secrets = Secrets {
         minecraft_token: "mc-token".into(),
-        owns: false,  // Does not own
+        owns: false, // Does not own
         plays: Some(true),
         ..secrets("mc-token", false)
     };
-    
+
     let store = MemoryStore::default();
-    store.set(&account.uuid, &serde_json::to_string(&no_own_secrets).unwrap());
+    store.set(
+        &account.uuid,
+        &serde_json::to_string(&no_own_secrets).unwrap(),
+    );
     let mut accounts = signed_in(&store, &no_own_secrets);
     accounts.update(account.clone());
-    
+
     // Attempt to get java player - should fail because doesn't own Minecraft
-    let result = java_player_with(
-        &test_endpoints(),
-        None,
-        &store,
-        &mut accounts,
+    let result = java_player_with(&test_endpoints(), None, &store, &mut accounts);
+
+    assert!(
+        result.is_err(),
+        "java_player_with must block when account doesn't own Minecraft"
     );
-    
-    assert!(result.is_err(), "java_player_with must block when account doesn't own Minecraft");
     let err = result.unwrap_err();
     assert!(
         err.contains("does not own Minecraft"),
@@ -2575,23 +2604,21 @@ fn java_player_blocks_when_fresh_credential_does_not_own_minecraft() {
 fn java_player_succeeds_when_cache_and_keychain_both_microsoft() {
     // Scenario: Both cached and fresh credentials are Microsoft
     // Expected: Launch normally
-    
+
     let (account, secrets) = finish_sign_in(ms_tokens());
     let store = MemoryStore::default();
     let mut accounts = signed_in(&store, &secrets);
     accounts.update(account.clone());
-    
+
     // Store fresh Microsoft secrets in keychain
     store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap());
-    
-    let result = java_player_with(
-        &test_endpoints(),
-        None,
-        &store,
-        &mut accounts,
+
+    let result = java_player_with(&test_endpoints(), None, &store, &mut accounts);
+
+    assert!(
+        result.is_ok(),
+        "java_player_with should succeed with Microsoft credentials"
     );
-    
-    assert!(result.is_ok(), "java_player_with should succeed with Microsoft credentials");
     let player = result.unwrap();
     assert!(!player.elyby, "Player should not be marked as Ely.by");
     assert_eq!(player.name, account.name);
@@ -2602,50 +2629,49 @@ fn java_player_succeeds_when_cache_and_keychain_both_microsoft() {
 fn java_player_defense_in_depth_elyby_field_always_false() {
     // Verify the invariant: after the Ely.by check, elyby field must be false
     // This test documents the expected behavior
-    
+
     let (account, secrets) = finish_sign_in(ms_tokens());
     let store = MemoryStore::default();
     let mut accounts = signed_in(&store, &secrets);
     accounts.update(account.clone());
     store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap());
-    
-    let player = java_player_with(
-        &test_endpoints(),
-        None,
-        &store,
-        &mut accounts,
-    ).unwrap();
-    
+
+    let player = java_player_with(&test_endpoints(), None, &store, &mut accounts).unwrap();
+
     // Invariant: elyby must be false after the check
-    assert!(!player.elyby, "After Ely.by check, player.elyby must be false");
+    assert!(
+        !player.elyby,
+        "After Ely.by check, player.elyby must be false"
+    );
 }
 
 #[test]
 fn java_player_uses_account_uuid_not_name_for_keychain_lookup() {
     // Verify that keychain lookup uses UUID, not account name
     // This ensures correct credential retrieval even if name changes
-    
+
     let (mut account, secrets) = finish_sign_in(ms_tokens());
     let original_uuid = account.uuid.clone();
     account.name = "ChangedName".to_string(); // Name changed
-    
+
     let store = MemoryStore::default();
     let mut accounts = signed_in(&store, &secrets);
     accounts.update(account.clone());
-    
+
     // Store secrets under the UUID (not the name)
     store.set(&original_uuid, &serde_json::to_string(&secrets).unwrap());
-    
-    let result = java_player_with(
-        &test_endpoints(),
-        None,
-        &store,
-        &mut accounts,
+
+    let result = java_player_with(&test_endpoints(), None, &store, &mut accounts);
+
+    assert!(
+        result.is_ok(),
+        "java_player_with should use UUID for keychain lookup"
     );
-    
-    assert!(result.is_ok(), "java_player_with should use UUID for keychain lookup");
     let player = result.unwrap();
-    assert_eq!(player.uuid, original_uuid, "Player should have the original UUID");
+    assert_eq!(
+        player.uuid, original_uuid,
+        "Player should have the original UUID"
+    );
 }
 
 // ============================================================================
@@ -2656,33 +2682,34 @@ fn java_player_uses_account_uuid_not_name_for_keychain_lookup() {
 fn java_player_returns_no_owner_when_no_account_owns_minecraft() {
     // Scenario: All accounts in the list do not own Minecraft
     // Expected: Return NoOwner error, do NOT fallback to another account
-    
+
     let store = MemoryStore::default();
     let mut accounts = Accounts::default();
-    
+
     // Create multiple accounts that don't own Minecraft
     for i in 0..3 {
         let (account, secrets) = finish_sign_in(ms_tokens());
         let mut no_own_secrets = secrets.clone();
         no_own_secrets.owns = false; // Does not own Minecraft
-        
+
         accounts.update(account.clone());
-        store.set(&account.uuid, &serde_json::to_string(&no_own_secrets).unwrap());
-        
+        store.set(
+            &account.uuid,
+            &serde_json::to_string(&no_own_secrets).unwrap(),
+        );
+
         if i == 0 {
             accounts.selected = Some(account.uuid.clone());
         }
     }
-    
-    let result = java_player_with(
-        &test_endpoints(),
-        None,
-        &store,
-        &mut accounts,
-    );
-    
+
+    let result = java_player_with(&test_endpoints(), None, &store, &mut accounts);
+
     // Should fail with NoOwner, not fallback to another account
-    assert!(result.is_err(), "java_player_with must return NoOwner when no account owns Minecraft");
+    assert!(
+        result.is_err(),
+        "java_player_with must return NoOwner when no account owns Minecraft"
+    );
     let err = result.unwrap_err();
     assert!(
         err.contains("no account") || err.contains("NoOwner"),
@@ -2695,30 +2722,34 @@ fn java_player_returns_no_owner_when_no_account_owns_minecraft() {
 fn java_player_does_not_fallback_when_selected_account_is_elyby() {
     // Scenario: Selected account is Ely.by, other accounts are Microsoft
     // Expected: Block launch (Ely.by not supported), do NOT fallback to Microsoft account
-    
+
     let store = MemoryStore::default();
     let mut accounts = Accounts::default();
-    
+
     // Create Ely.by account (selected)
     let (ely_account, ely_secrets) = finish_ely_sign_in(ely_tokens());
     accounts.update(ely_account.clone());
     accounts.selected = Some(ely_account.uuid.clone());
-    store.set(&ely_account.uuid, &serde_json::to_string(&ely_secrets).unwrap());
-    
+    store.set(
+        &ely_account.uuid,
+        &serde_json::to_string(&ely_secrets).unwrap(),
+    );
+
     // Create Microsoft account (not selected)
     let (ms_account, ms_secrets) = finish_sign_in(ms_tokens());
     accounts.update(ms_account.clone());
-    store.set(&ms_account.uuid, &serde_json::to_string(&ms_secrets).unwrap());
-    
-    let result = java_player_with(
-        &test_endpoints(),
-        None,
-        &store,
-        &mut accounts,
+    store.set(
+        &ms_account.uuid,
+        &serde_json::to_string(&ms_secrets).unwrap(),
     );
-    
+
+    let result = java_player_with(&test_endpoints(), None, &store, &mut accounts);
+
     // Should fail because selected account is Ely.by, not fallback to Microsoft
-    assert!(result.is_err(), "java_player_with must block Ely.by, not fallback");
+    assert!(
+        result.is_err(),
+        "java_player_with must block Ely.by, not fallback"
+    );
     let err = result.unwrap_err();
     assert!(
         err.contains("Ely.by"),
@@ -2731,57 +2762,57 @@ fn java_player_does_not_fallback_when_selected_account_is_elyby() {
 fn launch_returns_no_owner_when_all_accounts_fail_ownership_check() {
     // Scenario: Multiple accounts, all fail ownership check
     // Expected: launch() returns NoOwner, no fallback
-    
+
     let store = MemoryStore::default();
     let mut accounts = Accounts::default();
-    
+
     // Create 3 accounts that don't own Minecraft
     for i in 0..3 {
         let (account, mut secrets) = finish_sign_in(ms_tokens());
         secrets.owns = false;
-        
+
         accounts.update(account.clone());
         store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap());
-        
+
         if i == 0 {
             accounts.selected = Some(account.uuid.clone());
         }
     }
-    
-    let result = launch(
-        &test_endpoints(),
-        None,
-        &store,
-        &mut accounts,
-    );
-    
+
+    let result = launch(&test_endpoints(), None, &store, &mut accounts);
+
     // Should return NoOwner error
-    assert!(result.is_err(), "launch() must return NoOwner when no account owns Minecraft");
-    assert!(matches!(result.unwrap_err(), NoOwner), "Error should be NoOwner");
+    assert!(
+        result.is_err(),
+        "launch() must return NoOwner when no account owns Minecraft"
+    );
+    assert!(
+        matches!(result.unwrap_err(), NoOwner),
+        "Error should be NoOwner"
+    );
 }
 
 #[test]
 fn session_file_writes_user_type_correctly_for_elyby() {
     // Verify that session_file correctly marks Ely.by accounts
     // This ensures Horizon Client knows the provider type
-    
+
     let (account, secrets) = finish_ely_sign_in(ely_tokens());
     let dir = tempfile::tempdir().unwrap();
-    
-    let result = write_session_file(
-        dir.path(),
-        &account,
-        &secrets,
-    );
-    
+
+    let result = write_session_file(dir.path(), &account, &secrets);
+
     assert!(result.is_ok(), "write_session_file should succeed");
     let path = result.unwrap();
-    
+
     // Read the file and verify content
     let content = std::fs::read_to_string(&path).unwrap();
     let json: serde_json::Value = serde_json::from_str(&content).unwrap();
-    
-    assert_eq!(json["user_type"], "elyby", "user_type should be 'elyby' for Ely.by accounts");
+
+    assert_eq!(
+        json["user_type"], "elyby",
+        "user_type should be 'elyby' for Ely.by accounts"
+    );
     assert_eq!(json["name"], account.name);
     assert_eq!(json["uuid"], account.uuid);
 }
@@ -2789,24 +2820,23 @@ fn session_file_writes_user_type_correctly_for_elyby() {
 #[test]
 fn session_file_writes_user_type_correctly_for_microsoft() {
     // Verify that session_file correctly marks Microsoft accounts
-    
+
     let (account, secrets) = finish_sign_in(ms_tokens());
     let dir = tempfile::tempdir().unwrap();
-    
-    let result = write_session_file(
-        dir.path(),
-        &account,
-        &secrets,
-    );
-    
+
+    let result = write_session_file(dir.path(), &account, &secrets);
+
     assert!(result.is_ok(), "write_session_file should succeed");
     let path = result.unwrap();
-    
+
     // Read the file and verify content
     let content = std::fs::read_to_string(&path).unwrap();
     let json: serde_json::Value = serde_json::from_str(&content).unwrap();
-    
-    assert_eq!(json["user_type"], "msa", "user_type should be 'msa' for Microsoft accounts");
+
+    assert_eq!(
+        json["user_type"], "msa",
+        "user_type should be 'msa' for Microsoft accounts"
+    );
     assert_eq!(json["name"], account.name);
     assert_eq!(json["uuid"], account.uuid);
 }
@@ -2815,23 +2845,19 @@ fn session_file_writes_user_type_correctly_for_microsoft() {
 fn session_file_strips_elyby_prefix_from_token() {
     // Verify that session_file strips the 'elyby:' prefix from tokens
     // This ensures Horizon Client gets the raw token
-    
+
     let (account, secrets) = finish_ely_sign_in(ely_tokens());
     let dir = tempfile::tempdir().unwrap();
-    
-    let result = write_session_file(
-        dir.path(),
-        &account,
-        &secrets,
-    );
-    
+
+    let result = write_session_file(dir.path(), &account, &secrets);
+
     assert!(result.is_ok(), "write_session_file should succeed");
     let path = result.unwrap();
-    
+
     // Read the file and verify token is stripped
     let content = std::fs::read_to_string(&path).unwrap();
     let json: serde_json::Value = serde_json::from_str(&content).unwrap();
-    
+
     let access_token = json["access_token"].as_str().unwrap();
     assert!(
         !access_token.starts_with("elyby:"),
@@ -2867,18 +2893,16 @@ impl MutatingSecretStore {
             mutated: Arc::new(Mutex::new(false)),
         }
     }
-    
+
     /// Configure mutation to inject after the first read of this key
     fn set_mutation(&self, key: String, new_secret: String) {
         *self.mutation_target.lock().unwrap() = Some((key, new_secret));
     }
-    
 
-    
     fn reads_for_uuid(&self, uuid: &str) -> usize {
         *self.reads_by_uuid.lock().unwrap().get(uuid).unwrap_or(&0)
     }
-    
+
     fn was_mutated(&self) -> bool {
         *self.mutated.lock().unwrap()
     }
@@ -2888,16 +2912,15 @@ impl SecretStore for MutatingSecretStore {
     fn get(&self, key: &str) -> Result<Option<String>, String> {
         // Increment global read count
 
-        
         // Track reads by UUID
         {
             let mut reads_by_uuid = self.reads_by_uuid.lock().unwrap();
             *reads_by_uuid.entry(key.to_string()).or_insert(0) += 1;
         }
-        
+
         // Read the current value FIRST
         let value = self.inner.get(key)?;
-        
+
         // THEN check if we should mutate (after read, before return)
         // Only consume the mutation if the key matches
         {
@@ -2914,19 +2937,19 @@ impl SecretStore for MutatingSecretStore {
                 // If key doesn't match, mutation is NOT consumed and remains pending
             }
         }
-        
+
         // Return the ORIGINAL value (read before mutation)
         Ok(value)
     }
-    
+
     fn set(&self, key: &str, secret: &str) -> Result<(), String> {
         self.inner.set(key, secret)
     }
-    
+
     fn delete(&self, key: &str) -> Result<(), String> {
         self.inner.delete(key)
     }
-    
+
     fn persistent(&self) -> bool {
         self.inner.persistent()
     }
@@ -2937,32 +2960,30 @@ impl SecretStore for MutatingSecretStore {
 // ============================================================================
 
 use std::collections::HashMap;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Mutex;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 #[test]
 fn toctou_validated_snapshot_used_directly_for_player() {
     // Verifies the basic invariant without mutation
-    
+
     let store = MemoryStore::default();
     let mut accounts = Accounts::default();
-    
+
     let (account, secrets) = finish_sign_in(ms_tokens());
     accounts.update(account.clone());
     accounts.selected = Some(account.uuid.clone());
     store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap());
-    
-    let player = java_player_with(
-        &test_endpoints(),
-        None,
-        &store,
-        &mut accounts,
-    ).unwrap();
-    
+
+    let player = java_player_with(&test_endpoints(), None, &store, &mut accounts).unwrap();
+
     // Player must use the exact same credentials from the validated snapshot
     assert_eq!(player.name, account.name);
     assert_eq!(player.uuid, account.uuid);
-    assert!(!player.elyby, "Microsoft account must not be marked as Ely.by");
+    assert!(
+        !player.elyby,
+        "Microsoft account must not be marked as Ely.by"
+    );
     assert_eq!(player.token, secrets.minecraft_token);
 }
 
@@ -2972,37 +2993,40 @@ fn toctou_microsoft_credential_mutated_to_elyby_during_launch() {
     // The first read returns Microsoft snapshot.
     // Immediately after reading, mutate store to Ely.by.
     // java_player_with() must still use the validated Microsoft snapshot.
-    
+
     let inner = MemoryStore::default();
     let store = MutatingSecretStore::new(inner);
     let mut accounts = Accounts::default();
-    
+
     // Setup: valid Microsoft credential
     let (account, ms_secrets) = finish_sign_in(ms_tokens());
     accounts.update(account.clone());
     accounts.selected = Some(account.uuid.clone());
-    store.set(&account.uuid, &serde_json::to_string(&ms_secrets).unwrap()).unwrap();
-    
+    store
+        .set(&account.uuid, &serde_json::to_string(&ms_secrets).unwrap())
+        .unwrap();
+
     // Setup mutation: after first read of this account, change to Ely.by
     let (_, ely_secrets) = finish_ely_sign_in(ely_tokens());
     store.set_mutation(
         account.uuid.clone(),
-        serde_json::to_string(&ely_secrets).unwrap()
+        serde_json::to_string(&ely_secrets).unwrap(),
     );
-    
+
     // Act: java_player_with() calls launch() which reads credentials
-    let player = java_player_with(
-        &test_endpoints(),
-        None,
-        &store,
-        &mut accounts,
-    ).unwrap();
-    
+    let player = java_player_with(&test_endpoints(), None, &store, &mut accounts).unwrap();
+
     // Assert: mutation should have occurred
-    assert!(store.was_mutated(), "Store should have been mutated during read");
-    
+    assert!(
+        store.was_mutated(),
+        "Store should have been mutated during read"
+    );
+
     // Assert: Player must use the original Microsoft snapshot, not the mutated Ely.by
-    assert!(!player.elyby, "Player must use validated Microsoft snapshot, not mutated Ely.by");
+    assert!(
+        !player.elyby,
+        "Player must use validated Microsoft snapshot, not mutated Ely.by"
+    );
     assert_eq!(player.name, account.name);
     assert_eq!(player.uuid, account.uuid);
     assert_eq!(player.token, ms_secrets.minecraft_token);
@@ -3014,69 +3038,70 @@ fn toctou_elyby_credential_mutated_to_microsoft_during_launch() {
     // The first read returns Ely.by snapshot.
     // Immediately after reading, mutate store to Microsoft.
     // java_player_with() must still reject the validated Ely.by snapshot.
-    
+
     let inner = MemoryStore::default();
     let store = MutatingSecretStore::new(inner);
     let mut accounts = Accounts::default();
-    
+
     // Setup: Ely.by credential
     let (account, ely_secrets) = finish_ely_sign_in(ely_tokens());
     accounts.update(account.clone());
     accounts.selected = Some(account.uuid.clone());
-    store.set(&account.uuid, &serde_json::to_string(&ely_secrets).unwrap()).unwrap();
-    
+    store
+        .set(&account.uuid, &serde_json::to_string(&ely_secrets).unwrap())
+        .unwrap();
+
     // Setup mutation: after first read, change to Microsoft
     let (_, ms_secrets) = finish_sign_in(ms_tokens());
     store.set_mutation(
         account.uuid.clone(),
-        serde_json::to_string(&ms_secrets).unwrap()
+        serde_json::to_string(&ms_secrets).unwrap(),
     );
-    
+
     // Act: java_player_with() should reject Ely.by even though store mutated to Microsoft
-    let result = java_player_with(
-        &test_endpoints(),
-        None,
-        &store,
-        &mut accounts,
-    );
-    
+    let result = java_player_with(&test_endpoints(), None, &store, &mut accounts);
+
     // Assert: mutation should have occurred
-    assert!(store.was_mutated(), "Store should have been mutated during read");
-    
+    assert!(
+        store.was_mutated(),
+        "Store should have been mutated during read"
+    );
+
     // Assert: Must reject the validated Ely.by snapshot
     assert!(result.is_err(), "Must reject validated Ely.by snapshot");
     let err = result.unwrap_err();
-    assert!(err.contains("Ely.by"), "Error should mention Ely.by: {}", err);
+    assert!(
+        err.contains("Ely.by"),
+        "Error should mention Ely.by: {}",
+        err
+    );
 }
 
 #[test]
 fn toctou_read_count_verification() {
     // Verify that java_player_with() does not perform additional keychain reads
     // beyond what launch() performs for the selected account.
-    
+
     let inner = MemoryStore::default();
     let store = MutatingSecretStore::new(inner);
     let mut accounts = Accounts::default();
-    
+
     // Setup: single valid Microsoft account
     let (account, secrets) = finish_sign_in(ms_tokens());
     accounts.update(account.clone());
     accounts.selected = Some(account.uuid.clone());
-    store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap()).unwrap();
-    
+    store
+        .set(&account.uuid, &serde_json::to_string(&secrets).unwrap())
+        .unwrap();
+
     let initial_reads = store.reads_for_uuid(&account.uuid);
-    
+
     // Act
-    let _player = java_player_with(
-        &test_endpoints(),
-        None,
-        &store,
-        &mut accounts,
-    ).unwrap();
-    
+    let _player = java_player_with(&test_endpoints(), None, &store, &mut accounts).unwrap();
+
     let final_reads = store.reads_for_uuid(&account.uuid);
     let reads_for_account = final_reads - initial_reads;
-    
+
     // Assert: launch() reads the account exactly once for validation
     // java_player_with() should NOT perform additional reads for this account
     // The exact count should be 1 (one read during validation in launch())
@@ -3091,73 +3116,96 @@ fn toctou_read_count_verification() {
 fn toctou_mutation_not_consumed_by_unrelated_key_read() {
     // Verify that reading an unrelated key does not consume the pending mutation
     // This tests the fix for the mutation_target consumption bug
-    
+
     let inner = MemoryStore::default();
     let store = MutatingSecretStore::new(inner);
-    
+
     // Setup: two accounts
     let (account1, secrets1) = finish_sign_in(ms_tokens());
     let (account2, secrets2) = finish_ely_sign_in(ely_tokens());
-    
-    store.set(&account1.uuid, &serde_json::to_string(&secrets1).unwrap()).unwrap();
-    store.set(&account2.uuid, &serde_json::to_string(&secrets2).unwrap()).unwrap();
-    
+
+    store
+        .set(&account1.uuid, &serde_json::to_string(&secrets1).unwrap())
+        .unwrap();
+    store
+        .set(&account2.uuid, &serde_json::to_string(&secrets2).unwrap())
+        .unwrap();
+
     // Setup mutation for account1
     let (_, new_secrets) = finish_ely_sign_in(ely_tokens());
     store.set_mutation(
         account1.uuid.clone(),
-        serde_json::to_string(&new_secrets).unwrap()
+        serde_json::to_string(&new_secrets).unwrap(),
     );
-    
+
     // Act: Read account2 first (unrelated key)
     let result2 = store.get(&account2.uuid).unwrap();
-    
+
     // Assert: Mutation should NOT have occurred (key doesn't match)
-    assert!(!store.was_mutated(), "Mutation should not occur for unrelated key");
+    assert!(
+        !store.was_mutated(),
+        "Mutation should not occur for unrelated key"
+    );
     assert_eq!(result2, Some(serde_json::to_string(&secrets2).unwrap()));
-    
+
     // Act: Now read account1 (matching key)
     let result1 = store.get(&account1.uuid).unwrap();
-    
+
     // Assert: Mutation SHOULD have occurred now
-    assert!(store.was_mutated(), "Mutation should occur for matching key");
+    assert!(
+        store.was_mutated(),
+        "Mutation should occur for matching key"
+    );
     assert_eq!(result1, Some(serde_json::to_string(&secrets1).unwrap()));
-    
+
     // Act: Read account1 again
     let result1_again = store.get(&account1.uuid).unwrap();
-    
+
     // Assert: Should see the mutated value
-    assert_eq!(result1_again, Some(serde_json::to_string(&new_secrets).unwrap()));
+    assert_eq!(
+        result1_again,
+        Some(serde_json::to_string(&new_secrets).unwrap())
+    );
 }
 
 #[test]
 fn toctou_exact_validated_token_uuid_provider_ownership_used() {
     // Verify that the exact validated token, UUID, provider, and ownership state
     // are used to construct Player
-    
+
     let store = MemoryStore::default();
     let mut accounts = Accounts::default();
-    
+
     let (account, mut secrets) = finish_sign_in(ms_tokens());
     secrets.xuid = Some("test-xuid-12345".to_string());
-    
+
     accounts.update(account.clone());
     accounts.selected = Some(account.uuid.clone());
     store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap());
-    
-    let player = java_player_with(
-        &test_endpoints(),
-        None,
-        &store,
-        &mut accounts,
-    ).unwrap();
-    
+
+    let player = java_player_with(&test_endpoints(), None, &store, &mut accounts).unwrap();
+
     // All fields must match the validated snapshot exactly
-    assert_eq!(player.name, account.name, "Name must match validated snapshot");
-    assert_eq!(player.uuid, account.uuid, "UUID must match validated snapshot");
-    assert_eq!(player.token, secrets.minecraft_token, "Token must match validated snapshot");
-    assert_eq!(player.xuid, "test-xuid-12345", "XUID must match validated snapshot");
-    assert!(!player.elyby, "Provider must match validated snapshot (Microsoft, not Ely.by)");
+    assert_eq!(
+        player.name, account.name,
+        "Name must match validated snapshot"
+    );
+    assert_eq!(
+        player.uuid, account.uuid,
+        "UUID must match validated snapshot"
+    );
+    assert_eq!(
+        player.token, secrets.minecraft_token,
+        "Token must match validated snapshot"
+    );
+    assert_eq!(
+        player.xuid, "test-xuid-12345",
+        "XUID must match validated snapshot"
+    );
+    assert!(
+        !player.elyby,
+        "Provider must match validated snapshot (Microsoft, not Ely.by)"
+    );
 }
 
 #[test]
@@ -3171,8 +3219,13 @@ fn elyby_session_is_playable_but_is_not_a_mojang_owner() {
 
     let pass = launch(&test_endpoints(), None, &store, &mut accounts).unwrap();
 
-    assert!(pass.session.as_ref().is_some_and(|(a, s)| {
-        a.uuid == account.uuid && is_ely(s) && s.plays()
-    }));
-    assert!(pass.owner.is_none(), "Ely.by must never authorize Mojang downloads");
+    assert!(
+        pass.session
+            .as_ref()
+            .is_some_and(|(a, s)| { a.uuid == account.uuid && is_ely(s) && s.plays() })
+    );
+    assert!(
+        pass.owner.is_none(),
+        "Ely.by must never authorize Mojang downloads"
+    );
 }
