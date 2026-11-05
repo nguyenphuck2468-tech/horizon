@@ -4,8 +4,8 @@ Horizon supports Microsoft and Ely.by sign-in. A Microsoft account that owns Min
 Java Edition is required for Mojang downloads, Java Edition instances and Mojang's online-mode
 authentication ([the owner gate](#the-owner-gate)). An Ely.by account can authenticate the Horizon
 Client to servers that accept Ely.by, but it does not prove Java Edition ownership and cannot
-authorize Mojang downloads or a Java Edition instance. Offline names, LAN and offline-mode servers
-remain subject to the owner gate unless the hidden developer-only offline option is enabled.
+authorize Mojang downloads or a Java Edition instance. Offline names retain their separate
+Microsoft-owner requirement; Horizon Client play with Ely.by is governed by its own session flow.
 
 This note documents both providers and the account registrations needed for release builds.
 
