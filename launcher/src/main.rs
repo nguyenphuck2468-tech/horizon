@@ -1103,7 +1103,12 @@ impl Launcher {
                     self.load_auth_statuses(false);
                     if let Some(tag) = self.starting_client.take() {
                         let mut cmd = backend::client_command(&tag);
-                        let account::GameSession { file, offline, env } = match session {
+                        let account::GameSession {
+                            owner,
+                            file,
+                            offline,
+                            env,
+                        } = match session {
                             Ok(pass) => pass,
                             Err(account::NoOwner) => {
                                 self.owner = Some(false);
@@ -1115,10 +1120,7 @@ impl Launcher {
                                 continue;
                             }
                         };
-                        // Past the gate by the developer option alone is no owner.
-                        if !self.settings.dev_offline {
-                            self.owner = Some(true);
-                        }
+                        self.owner = Some(owner);
                         if let Some(file) = file {
                             cmd.arg("--session-file").arg(file);
                         }
