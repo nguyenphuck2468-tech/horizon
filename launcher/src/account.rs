@@ -1782,7 +1782,10 @@ impl Accounts {
         self.selected()
             .into_iter()
             .chain(self.accounts.iter().filter(|a| Some(*a) != self.selected()))
-            .any(|a| secrets_in(store, &a.uuid).is_some_and(|s| s.owns_minecraft()))
+            .any(|a| {
+                secrets_in(store, &a.uuid)
+                    .is_some_and(|s| s.owns_minecraft() && !s.sign_in_required)
+            })
     }
 
     /// Who plays now.
