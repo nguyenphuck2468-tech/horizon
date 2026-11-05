@@ -284,7 +284,7 @@ pub(super) fn refresh_account(
             serde_json::to_string(&secrets).map_err(|_| "Could not read the saved sign-in.")?;
         let (mut status, secrets) =
             match check_with(ep, client_id, account, secrets, true, progress) {
-                Check::Owns(renewed, s) => {
+                Check::Confirmed(renewed, s) => {
                     // A new name or skin goes to accounts.json, as launch() saves it, so the
                     // row and its profile head follow the refresh, not the next Play.
                     let mut saved = Accounts::load_from(accounts);
