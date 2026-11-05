@@ -410,8 +410,8 @@ pub(super) fn join_server_with(
     }
     let secrets = {
         let _operation = lock(store)?;
-        let secrets = read(store, &account.uuid)?
-            .ok_or("Sign in with a Minecraft account first.")?;
+        let secrets =
+            read(store, &account.uuid)?.ok_or("Sign in with a Minecraft account first.")?;
         // Recheck the credential read after refresh_account's lock was released. A concurrent
         // sign-out or rejected refresh must not leave this path using a no-longer-ready token.
         let current = Status::from_secrets(Some(&secrets));
@@ -429,7 +429,11 @@ pub(super) fn join_server_with(
         "serverId": server_id,
     });
     let (session, path, service) = if super::is_ely(&secrets) {
-        (ELY_SESSION_SERVER, "/session/join", "Ely.by's session server")
+        (
+            ELY_SESSION_SERVER,
+            "/session/join",
+            "Ely.by's session server",
+        )
     } else {
         (session, "/session/minecraft/join", "Mojang's session server")
     };
