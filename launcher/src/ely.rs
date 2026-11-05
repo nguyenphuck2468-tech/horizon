@@ -209,10 +209,27 @@ fn poll_device(code: &DeviceCode) -> Result<DevicePoll, String> {
 
 /// Why a refresh failed: Ely.by refused the token (sign in again), or could not be asked
 /// (network or server trouble: the sign-in is still good, try later).
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub enum RefreshError {
     Rejected(String),
     Unavailable(String),
+    /// The provider rotated the refresh token, but profile lookup failed afterwards.
+    /// Keep the replacement so a transient profile outage cannot strand the account.
+    UnavailableWithRefresh(String, Option<String>),
+}
+
+impl std::fmt::Debug for RefreshError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Rejected(message) => f.debug_tuple("Rejected").field(message).finish(),
+            Self::Unavailable(message) => f.debug_tuple("Unavailable").field(message).finish(),
+            Self::UnavailableWithRefresh(message, refresh) => f
+                .debug_tuple("UnavailableWithRefresh")
+                .field(message)
+                .field(&refresh.as_ref().map(|_| "<hidden>"))
+                .finish(),
+        }
+    }
 }
 
 pub fn refresh(refresh_token: &str) -> Result<Tokens, RefreshError> {
@@ -235,7 +252,10 @@ pub fn refresh(refresh_token: &str) -> Result<Tokens, RefreshError> {
             error_message(&body, "Ely.by refused the sign-in."),
         ));
     }
-    tokens(status, &body).map_err(RefreshError::Unavailable)
+    let rotated_refresh = string_field(&body, "refresh_token");
+    tokens(status, &body).map_err(|error| {
+        RefreshError::UnavailableWithRefresh(error, rotated_refresh)
+    })
 }
 
 /// A refresh that did not give tokens: only a real refusal (4xx other than "too many requests"
