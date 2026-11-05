@@ -2927,9 +2927,8 @@ fn toctou_validated_snapshot_used_directly_for_player() {
     let mut accounts = Accounts::default();
 
     let (account, secrets) = finish_ms_sign_in(ms_tokens());
-    accounts.update(account.clone());
+    accounts.add(&store, account.clone(), &secrets).unwrap();
     accounts.selected = Some(account.uuid.clone());
-    store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap());
 
     let player = java_player_with(&test_endpoints(), None, &store, &mut accounts).unwrap();
 
@@ -2956,11 +2955,8 @@ fn toctou_microsoft_credential_mutated_to_elyby_during_launch() {
 
     // Setup: valid Microsoft credential
     let (account, ms_secrets) = finish_ms_sign_in(ms_tokens());
-    accounts.update(account.clone());
+    accounts.add(&store, account.clone(), &ms_secrets).unwrap();
     accounts.selected = Some(account.uuid.clone());
-    store
-        .set(&account.uuid, &serde_json::to_string(&ms_secrets).unwrap())
-        .unwrap();
 
     // Setup mutation: after first read of this account, change to Ely.by
     let (_, ely_secrets) = finish_ely_sign_in(ely_tokens());
@@ -3001,11 +2997,8 @@ fn toctou_elyby_credential_mutated_to_microsoft_during_launch() {
 
     // Setup: Ely.by credential
     let (account, ely_secrets) = finish_ely_sign_in(ely_tokens());
-    accounts.update(account.clone());
+    accounts.add(&store, account.clone(), &ely_secrets).unwrap();
     accounts.selected = Some(account.uuid.clone());
-    store
-        .set(&account.uuid, &serde_json::to_string(&ely_secrets).unwrap())
-        .unwrap();
 
     // Setup mutation: after first read, change to Microsoft
     let (_, ms_secrets) = finish_ms_sign_in(ms_tokens());
@@ -3044,11 +3037,8 @@ fn toctou_read_count_verification() {
 
     // Setup: single valid Microsoft account
     let (account, secrets) = finish_ms_sign_in(ms_tokens());
-    accounts.update(account.clone());
+    accounts.add(&store, account.clone(), &secrets).unwrap();
     accounts.selected = Some(account.uuid.clone());
-    store
-        .set(&account.uuid, &serde_json::to_string(&secrets).unwrap())
-        .unwrap();
 
     let initial_reads = store.reads_for_uuid(&account.uuid);
 
@@ -3135,9 +3125,8 @@ fn toctou_exact_validated_token_uuid_provider_ownership_used() {
     let (account, mut secrets) = finish_ms_sign_in(ms_tokens());
     secrets.xuid = Some("test-xuid-12345".to_string());
 
-    accounts.update(account.clone());
+    accounts.add(&store, account.clone(), &secrets).unwrap();
     accounts.selected = Some(account.uuid.clone());
-    store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap());
 
     let player = java_player_with(&test_endpoints(), None, &store, &mut accounts).unwrap();
 
@@ -3169,9 +3158,8 @@ fn elyby_session_is_playable_but_is_not_a_mojang_owner() {
     let store = MemoryStore::default();
     let mut accounts = Accounts::default();
     let (account, secrets) = finish_ely_sign_in(ely_tokens());
-    accounts.update(account.clone());
+    accounts.add(&store, account.clone(), &secrets).unwrap();
     accounts.selected = Some(account.uuid.clone());
-    store.set(&account.uuid, &serde_json::to_string(&secrets).unwrap());
 
     let pass = launch(&test_endpoints(), None, &store, &mut accounts).unwrap();
 
