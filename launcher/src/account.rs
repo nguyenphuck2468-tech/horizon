@@ -1182,7 +1182,8 @@ fn get_pieces(items: &dyn Items, key: &str) -> Result<Option<String>, String> {
 
 #[cfg(any(target_os = "windows", test))]
 fn set_pieces(items: &dyn Items, key: &str, secret: &str) -> Result<(), String> {
-    let before = get_pieces(items, key).ok().flatten();
+    // Without the old value, a partial write cannot be rolled back safely.
+    let before = get_pieces(items, key)?;
     let pieces = split_secret(secret);
     for (n, piece) in pieces.iter().enumerate() {
         if let Err(e) = items.write(&piece_key(key, n), piece) {
