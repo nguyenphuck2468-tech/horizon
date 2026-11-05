@@ -358,6 +358,13 @@ pub(super) fn renew_for_game_with(
     let secrets = read(store, &account.uuid)
         .map_err(|e| Status::failed(&e))?
         .ok_or_else(|| Status::from_secrets(None))?;
+    // The first Ready answer came before this second keychain read. A sign-out, revoked
+    // credential or provider change may have happened in between; only hand off a session
+    // that is still locally ready while this operation lock is held.
+    let current = Status::from_secrets(Some(&secrets));
+    if current.state != State::Ready {
+        return Err(current);
+    }
     // This is still a one-shot handoff: track it with ordinary launch session files so a
     // client that never consumes it cannot leave a live access token on disk indefinitely.
     write_launch_session_file(dir, account, &secrets).map_err(|e| Status::failed(&e))
@@ -403,7 +410,15 @@ pub(super) fn join_server_with(
     }
     let secrets = {
         let _operation = lock(store)?;
-        read(store, &account.uuid)?.ok_or("Sign in with a Minecraft account first.")?
+        let secrets = read(store, &account.uuid)?
+            .ok_or("Sign in with a Minecraft account first.")?;
+        // Recheck the credential read after refresh_account's lock was released. A concurrent
+        // sign-out or rejected refresh must not leave this path using a no-longer-ready token.
+        let current = Status::from_secrets(Some(&secrets));
+        if current.state != State::Ready {
+            return Err(current.message);
+        }
+        secrets
     };
     let body = json!({
         "accessToken": secrets
