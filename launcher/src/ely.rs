@@ -593,6 +593,23 @@ mod tests {
     }
 
     #[test]
+    fn debug_output_redacts_access_and_refresh_tokens() {
+        let tokens = Tokens {
+            access_token: "access-secret-fixture".into(),
+            refresh_token: Some("refresh-secret-fixture".into()),
+            expires_at: 1,
+            profile: Profile {
+                uuid: "11111111111111111111111111111111".into(),
+                name: "ElyPlayer".into(),
+            },
+        };
+        let debug = format!("{tokens:?}");
+        assert!(!debug.contains("access-secret-fixture"));
+        assert!(!debug.contains("refresh-secret-fixture"));
+        assert!(debug.contains("<hidden>"));
+    }
+
+    #[test]
     fn error_message_prefers_the_description() {
         let v: Value =
             serde_json::json!({"error": "invalid_grant", "error_description": "Expired"});
