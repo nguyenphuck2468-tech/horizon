@@ -688,6 +688,23 @@ mod tests {
     }
 
     #[test]
+    fn refresh_error_redacts_a_rotated_refresh_token() {
+        let error = RefreshError::UnavailableWithRefresh(
+            "profile lookup timed out".into(),
+            Some("rotated-refresh-secret".into()),
+        );
+        let debug = format!("{error:?}");
+        assert!(debug.contains("profile lookup timed out"));
+        assert!(debug.contains("<hidden>"));
+        assert!(!debug.contains("rotated-refresh-secret"));
+        assert!(matches!(
+            error,
+            RefreshError::UnavailableWithRefresh(message, Some(token))
+                if message == "profile lookup timed out" && token == "rotated-refresh-secret"
+        ));
+    }
+
+    #[test]
     fn only_a_refusal_ends_the_sign_in() {
         for status in [500, 502, 503, 429, 408] {
             assert!(matches!(
