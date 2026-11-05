@@ -2545,6 +2545,13 @@ fn forced_ely_refresh_does_not_skip_a_fresh_access_token() {
 fn game_session_owner_flag_does_not_follow_elyby_playability() {
     let (ely_account, ely_secrets) = finish_ely_sign_in(ely_tokens());
     let (ms_account, ms_secrets) = finish_ms_sign_in(ms_tokens());
+    let store = MemoryStore::default();
+    store
+        .set(
+            &ely_account.uuid,
+            &serde_json::to_string(&ely_secrets).unwrap(),
+        )
+        .unwrap();
     let path = secrets_file("game-session-owner");
     let game_home = path.parent().unwrap();
 
@@ -2555,6 +2562,7 @@ fn game_session_owner_flag_does_not_follow_elyby_playability() {
             ..Default::default()
         },
         Vec::new(),
+        &store,
     );
     assert!(!ely_session.owner);
     assert!(ely_session.file.is_some());
@@ -2569,6 +2577,7 @@ fn game_session_owner_flag_does_not_follow_elyby_playability() {
             ..Default::default()
         },
         Vec::new(),
+        &store,
     );
     assert!(microsoft_owner.owner);
     remove_secrets_dir(&path);
