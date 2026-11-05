@@ -1092,6 +1092,7 @@
   "Its mods made for {loader} stay in its folder but won't load.": "Các mod làm cho {loader} vẫn ở trong thư mục của nó nhưng sẽ không được tải.",
   "Its mods made for Minecraft {from} stay in its folder; some may not load in {to}.": "Các mod làm cho Minecraft {from} vẫn ở trong thư mục của nó; một số có thể không tải được trong {to}.",
   "Its worlds were saved by Minecraft {from}: {to} upgrades them for good, and can't open them if it is older.": "Các thế giới của nó được lưu bởi Minecraft {from}: {to} nâng cấp chúng vĩnh viễn, và không mở được nếu là bản cũ hơn.",
+  "Java Edition owner required": "Cần tài khoản sở hữu Java Edition",
   "Ely.by account · servers that accept Ely.by": "Tài khoản Ely.by · các máy chủ chấp nhận Ely.by",
   "This build has no configured account provider.": "Bản dựng này không có nhà cung cấp tài khoản nào được cấu hình.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Bản dựng này chưa cấu hình đăng nhập Microsoft. Tài khoản Ely.by vẫn chơi được Horizon Client, nhưng không thể xác nhận quyền sở hữu Minecraft: Java Edition.",
