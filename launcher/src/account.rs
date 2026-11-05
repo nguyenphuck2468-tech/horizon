@@ -2186,7 +2186,20 @@ fn write_launch_session_file_if_current(
     account: &Account,
     secrets: &Secrets,
 ) -> Result<PathBuf, String> {
-    let _operation = session::lock(store)?;
+    write_launch_session_file_if_current_within(store, dir, account, secrets, None)
+}
+
+fn write_launch_session_file_if_current_within(
+    store: &dyn SecretStore,
+    dir: &Path,
+    account: &Account,
+    secrets: &Secrets,
+    timeout: Option<Duration>,
+) -> Result<PathBuf, String> {
+    let _operation = match timeout {
+        Some(timeout) => session::lock_within(store, Some(timeout))?,
+        None => session::lock(store)?,
+    };
     let text = store
         .get(&account.uuid)?
         .ok_or_else(|| "The account was signed out while the game was starting.".to_string())?;
@@ -2659,7 +2672,13 @@ fn account_sessions_until(
             });
             continue;
         };
-        match write_launch_session_file_if_current(store, dir, &account, &secrets) {
+        match write_launch_session_file_if_current_within(
+            store,
+            dir,
+            &account,
+            &secrets,
+            Some(deadline.saturating_duration_since(Instant::now())),
+        ) {
             Ok(file) => {
                 list.push(json!({ "name": account.name, "uuid": account.uuid, "file": file }))
             }
