@@ -690,6 +690,14 @@ fn check_ely(
         }
         // Network or server trouble: keep the sign-in, try again later.
         Err(crate::ely::RefreshError::Unavailable(error)) => Check::NoAnswer(error, secrets),
+        // The refresh endpoint may rotate its refresh token before profile lookup fails.
+        // Persist that replacement even though this attempt cannot safely hand off a session.
+        Err(crate::ely::RefreshError::UnavailableWithRefresh(error, refresh)) => {
+            if let Some(refresh) = refresh {
+                secrets.refresh_token = format!("{ELY_REFRESH_PREFIX}{refresh}");
+            }
+            Check::NoAnswer(error, secrets)
+        }
     }
 }
 
