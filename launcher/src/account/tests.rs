@@ -2485,6 +2485,39 @@ fn forced_ely_refresh_does_not_skip_a_fresh_access_token() {
 }
 
 #[test]
+fn game_session_owner_flag_does_not_follow_elyby_playability() {
+    let (ely_account, ely_secrets) = finish_ely_sign_in(ely_tokens());
+    let (ms_account, ms_secrets) = finish_ms_sign_in(ms_tokens());
+    let path = secrets_file("game-session-owner");
+    let game_home = path.parent().unwrap();
+
+    let ely_session = session_file(
+        game_home,
+        Launch {
+            session: Some((ely_account, ely_secrets)),
+            ..Default::default()
+        },
+        Vec::new(),
+    );
+    assert!(!ely_session.owner);
+    assert!(ely_session.file.is_some());
+    if let Some(file) = ely_session.file {
+        let _ = std::fs::remove_file(file);
+    }
+
+    let microsoft_owner = session_file(
+        game_home,
+        Launch {
+            owner: Some((ms_account, ms_secrets)),
+            ..Default::default()
+        },
+        Vec::new(),
+    );
+    assert!(microsoft_owner.owner);
+    remove_secrets_dir(&path);
+}
+
+#[test]
 fn ely_account_opens_the_gate_and_reports_ready() {
     let (account, secrets) = finish_ely_sign_in(ely_tokens());
     let store = MemoryStore::default();
