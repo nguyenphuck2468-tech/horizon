@@ -2384,6 +2384,32 @@ fn ely_sign_in_plays_but_never_claims_minecraft_ownership() {
 }
 
 #[test]
+fn ely_refresh_cannot_replace_the_saved_profile_uuid() {
+    let (account, secrets) = finish_ely_sign_in(ely_tokens());
+    let mut tokens = ely_tokens();
+    tokens.access_token = "rotated-access".into();
+    tokens.refresh_token = Some("rotated-refresh".into());
+    tokens.profile.uuid = "22222222222222222222222222222222".into();
+    tokens.profile.name = "DifferentProfile".into();
+
+    let Check::NoAnswer(error, refreshed) = check_ely_tokens(&account, secrets, tokens) else {
+        panic!("an Ely.by refresh must not replace the saved account identity");
+    };
+
+    assert_eq!(error, OTHER_PROFILE);
+    assert!(refreshed.sign_in_required);
+    assert!(is_ely(&refreshed));
+    assert_eq!(
+        refreshed.refresh_token,
+        format!("{ELY_REFRESH_PREFIX}rotated-refresh")
+    );
+    assert_eq!(
+        refreshed.minecraft_token,
+        format!("{ELY_ACCESS_PREFIX}rotated-access")
+    );
+}
+
+#[test]
 fn ely_account_opens_the_gate_and_reports_ready() {
     let (account, secrets) = finish_ely_sign_in(ely_tokens());
     let store = MemoryStore::default();
