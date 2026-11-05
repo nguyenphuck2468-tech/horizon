@@ -2164,6 +2164,31 @@ fn write_launch_session_file(
 
 /// Deletes the files of `unread` older than `life` (the game would refuse them) and forgets
 /// those gone (read).
+/// Write a token-bearing session file only if the exact credential snapshot is still
+/// stored. The check and file creation share the account-operation lock, closing the gap between
+/// a successful refresh/ownership check and handing the session to a newly starting client.
+fn write_launch_session_file_if_current(
+    store: &dyn SecretStore,
+    dir: &Path,
+    account: &Account,
+    secrets: &Secrets,
+) -> Result<PathBuf, String> {
+    let _operation = session::lock(store)?;
+    let text = store
+        .get(&account.uuid)?
+        .ok_or_else(|| "The account was signed out while the game was starting.".to_string())?;
+    let current: Secrets = serde_json::from_str(&text)
+        .map_err(|_| "The saved sign-in is damaged.".to_string())?;
+    let expected = serde_json::to_string(secrets)
+        .map_err(|_| "Could not validate the sign-in for this launch.".to_string())?;
+    let actual = serde_json::to_string(&current)
+        .map_err(|_| "Could not validate the saved sign-in.".to_string())?;
+    if actual != expected {
+        return Err("The account changed while the game was starting. Start it again.".into());
+    }
+    write_launch_session_file(dir, account, secrets)
+}
+
 fn reap(unread: &mut Vec<PathBuf>, life: Duration) {
     unread.retain(|path| {
         let waiting = std::fs::metadata(path)
@@ -2479,25 +2504,14 @@ fn session_file(
         ..GameSession::default()
     };
     if let Some((account, secrets)) = pass.session {
-        let handoff = (|| {
-            // launch() checked this snapshot earlier. Re-read it under the same operation lock
-            // immediately before writing the token-bearing session file: sign-out or reauth in
-            // another process must not hand the old credential to a newly starting client.
-            let _operation = session::lock(store)?;
-            let text = store
-                .get(&account.uuid)?
-                .ok_or_else(|| "The account was signed out while the game was starting.".to_string())?;
-            let current: Secrets = serde_json::from_str(&text)
-                .map_err(|_| "The saved sign-in is damaged.".to_string())?;
-            let expected = serde_json::to_string(&secrets)
-                .map_err(|_| "Could not validate the sign-in for this launch.".to_string())?;
-            let actual = serde_json::to_string(&current)
-                .map_err(|_| "Could not validate the saved sign-in.".to_string())?;
-            if actual != expected {
-                return Err("The account changed while the game was starting. Start it again.".into());
-            }
-            write_launch_session_file(&game_home.join("sessions"), &account, &secrets)
-        })();
+        // launch() checked this snapshot earlier; confirm it is still current immediately
+        // before handing the token to the game.
+        let handoff = write_launch_session_file_if_current(
+            store,
+            &game_home.join("sessions"),
+            &account,
+            &secrets,
+        );
         match handoff {
             Ok(file) => out.file = Some(file),
             Err(e) => out.offline = Some(e),
@@ -2631,7 +2645,7 @@ fn account_sessions_until(
             });
             continue;
         };
-        match write_launch_session_file(dir, &account, &secrets) {
+        match write_launch_session_file_if_current(store, dir, &account, &secrets) {
             Ok(file) => {
                 list.push(json!({ "name": account.name, "uuid": account.uuid, "file": file }))
             }
