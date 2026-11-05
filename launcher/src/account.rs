@@ -1906,11 +1906,11 @@ pub fn take_unsaved() -> Option<String> {
     UNSAVED.lock().ok()?.take()
 }
 
-/// The owner gate: the game starts only while an account in the launcher owns Minecraft: Java
-/// Edition. The accounts are asked again, the selected one first, until one owns it; each keeps
-/// the answer in the keychain. An account that gets no answer (no network) keeps its last one, so
-/// being offline never blocks a player who passed before, while "doesn't own" blocks at once.
-/// The caller saves `accounts` (renewed names and skins).
+/// The account gate: a Horizon-playable account lets the selected player start; a
+/// Microsoft account confirmed by Minecraft services is separately required for Mojang downloads
+/// and Java Edition. Check the selected account first, then keep looking for a real owner even
+/// after an Ely.by account has supplied the Horizon session. An account with no answer keeps its
+/// last play entitlement for Horizon. The caller saves `accounts` (renewed names and skins).
 pub fn launch(
     ep: &Endpoints,
     client_id: Option<&str>,
@@ -1921,9 +1921,11 @@ pub fn launch(
     let mut order = accounts.accounts.clone();
     order.sort_by_key(|a| Some(&a.uuid) != selected.as_ref());
     let mut pass = Launch::default();
-    let mut owned = false;
+    let mut playable = false;
     for account in order {
-        if owned {
+        // A playable Ely.by session is not a Mojang owner. Keep searching for a Microsoft
+        // owner, while preserving the selected account's independent Horizon session.
+        if pass.owner.is_some() {
             break;
         }
         let plays = Some(&account.uuid) == selected.as_ref();
@@ -1959,7 +1961,7 @@ pub fn launch(
             Check::DoesNot(secrets) => (Some(DOES_NOT_OWN.to_string()), secrets),
             Check::NoAnswer(e, secrets) => (Some(e), secrets),
         };
-        owned = secrets.plays();
+        playable |= secrets.plays();
         if plays {
             pass.offline = said;
         }
@@ -1981,7 +1983,11 @@ pub fn launch(
             }
         }
     }
-    if owned { Ok(pass) } else { Err(NoOwner) }
+    if playable || pass.owner.is_some() {
+        Ok(pass)
+    } else {
+        Err(NoOwner)
+    }
 }
 
 /// The owner gate before the game starts. With the window's hidden developer option
@@ -2581,9 +2587,11 @@ fn java_player_with(
     // Use the validated credential snapshot directly from Launch.
     // This eliminates the TOCTOU window: the exact credentials validated by the ownership
     // gate are used to construct the Player, with no second keychain read.
+    // Java Edition must use a confirmed Microsoft owner, not the selected Horizon
+    // session (which may legitimately be Ely.by).
     let (account, secrets) = pass
-        .session
-        .or(pass.owner)
+        .owner
+        .or(pass.session)
         .ok_or_else(|| NoOwner.to_string())?;
 
     // Validate provider on the validated snapshot.
