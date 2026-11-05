@@ -2155,12 +2155,15 @@ fn write_launch_session_file(
 ) -> Result<PathBuf, String> {
     let path = write_session_file(dir, account, secrets)?;
     let Ok(mut unread) = UNREAD.lock() else {
-        return Ok(path);
+        // Never hand a token file to a client if we cannot track its expiry.
+        let _ = std::fs::remove_file(&path);
+        return Err("Could not track the game session file for cleanup.".into());
     };
     if unread.is_empty() {
         // One reaper while files wait; it ends with the list (under its lock, so a file added
-        // as it ends starts the next).
-        let _ = std::thread::Builder::new()
+        // as it ends starts the next). If the worker cannot start, remove the token file rather
+        // than leave an untracked credential on disk.
+        if let Err(error) = std::thread::Builder::new()
             .name("Session files".into())
             .spawn(|| loop {
                 std::thread::sleep(Duration::from_secs(5));
@@ -2171,7 +2174,12 @@ fn write_launch_session_file(
                 if unread.is_empty() {
                     return;
                 }
-            });
+            })
+        {
+            drop(unread);
+            let _ = std::fs::remove_file(&path);
+            return Err(format!("Could not start session-file cleanup: {error}"));
+        }
     }
     unread.push(path.clone());
     Ok(path)
