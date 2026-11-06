@@ -661,18 +661,19 @@ mod tests {
     #[test]
     fn empty_runtime_client_id_falls_back_to_the_embedded_public_id() {
         assert_eq!(
-            choose_client_id(Some("  ".into()), Some(" embedded-id ")),
+            choose_client_id(Some("  "), Some(" embedded-id "), "built-in-id"),
             Some("embedded-id".into())
         );
         assert_eq!(
-            choose_client_id(Some(" runtime-id ".into()), Some("embedded-id")),
+            choose_client_id(Some(" runtime-id "), Some("embedded-id"), "built-in-id"),
             Some("runtime-id".into())
         );
         assert_eq!(
-            choose_client_id(None, Some("embedded-id")),
+            choose_client_id(None, None, "embedded-id"),
             Some("embedded-id".into())
         );
-        assert_eq!(choose_client_id(Some(String::new()), None), None);
+        // An empty built-in id (no embedded default) yields nothing to use.
+        assert_eq!(choose_client_id(Some("  "), None, ""), None);
     }
 
     #[test]

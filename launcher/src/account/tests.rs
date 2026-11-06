@@ -1227,9 +1227,12 @@ fn session_files_are_private_and_complete() {
 
 #[test]
 fn client_id_is_configuration() {
-    // The run-time variable overrides; empty means not configured.
+    // The run-time variable overrides the built-in default; whitespace falls through to it.
     std::env::set_var("HORIZON_MSA_CLIENT_ID", " ");
-    assert_eq!(client_id(), None);
+    assert_eq!(
+        client_id().as_deref(),
+        Some("36132831-5d53-436d-8730-1c7904bc84f6")
+    );
     std::env::set_var(
         "HORIZON_MSA_CLIENT_ID",
         "00000000-1111-2222-3333-444444444444",
@@ -1239,6 +1242,10 @@ fn client_id_is_configuration() {
         Some("00000000-1111-2222-3333-444444444444")
     );
     std::env::remove_var("HORIZON_MSA_CLIENT_ID");
+    assert_eq!(
+        client_id().as_deref(),
+        Some("36132831-5d53-436d-8730-1c7904bc84f6")
+    );
 }
 
 #[test]
