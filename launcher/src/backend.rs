@@ -9,9 +9,10 @@ use std::process::{Child, ChildStdin, Command, Stdio};
 use std::sync::mpsc::Sender;
 use std::sync::{Arc, Mutex};
 
-/// The Horizon game's releases, the mixin registry and links.json: what upstream ships. A fork
-/// keeps updating its launcher from its own releases ([`LAUNCHER_REPO`]).
-pub const REPO: &str = "horizon-rust/horizon";
+/// The Horizon game's releases, the mixin registry and links.json: this repository
+/// publishes them ([`game-nightly.yml`]), so the game and the launcher both update
+/// from the fork.
+pub const REPO: &str = "nguyenphuck2468-tech/horizon";
 /// The launcher's own releases, published by this repo: the launcher self-updates from them
 /// ([`launcher_releases_in`]) while the game stays on [`REPO`].
 pub const LAUNCHER_REPO: &str = "nguyenphuck2468-tech/horizon";
