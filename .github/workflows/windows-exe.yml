@@ -1,9 +1,14 @@
 name: windows-exe
-# Builds horizon-launcher.exe for Windows x64 (the launcher's own release train is launcher.yml, which
-# publishes to the upstream project; this one only builds a downloadable exe for this repository).
+# Builds horizon-launcher.exe for Windows x64. The game's releases stay on upstream's
+# launcher.yml (horizon-rust/horizon); this workflow only serves this repository's launcher
+# builds and, for a `launcher@X.Y.Z` tag, the release its launcher self-updates from.
 #
-#   gh workflow run windows-exe                      # build, keep the exe as a run artifact
-#   git tag exe-v1.0.0 && git push origin exe-v1.0.0 # build and publish a GitHub release with the exe
+#   gh workflow run windows-exe                          # build, keep the exe as a run artifact
+#   git tag launcher@0.2.1 && git push origin launcher@0.2.1
+#                                                        # build and publish a release the
+#                                                        # launcher's updater recognizes:
+#                                                        # tag launcher@X.Y.Z, the platform's
+#                                                        # zip, and signed SHA256SUMS(.sig)
 #
 # Optional repository variables, compiled into the exe (docs/elyby-account.md, docs/microsoft-account.md):
 #   HORIZON_ELY_CLIENT_ID   Ely.by public client ID (Device Code sign-in)
@@ -19,13 +24,7 @@ on:
         default: false
   push:
     branches: [main, horizon-repo-review-plan-abfc6]
-    paths:
-      - 'launcher/**'
-      - 'crates/**'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
-      - '.github/workflows/windows-exe.yml'
-    tags: ['exe-v*']
+    tags: ['launcher@*']
   pull_request:
     paths:
       - '.github/workflows/windows-exe.yml'
@@ -58,6 +57,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Release variables from the tag
+        # A launcher@X.Y.Z tag builds its own release: the version and tag are compiled in
+        # (backend.rs VERSION and own_tag), no version-bump commits.
+        if: startsWith(github.ref, 'refs/tags/launcher@')
+        run: |
+          echo "HORIZON_LAUNCHER_TAG=$GITHUB_REF_NAME" >> "$GITHUB_ENV"
+          echo "HORIZON_LAUNCHER_VERSION=${GITHUB_REF_NAME#launcher@}" >> "$GITHUB_ENV"
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
@@ -87,24 +93,48 @@ jobs:
           retention-days: 30
 
   release:
-    # Only a pushed exe-v* tag publishes anything.
-    if: startsWith(github.ref, 'refs/tags/exe-v')
+    # Only a pushed launcher@* tag publishes anything: the only tag spelling the launcher's
+    # updater recognizes (backend::launcher_version).
+    if: startsWith(github.ref, 'refs/tags/launcher@')
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: write
+    defaults:
+      run:
+        shell: bash
     steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
           name: horizon-launcher-windows-x64
           path: out
-      - name: Publish
+      - name: Zip the launcher the updater expects (backend::PLATFORMS)
+        run: (cd out && zip horizon-launcher-windows-x64.zip horizon-launcher.exe && unzip -t horizon-launcher-windows-x64.zip)
+      - name: Sign the checksums (SHA256SUMS, SHA256SUMS.sig)
+        env:
+          TAG: ${{ github.ref_name }}
+          # base64 PKCS#8 Ed25519, the only role of the key: no code runs with it
+          # but tools/ci/sign_release.sh (docs/release-flow.md).
+          RELEASE_SIGNING_KEY: ${{ secrets.RELEASE_SIGNING_KEY }}
+        run: bash tools/ci/sign_release.sh "$TAG" out/horizon-launcher-windows-x64.zip
+      - uses: dtolnay/rust-toolchain@stable
+      - name: The signature, checked as launchers check it
+        env:
+          TAG: ${{ github.ref_name }}
+        run: cargo run --locked --quiet -p horizon-release-sign -- verify --tag "$TAG" out
+      # Never marked latest: upstream's own releases stay the repository's latest.
+      - name: Publish ${{ github.ref_name }}
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
-          gh release create "$TAG" out/* \
+          gh release create "$TAG" --target "$GITHUB_SHA" \
             --repo "$GITHUB_REPOSITORY" \
             --title "Horizon Launcher $TAG" \
-            --notes "Windows x64 build of the launcher. SHA-256 of each file is in SHA256SUMS.txt." \
-            --prerelease
+            --notes "This fork's Windows x64 launcher ($TAG). Its SHA256SUMS is signed; the launcher verifies it against the key built into it before it replaces itself." \
+            --latest=false \
+            out/horizon-launcher-windows-x64.zip out/SHA256SUMS out/SHA256SUMS.sig

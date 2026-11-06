@@ -3,3 +3,6 @@
 # The private keys exist only as the RELEASE_SIGNING_KEY secret(s) of the repository's `release` environment.
 # Changing this file needs Ludovic's review (.github/CODEOWNERS).
 MU4oiIQcCxkZvbwSjjXs7SySCuM6ywRQ3nGaJYZG0gw=
+# Signed key of this fork (release job of .github/workflows/windows-exe.yml): it signs only the
+# fork's own launcher releases there, never the game's (signed on horizon-rust/horizon).
+9Cc/GAOZsMlocIwykn4s/JxLAuzLkRU84pArMGuSbk4=
