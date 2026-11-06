@@ -9,7 +9,12 @@ use std::process::{Child, ChildStdin, Command, Stdio};
 use std::sync::mpsc::Sender;
 use std::sync::{Arc, Mutex};
 
+/// The Horizon game's releases, the mixin registry and links.json: what upstream ships. A fork
+/// keeps updating its launcher from its own releases ([`LAUNCHER_REPO`]).
 pub const REPO: &str = "horizon-rust/horizon";
+/// The launcher's own releases, published by this repo: the launcher self-updates from them
+/// ([`launcher_releases_in`]) while the game stays on [`REPO`].
+pub const LAUNCHER_REPO: &str = "nguyenphuck2468-tech/horizon";
 pub const README_URL: &str = "https://github.com/horizon-rust/horizon/blob/main/launcher/README.md";
 /// The players' page on connecting an AI agent (the website's docs/agents.md).
 pub const AGENT_DOCS_URL: &str = "https://playhorizon.dev/docs/agents";
@@ -316,11 +321,20 @@ pub fn compare_versions(a: &str, b: &str) -> std::cmp::Ordering {
     release_order(a).cmp(&release_order(b))
 }
 
-/// Every published release of the repository, both kinds, as GitHub's JSON (kept on disk with its
-/// ETag, and read through Kira's mirror past GitHub's rate limit: [`crate::github`]).
+/// Every published release of the game repository ([`REPO`]), as GitHub's JSON (kept on disk with
+/// its ETag, and read through Kira's mirror past GitHub's rate limit: [`crate::github`]).
 fn release_list() -> Result<serde_json::Value, String> {
     crate::github::json(&format!(
         "https://api.github.com/repos/{REPO}/releases?per_page=100"
+    ))
+}
+
+/// The launcher's own releases ([`LAUNCHER_REPO`]), as GitHub's JSON (kept on disk like the game's
+/// list, read again within [`crate::github::FRESH_SECS`]). Horizon's mirror serves only Horizon's
+/// repository reads, so a fork's list always comes from GitHub itself.
+fn launcher_release_list() -> Result<serde_json::Value, String> {
+    crate::github::json(&format!(
+        "https://api.github.com/repos/{LAUNCHER_REPO}/releases?per_page=100"
     ))
 }
 
@@ -398,10 +412,10 @@ pub(crate) fn game_releases(list: &serde_json::Value) -> Vec<Release> {
     out
 }
 
-/// The launcher releases in `list` (the newest 100 releases). Game releases come out several times
-/// a day, so the newest launcher release can be older than all of those: then the newest
-/// `launcher@` and `launcher-v` tags are looked up one by one (a draft's tag is skipped: it has no
-/// public release).
+/// The launcher releases in the launcher's own list ([`LAUNCHER_REPO`]), the newest 100 releases.
+/// If the newest launcher release falls out of that list (a fork with many other releases), the
+/// newest `launcher@` and `launcher-v` tags are looked up one by one (a draft's tag is skipped: it
+/// has no public release).
 fn launcher_releases_in(list: &serde_json::Value) -> Vec<Release> {
     launcher_releases_in_with(list, |url| crate::github::json(&url))
 }
@@ -414,7 +428,7 @@ fn launcher_releases_in_with(
     if found.iter().any(|r| r.asset.is_some()) {
         return found;
     }
-    let api = format!("https://api.github.com/repos/{REPO}");
+    let api = format!("https://api.github.com/repos/{LAUNCHER_REPO}");
     let mut tags = Vec::new();
     for prefix in [LAUNCHER_TAG_PREFIX, OLD_LAUNCHER_TAG_PREFIX] {
         // Every `launcher@` tag is newer than every `launcher-v` one: those only when there is none.
@@ -2641,17 +2655,25 @@ fn launcher_update_from(releases: &[Release], own: &str) -> Option<Release> {
         .cloned()
 }
 
-/// Load the game's release list and both update kinds from the same GitHub response.
-/// Publish the game releases before any fallback lookups for older launcher tags, so those
-/// lookups cannot hold up the release pages or opening animation. A list error reaches both.
+/// Load the game's release list from [`REPO`] and the launcher's own from [`LAUNCHER_REPO`], and
+/// parse both update kinds from the two responses. Publish the game releases before the launcher
+/// list is read, so a slow or failing launcher read cannot hold up the release pages or the
+/// opening animation. A list error reaches both kinds.
 pub fn releases_and_updates(
     on_releases: impl FnOnce(Result<Vec<Release>, String>),
 ) -> Result<Updates, String> {
-    releases_and_updates_with(release_list, installed, launcher_releases_in, on_releases)
+    releases_and_updates_with(
+        release_list,
+        launcher_release_list,
+        installed,
+        launcher_releases_in,
+        on_releases,
+    )
 }
 
 fn releases_and_updates_with(
     load: impl FnOnce() -> Result<serde_json::Value, String>,
+    launcher_list: impl FnOnce() -> Result<serde_json::Value, String>,
     installed: impl FnOnce() -> Vec<String>,
     launchers: impl FnOnce(&serde_json::Value) -> Vec<Release>,
     on_releases: impl FnOnce(Result<Vec<Release>, String>),
@@ -2666,9 +2688,10 @@ fn releases_and_updates_with(
     let releases = game_releases(&list);
     let horizon = horizon_update(&installable_updates(&releases), &installed());
     on_releases(Ok(releases));
+    let own = launcher_list()?;
     Ok(Updates {
         horizon,
-        launcher: launcher_update(&launchers(&list)),
+        launcher: launcher_update(&launchers(&own)),
     })
 }
 
