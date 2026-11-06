@@ -910,7 +910,13 @@ pub fn button(id: SharedString, label: SharedString, kind: Kind, t: &Theme) -> S
             .text_color(white(ink::BODY))
             .hover(|s| s.bg(white(0.06)).text_color(white(ink::FULL))),
     };
-    keyboard(track_hover(d.child(label), id), t)
+    let d = if id == "sign-in-elyby" {
+        let d = d.child(crate::elyby::logo(16.));
+        d.child(label)
+    } else {
+        d.child(label)
+    };
+    keyboard(track_hover(d, id), t)
 }
 
 /// A segmented control in the glass look (the server dialog's difficulty): white at 4 % round

@@ -14,6 +14,7 @@ mod console_page;
 mod cull;
 mod datapacks_page;
 mod dev_options;
+mod elyby;
 mod export_page;
 mod frame;
 mod game_tools;
@@ -2140,15 +2141,18 @@ fn button(
         Kind::Ghost => base.text_color(t.muted).hover(move |s| s.text_color(t.ink)),
     };
     // The label sits on the block's face, above its lip; pressing pushes it down.
-    let base = base.child(
-        div()
-            .relative()
-            .flex()
-            .items_center()
-            .gap(px(8.))
-            .pb(px(if kind == Kind::Ghost { 0. } else { 2. }))
-            .child(label),
-    );
+    let inner = div()
+        .relative()
+        .flex()
+        .items_center()
+        .gap(px(8.))
+        .pb(px(if kind == Kind::Ghost { 0. } else { 2. }));
+    let inner = if id == "sign-in-elyby" {
+        inner.child(crate::elyby::logo(16.))
+    } else {
+        inner
+    };
+    let base = base.child(inner.child(label));
     keyboard(track_hover(base, id), &t).active(|s| s.opacity(theme::PRESSED).top(px(1.)))
 }
 

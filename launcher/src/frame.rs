@@ -658,12 +658,14 @@ impl Launcher {
                     .id("topbar-sign-in-elyby")
                     .flex()
                     .items_center()
+                    .gap(px(10.))
                     .h(px(44.))
                     .px(px(16.))
                     .rounded(px(radius::ROW))
                     .bg(white(0.08))
                     .hover(|s| s.bg(white(0.11)))
                     .cursor_pointer()
+                    .child(elyby::logo(16.))
                     .child(
                         ui::text(14., FontWeight::MEDIUM, ink::FULL)
                             .child(tr("Sign in with Ely.by")),

@@ -338,6 +338,7 @@ impl Launcher {
                             .flex()
                             .items_center()
                             .justify_center()
+                            .gap(px(10.))
                             .h(px(48.))
                             .w_full()
                             .mt(px(8.))
@@ -351,6 +352,7 @@ impl Launcher {
                             .text_size(px(15.))
                             .font_weight(FontWeight::SEMIBOLD)
                             .text_color(white(ink::FULL))
+                            .child(elyby::logo(18.))
                             .child(tr("Sign in with Ely.by")),
                         &t,
                     )

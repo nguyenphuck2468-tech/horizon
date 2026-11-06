@@ -203,7 +203,67 @@ fn profile_face_with(
             }
         }
     }
+    // No Mojang skin: an Ely.by account's skin comes from Ely's own skins system
+    // (`skinsystem.ely.by/skins/<nickname>.png`, or its textures JSON when the skin
+    // moved to ely.by storage). Only that host is asked, never an arbitrary URL.
+    if crate::account::is_ely_account(&account.uuid) {
+        if let Some(name) = account_name_for_ely(account) {
+            let ely_url = format!("https://skinsystem.ely.by/skins/{}.png", name);
+            let file = cache.join(format!("{:x}.png", Sha1::digest(ely_url.as_bytes())));
+            if let Some(face) = std::fs::read(&file)
+                .ok()
+                .and_then(|png| profile_pixels(&png))
+            {
+                return Some(face);
+            }
+            if let Some(png) = fetch(&ely_url) {
+                if let Some(face) = profile_pixels(&png) {
+                    if std::fs::create_dir_all(cache).is_ok() {
+                        let _ = std::fs::write(&file, png);
+                    }
+                    return Some(face);
+                }
+            }
+            // The /skins endpoint may 404 while the textures JSON still lists a storage URL.
+            let textures_url = format!("https://skinsystem.ely.by/textures/{}", name);
+            if let Some(body) = fetch(&textures_url) {
+                if let Some(storage_url) = serde_json::from_slice::<serde_json::Value>(&body)
+                    .ok()
+                    .and_then(|v| v["SKIN"]["url"].as_str().map(|s| s.to_owned()))
+                {
+                    let storage_file =
+                        cache.join(format!("{:x}.png", Sha1::digest(storage_url.as_bytes())));
+                    if let Some(face) = std::fs::read(&storage_file)
+                        .ok()
+                        .and_then(|png| profile_pixels(&png))
+                    {
+                        return Some(face);
+                    }
+                    if let Some(png) = fetch(&storage_url) {
+                        if let Some(face) = profile_pixels(&png) {
+                            if std::fs::create_dir_all(cache).is_ok() {
+                                let _ = std::fs::write(storage_file, png);
+                            }
+                            return Some(face);
+                        }
+                    }
+                }
+            }
+        }
+    }
     default_face(resources, &account.uuid)
+}
+
+fn account_name_for_ely(account: &crate::account::Account) -> Option<String> {
+    // Ely.by nicknames are Minecraft names: 3..16 word characters, as `parse_profile` checks.
+    let name = account.name.trim();
+    if (3..=16).contains(&name.len())
+        && name.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'_')
+    {
+        Some(name.to_owned())
+    } else {
+        None
+    }
 }
 
 #[cfg(test)]
