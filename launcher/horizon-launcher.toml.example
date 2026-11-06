@@ -1,0 +1,11 @@
+# Horizon Launcher configuration
+# Copy this file to `horizon-launcher.toml` next to the executable and fill in your IDs.
+#
+# These are public OAuth client IDs, not secrets. It is safe to commit them
+# to a public repository if they belong to your own registered applications.
+
+# Microsoft Azure App (client) ID — register at https://portal.azure.com
+HORIZON_MSA_CLIENT_ID = ""
+
+# Ely.by public client ID — register at https://account.ely.by/dev/applications/new
+HORIZON_ELY_CLIENT_ID = ""

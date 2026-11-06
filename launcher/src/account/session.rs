@@ -52,6 +52,8 @@ pub enum State {
 #[derive(Clone, Debug, serde::Serialize)]
 pub struct Status {
     pub state: State,
+    /// Last confirmed Minecraft: Java Edition ownership; Ely.by playability is separate.
+    pub owns_minecraft: bool,
     pub expires_at: Option<u64>,
     pub message: String,
 }
@@ -76,6 +78,7 @@ impl Status {
             } else {
                 State::Retry
             },
+            owns_minecraft: false,
             expires_at: None,
             message: message.into(),
         }
@@ -91,6 +94,7 @@ impl Status {
         };
         let mut status = Self {
             state,
+            owns_minecraft: secrets.is_some_and(|s| s.owns_minecraft() && !s.sign_in_required),
             expires_at: secrets.map(|s| s.minecraft_expires_at),
             message: String::new(),
         };
@@ -280,7 +284,7 @@ pub(super) fn refresh_account(
             serde_json::to_string(&secrets).map_err(|_| "Could not read the saved sign-in.")?;
         let (mut status, secrets) =
             match check_with(ep, client_id, account, secrets, true, progress) {
-                Check::Owns(renewed, s) => {
+                Check::Confirmed(renewed, s) => {
                     // A new name or skin goes to accounts.json, as launch() saves it, so the
                     // row and its profile head follow the refresh, not the next Play.
                     let mut saved = Accounts::load_from(accounts);
@@ -354,7 +358,16 @@ pub(super) fn renew_for_game_with(
     let secrets = read(store, &account.uuid)
         .map_err(|e| Status::failed(&e))?
         .ok_or_else(|| Status::from_secrets(None))?;
-    write_session_file(dir, account, &secrets).map_err(|e| Status::failed(&e))
+    // The first Ready answer came before this second keychain read. A sign-out, revoked
+    // credential or provider change may have happened in between; only hand off a session
+    // that is still locally ready while this operation lock is held.
+    let current = Status::from_secrets(Some(&secrets));
+    if current.state != State::Ready {
+        return Err(current);
+    }
+    // This is still a one-shot handoff: track it with ordinary launch session files so a
+    // client that never consumes it cannot leave a live access token on disk indefinitely.
+    write_launch_session_file(dir, account, &secrets).map_err(|e| Status::failed(&e))
 }
 
 /// Mojang's session server: what an online-mode server asks to check that a player is who they
@@ -397,7 +410,15 @@ pub(super) fn join_server_with(
     }
     let secrets = {
         let _operation = lock(store)?;
-        read(store, &account.uuid)?.ok_or("Sign in with a Minecraft account first.")?
+        let secrets =
+            read(store, &account.uuid)?.ok_or("Sign in with a Minecraft account first.")?;
+        // Recheck the credential read after refresh_account's lock was released. A concurrent
+        // sign-out or rejected refresh must not leave this path using a no-longer-ready token.
+        let current = Status::from_secrets(Some(&secrets));
+        if current.state != State::Ready {
+            return Err(current.message);
+        }
+        secrets
     };
     let body = json!({
         "accessToken": secrets
@@ -407,23 +428,25 @@ pub(super) fn join_server_with(
         "selectedProfile": account.uuid,
         "serverId": server_id,
     });
-    let session = if super::is_ely(&secrets) {
-        ELY_SESSION_SERVER
+    let (session, path, service) = if super::is_ely(&secrets) {
+        (
+            ELY_SESSION_SERVER,
+            "/session/join",
+            "Ely.by's session server",
+        )
     } else {
-        session
+        (
+            session,
+            "/session/minecraft/join",
+            "Mojang's session server",
+        )
     };
-    let url = if super::is_ely(&secrets) {
-        format!("{session}/session/join")
-    } else {
-        format!("{session}/session/minecraft/join")
-    };
-    match send(
-        request_to("POST", &url),
-        Some(Body::Json(body)),
-        "Mojang's session server",
-    )? {
+    let url = format!("{session}{path}");
+    match send(request_to("POST", &url), Some(Body::Json(body)), service)? {
         (200..=299, _) => Ok(()),
-        (403, _) => Err("Mojang could not confirm your account. Sign in again and retry.".into()),
-        _ => Err("Mojang's session server is not answering. Try again later.".into()),
+        (403, _) => Err(format!(
+            "{service} could not confirm your account. Sign in again and retry."
+        )),
+        _ => Err(format!("{service} is not answering. Try again later.")),
     }
 }

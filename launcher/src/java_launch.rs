@@ -20,6 +20,12 @@ pub struct Player {
     pub uuid: String,
     pub token: String,
     pub xuid: String,
+    /// Which service signed the token in. Mojang's game takes `--userType`; it only ever saw
+    /// what Mojang's launcher gives (`msa`, or `legacy`/`mojang` for old sign-ins). An Ely.by
+    /// token is neither: the Java game cannot check it with Mojang, so a Java instance must not
+    /// be started with one (see `account::java_player`). Horizon Client reads its session file
+    /// instead, where `account::write_session_file` says `elyby`.
+    pub elyby: bool,
 }
 
 impl std::fmt::Debug for Player {
@@ -370,6 +376,11 @@ pub fn command(version: &Value, launch: &Launch) -> Result<Command, String> {
     let game_assets = game_assets(version, launch.minecraft, launch.game_dir)?;
     let path = |p: &Path| p.to_string_lossy().into_owned();
     let p = launch.player;
+    // `${user_type}`: never pretend an Ely.by sign-in is a Microsoft one (E1.0.1). Mojang's game
+    // only ever saw what Mojang's launcher gives (`msa`). `account::java_player` refuses to hand
+    // an Ely.by token to a Java instance at all, so this branch is defense in depth: should one
+    // ever reach here, it is not labelled as a Microsoft purchase.
+    let user_type = if p.elyby { "elyby" } else { "msa" };
     let vars: HashMap<&str, String> = HashMap::from([
         ("auth_player_name", p.name.clone()),
         ("auth_uuid", p.uuid.clone()),
@@ -377,7 +388,7 @@ pub fn command(version: &Value, launch: &Launch) -> Result<Command, String> {
         ("auth_session", format!("token:{}:{}", p.token, p.uuid)),
         ("auth_xuid", p.xuid.clone()),
         ("clientid", String::new()),
-        ("user_type", "msa".into()),
+        ("user_type", user_type.into()),
         ("user_properties", "{}".into()),
         ("version_name", id.to_string()),
         (

@@ -26,10 +26,10 @@ impl Launcher {
     /// Opens the screen and starts the sign-in on it.
     pub(crate) fn sign_in_to_play(&mut self) {
         self.owner_screen_open = true;
+        // This screen is specifically for Java Edition ownership. Ely.by can authenticate the
+        // Horizon Client, but it cannot satisfy the Microsoft/Mojang owner check.
         if account::client_id().is_some() {
             self.start_sign_in();
-        } else {
-            self.start_ely_sign_in();
         }
     }
 
@@ -46,11 +46,14 @@ impl Launcher {
     pub(crate) fn owner_screen(&mut self, cx: &mut Context<Self>) -> Stateful<Div> {
         let t = self.theme;
         let n = t.night;
-        let configured = account::client_id().is_some() || account::ely_configured();
+        // Ely.by is a valid Horizon Client provider, not an owner for this screen.
+        let configured = account::client_id().is_some();
         // The screenshot preview shows a code without asking Microsoft for one.
         let state = match &self.sign_in_state {
             _ if sign_in_preview() => Shown::Code("https://www.microsoft.com/link", "K7Q-4MXR"),
-            _ if !configured => Shown::Error(tr("This build has no configured account provider.")),
+            _ if !configured => Shown::Error(tr(
+                "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.",
+            )),
             Some(SignInState::Starting) => Shown::Starting("Asking Microsoft…"),
             Some(SignInState::Working(phase)) => Shown::Starting(phase.label()),
             Some(SignInState::Code(code)) => Shown::Code(&code.verification_uri, &code.user_code),
@@ -78,15 +81,19 @@ impl Launcher {
             .child(
                 shell::text(theme::night::TITLE, shell::c(n.ink))
                     .mb(px(4.))
-                    .child(tr("Sign in to play").to_string()),
+                    .child(tr("Java Edition owner required").to_string()),
             )
             .child(line(
-                "Horizon needs a Microsoft account that owns Minecraft: Java Edition, like other launchers.",
+                "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.",
                 n.ink_soft,
             ))
             .child(line(
-                "No Minecraft install needed: Horizon downloads it from Mojang for your account.",
+                "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.",
                 n.ink_soft,
+            ))
+            .child(line(
+                "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.",
+                n.muted,
             ))
             .child(line(
                 "Your worlds, offline names and settings stay where they are.",
@@ -280,10 +287,13 @@ impl Launcher {
                     .flex_col()
                     .gap(px(8.))
                     .child(ui::text(14., FontWeight::NORMAL, ink::BODY).child(tr(
-                        "Horizon needs a Microsoft account that owns Minecraft: Java Edition, like other launchers.",
+                        "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.",
                     )))
                     .child(ui::text(14., FontWeight::NORMAL, ink::BODY).child(tr(
-                        "No Minecraft install needed: Horizon downloads it from Mojang for your account.",
+                        "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.",
+                    )))
+                    .child(ui::text(14., FontWeight::NORMAL, ink::QUIET).child(tr(
+                        "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.",
                     )))
                     .child(ui::text(14., FontWeight::NORMAL, ink::QUIET).child(tr(
                         "Your worlds, offline names and settings stay where they are.",

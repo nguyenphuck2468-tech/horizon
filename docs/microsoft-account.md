@@ -1,10 +1,13 @@
-# Microsoft account sign-in and online-mode play
+# Account sign-in, ownership and online-mode play
 
-Horizon signs players in with their Microsoft account in the launcher and joins online-mode
-(authenticated) servers like vanilla 26.3 does. The launcher plays only with an account that owns
-Minecraft: Java Edition ([the owner gate](#the-owner-gate)); offline names, LAN and offline-mode
-servers play behind it. This note is the design, the status of each part and what Ludovic has to
-register.
+Horizon supports Microsoft and Ely.by sign-in. A Microsoft account that owns Minecraft:
+Java Edition is required for Mojang downloads, Java Edition instances and Mojang's online-mode
+authentication ([the owner gate](#the-owner-gate)). An Ely.by account can authenticate the Horizon
+Client to servers that accept Ely.by, but it does not prove Java Edition ownership and cannot
+authorize Mojang downloads or a Java Edition instance. Offline names retain their separate
+Microsoft-owner requirement; Horizon Client play with Ely.by is governed by its own session flow.
+
+This note documents both providers and the account registrations needed for release builds.
 
 ## What Ludovic registers (needs his accounts)
 
@@ -40,6 +43,34 @@ no Microsoft sign-in"); release builds have it.
 
 Never use another application's client ID (the official launcher's or another launcher's).
 
+## Ely.by sign-in
+
+Ely.by is a separate authentication provider, not a Microsoft or Mojang ownership check. It is
+available to the Horizon Client session path; it is deliberately not used as a Microsoft token
+for Mojang downloads or a Java Edition instance.
+
+- Register an Ely.by OAuth application and configure its **public client ID** as the GitHub
+  repository variable `HORIZON_ELY_CLIENT_ID`. The launcher release workflow embeds this public
+  value at compile time. It is not a secret.
+- For a local build, `HORIZON_ELY_CLIENT_ID` can also be supplied in the process environment;
+  a non-empty runtime value overrides the compiled value.
+- The default flow is OAuth 2.0 Device Authorization (public client): no client secret is needed.
+  It requests `account_info offline_access minecraft_server_session`, shows the user code and
+  verification URL, and polls the token endpoint. The refresh token is kept in the OS keychain
+  (or the launcher's encrypted fallback store where supported).
+- An experimental local Authorization Code callback exists in code but is not wired into
+  the normal account UI. It requires `HORIZON_ELY_CLIENT_SECRET` and an exact loopback redirect
+  URI registered for this application (use a fixed callback port). The supported user-facing
+  flow is Device Code and needs no secret. Do not set `HORIZON_ELY_CLIENT_SECRET` for normal
+  launches. The launcher explicitly strips it from child game processes, but it remains available
+  to the launcher process itself and should not be placed in a global or shared environment.
+- Ely.by sessions are written to the Horizon Client's short-lived, owner-readable session file
+  with `user_type: "elyby"`. The client sends those tokens only to Ely.by's session service;
+  it does not send them to Minecraft Services. A server must accept Ely.by authentication for
+  online-mode play to succeed.
+
+The public client ID must belong to this project. Never borrow another application's ID.
+
 ## Flow (launcher)
 
 All requests use HTTPS and JSON except the two OAuth calls (form-encoded):
@@ -68,32 +99,34 @@ All requests use HTTPS and JSON except the two OAuth calls (form-encoded):
 
 ## The owner gate
 
-Decided 2026-10-27 (Ludovic, after a modder's suggestion): like other launchers, Horizon's
-launcher starts the game only while an account in it owns Java Edition. Offline play stays
-possible; the launcher just doesn't offer it on its own.
+Decided 2026-10-27, then extended for Ely.by: Horizon keeps two separate questions.
 
-- **Play needs an owner.** Every Play (Home, instances and packs, `horizon-launcher play`,
-  `modpack play`, the MCP's `play`) asks `account::launch` first. It asks the Minecraft services
-  again for each account, the selected one first, until one owns the game: the token renewal
-  (below) if due, then entitlements and profile. Without an owner the game doesn't start and Play
-  says "Sign in with a Microsoft account that owns Minecraft: Java Edition to play", with Sign in.
-- **The window says it once.** A player without an owner (one who played offline until now) sees
-  the gate's screen once when the launcher opens: why Horizon needs the account ("like other
-  launchers"), that worlds, offline names and settings stay where they are, and Sign in, which shows
-  the device code on the same screen. It comes back whenever Play is refused; Not now closes it,
-  and Home keeps a Sign in row (`launcher/src/owner_page.rs`).
-- **The answer lives with the tokens.** Each account's keychain item keeps the last answer
-  (`owns`), so accounts.json can't say yes. Where there is no keychain the answer sits in the
-  secrets file with the tokens; a player can edit that file, as they can write keychain items with
-  `secret-tool` or Keychain Access. With no network (or a sign-in that can't be renewed) the
-  last answer stands: being offline never blocks a player who passed before, and the game starts
-  without a session, offline. An answer of "doesn't own" (or no profile) blocks at once.
-- **Offline names play behind an owner.** They can be added and played only while an owning
-  account is signed in. Signing the last one out keeps them, and they play again once one is back.
-- **Who isn't affected:** the game binary itself (`horizon-client`, `horizon-ctl launch`, the
-  harnesses, CI), the dedicated server and `horizon-server`, the website. There is no bypass flag:
-  the launcher's tests use accounts in a memory store (`MemoryStore`, and `HORIZON_NO_KEYCHAIN`
-  for the CLI and MCP tests, which then have no owner).
+- **Can this account play Horizon?** A Microsoft account that previously passed the owner check
+  keeps its play entitlement while offline. An Ely.by account can also supply a Horizon Client
+  session, but only to servers that accept Ely.by. The selected account supplies the session; an
+  Ely.by token is never substituted for a Microsoft token.
+- **Does an account own Java Edition?** Only a Microsoft credential whose ownership Minecraft
+  services confirm can answer yes. The launcher checks the selected account first, then other
+  accounts until it finds an owner. This separate owner result is required for Mojang downloads
+  and Java Edition instances; an Ely.by session cannot satisfy it.
+- **Play and downloads are separate.** Home, instances and packs, `horizon-launcher play`,
+  `modpack play` and the MCP's `play` use `account::launch`. A playable Ely.by session can start
+  the Horizon Client without authorizing Mojang downloads. If the selected account cannot be
+  renewed, its stale session is not handed to the client; the game may start offline using the
+  previously saved play entitlement.
+- **The answer lives with the tokens.** Each account's keychain item keeps the last ownership
+  answer (`owns`) and the separate play entitlement (`plays`), so accounts.json cannot grant
+  either. Where there is no keychain the answer sits in the launcher's encrypted fallback store.
+  An answer of "doesn't own" (or no profile) blocks that account's Java-owner status.
+- **Offline names still need a Java owner.** An Ely.by account does not unlock a saved offline
+  name. Offline names can be added and played only while a Microsoft owner is signed in; signing
+  the last owner out keeps the names but blocks them until an owner returns.
+- **The window explains the distinction.** It can show a playable Ely.by account while still
+  reporting that no Java owner is available. Sign-in and owner status are independent, and the
+  owner notice does not imply that an Ely.by token can be sent to Mojang.
+- **Who isn't affected:** the dedicated server and `horizon-server`, the website and vanilla
+  harnesses. Tests use an in-memory store (`MemoryStore`) or `HORIZON_NO_KEYCHAIN`; the hidden
+  developer-only offline option is testable but is not a normal player sign-in path.
 
 ## Downloading the game for an owner
 

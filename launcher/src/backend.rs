@@ -9,7 +9,12 @@ use std::process::{Child, ChildStdin, Command, Stdio};
 use std::sync::mpsc::Sender;
 use std::sync::{Arc, Mutex};
 
+/// The Horizon game's releases, the mixin registry and links.json: what upstream ships. A fork
+/// keeps updating its launcher from its own releases ([`LAUNCHER_REPO`]).
 pub const REPO: &str = "horizon-rust/horizon";
+/// The launcher's own releases, published by this repo: the launcher self-updates from them
+/// ([`launcher_releases_in`]) while the game stays on [`REPO`].
+pub const LAUNCHER_REPO: &str = "nguyenphuck2468-tech/horizon";
 pub const README_URL: &str = "https://github.com/horizon-rust/horizon/blob/main/launcher/README.md";
 /// The players' page on connecting an AI agent (the website's docs/agents.md).
 pub const AGENT_DOCS_URL: &str = "https://playhorizon.dev/docs/agents";
@@ -316,11 +321,20 @@ pub fn compare_versions(a: &str, b: &str) -> std::cmp::Ordering {
     release_order(a).cmp(&release_order(b))
 }
 
-/// Every published release of the repository, both kinds, as GitHub's JSON (kept on disk with its
-/// ETag, and read through Kira's mirror past GitHub's rate limit: [`crate::github`]).
+/// Every published release of the game repository ([`REPO`]), as GitHub's JSON (kept on disk with
+/// its ETag, and read through Kira's mirror past GitHub's rate limit: [`crate::github`]).
 fn release_list() -> Result<serde_json::Value, String> {
     crate::github::json(&format!(
         "https://api.github.com/repos/{REPO}/releases?per_page=100"
+    ))
+}
+
+/// The launcher's own releases ([`LAUNCHER_REPO`]), as GitHub's JSON (kept on disk like the game's
+/// list, read again within [`crate::github::FRESH_SECS`]). Horizon's mirror serves only Horizon's
+/// repository reads, so a fork's list always comes from GitHub itself.
+fn launcher_release_list() -> Result<serde_json::Value, String> {
+    crate::github::json(&format!(
+        "https://api.github.com/repos/{LAUNCHER_REPO}/releases?per_page=100"
     ))
 }
 
@@ -398,10 +412,10 @@ pub(crate) fn game_releases(list: &serde_json::Value) -> Vec<Release> {
     out
 }
 
-/// The launcher releases in `list` (the newest 100 releases). Game releases come out several times
-/// a day, so the newest launcher release can be older than all of those: then the newest
-/// `launcher@` and `launcher-v` tags are looked up one by one (a draft's tag is skipped: it has no
-/// public release).
+/// The launcher releases in the launcher's own list ([`LAUNCHER_REPO`]), the newest 100 releases.
+/// If the newest launcher release falls out of that list (a fork with many other releases), the
+/// newest `launcher@` and `launcher-v` tags are looked up one by one (a draft's tag is skipped: it
+/// has no public release).
 fn launcher_releases_in(list: &serde_json::Value) -> Vec<Release> {
     launcher_releases_in_with(list, |url| crate::github::json(&url))
 }
@@ -414,7 +428,7 @@ fn launcher_releases_in_with(
     if found.iter().any(|r| r.asset.is_some()) {
         return found;
     }
-    let api = format!("https://api.github.com/repos/{REPO}");
+    let api = format!("https://api.github.com/repos/{LAUNCHER_REPO}");
     let mut tags = Vec::new();
     for prefix in [LAUNCHER_TAG_PREFIX, OLD_LAUNCHER_TAG_PREFIX] {
         // Every `launcher@` tag is newer than every `launcher-v` one: those only when there is none.
@@ -716,6 +730,18 @@ pub(crate) fn fetch_small(url: &str) -> Result<Option<Vec<u8>>, String> {
 /// The SHA-256 the release's signed checksums give for `asset`, or why it must not be installed.
 fn signed_digest(tag: &str, asset: &str) -> Result<String, String> {
     crate::signed::digest(
+        tag,
+        asset,
+        &horizon_release_sign::trusted_keys(),
+        fetch_small,
+    )
+}
+
+/// The SHA-256 the launcher release's signed checksums (this repo's, [`LAUNCHER_REPO`]) give for
+/// `asset`, or why the launcher must not replace itself with the download: verified just as the
+/// game's downloads are ([`signed_digest`]).
+fn launcher_signed_digest(tag: &str, asset: &str) -> Result<String, String> {
+    crate::signed::launcher_digest(
         tag,
         asset,
         &horizon_release_sign::trusted_keys(),
@@ -1644,12 +1670,17 @@ fn download_for(
                 format!("\n  • Horizon tried to download {v} from Mojang for {name}, but: {e}")
             })
         }
-        // An owner by its last answer, who can't be asked now.
-        Ok(pass) => Err(format!(
-            "\n  • Downloading {v} from Mojang needs your Microsoft account, which could not be \
-             checked: {}",
-            pass.offline.unwrap_or_default()
-        )),
+        // A playable Horizon session is not necessarily a Mojang owner (Ely.by, for
+        // example). An offline Microsoft account also cannot authorize a new download until
+        // Minecraft services can confirm ownership again.
+        Ok(pass) => {
+            let reason = pass.offline.unwrap_or_else(|| {
+                "A playable Horizon session does not prove ownership of Minecraft: Java Edition. Sign in with the Microsoft account that owns the game.".into()
+            });
+            Err(format!(
+                "\n  • Downloading {v} from Mojang needs a Microsoft account whose Minecraft ownership can be confirmed: {reason}"
+            ))
+        },
         Err(_) if signed_in => Err(
             "\n  • No signed-in account owns Minecraft: Java Edition, so Horizon can't download it."
                 .into(),
@@ -1939,7 +1970,7 @@ pub fn preparer(
             };
             return Ok((Preparer::InProcess(options), minecraft));
         }
-        let mut cmd = Command::new(binary);
+        let mut cmd = crate::process::command(binary);
         with_java(&mut cmd, &java_home);
         cmd.current_dir(&dir).arg("--root").arg(&dir);
         if !reused {
@@ -1948,7 +1979,7 @@ pub fn preparer(
         cmd.arg("--minecraft-dir").arg(&minecraft);
         return Ok((Preparer::Process(cmd), minecraft));
     }
-    let mut cmd = Command::new(python.unwrap());
+    let mut cmd = crate::process::command(python.unwrap());
     with_java(&mut cmd, &java_home);
     cmd.current_dir(&dir)
         .args(["-u", "tools/prepare_native_client.py"]);
@@ -2386,7 +2417,7 @@ fn stale_versions(installed: &[String], keep: usize, protected: &[String]) -> Ve
 #[cfg(unix)]
 fn in_use(tag: &str) -> bool {
     let dir = format!("{}/", version_dir(tag).display());
-    Command::new("ps")
+    crate::process::command("ps")
         .args(["-A", "-ww", "-o", "args="])
         .output()
         .ok()
@@ -2636,17 +2667,25 @@ fn launcher_update_from(releases: &[Release], own: &str) -> Option<Release> {
         .cloned()
 }
 
-/// Load the game's release list and both update kinds from the same GitHub response.
-/// Publish the game releases before any fallback lookups for older launcher tags, so those
-/// lookups cannot hold up the release pages or opening animation. A list error reaches both.
+/// Load the game's release list from [`REPO`] and the launcher's own from [`LAUNCHER_REPO`], and
+/// parse both update kinds from the two responses. Publish the game releases before the launcher
+/// list is read, so a slow or failing launcher read cannot hold up the release pages or the
+/// opening animation. A list error reaches both kinds.
 pub fn releases_and_updates(
     on_releases: impl FnOnce(Result<Vec<Release>, String>),
 ) -> Result<Updates, String> {
-    releases_and_updates_with(release_list, installed, launcher_releases_in, on_releases)
+    releases_and_updates_with(
+        release_list,
+        launcher_release_list,
+        installed,
+        launcher_releases_in,
+        on_releases,
+    )
 }
 
 fn releases_and_updates_with(
     load: impl FnOnce() -> Result<serde_json::Value, String>,
+    launcher_list: impl FnOnce() -> Result<serde_json::Value, String>,
     installed: impl FnOnce() -> Vec<String>,
     launchers: impl FnOnce(&serde_json::Value) -> Vec<Release>,
     on_releases: impl FnOnce(Result<Vec<Release>, String>),
@@ -2661,9 +2700,10 @@ fn releases_and_updates_with(
     let releases = game_releases(&list);
     let horizon = horizon_update(&installable_updates(&releases), &installed());
     on_releases(Ok(releases));
+    let own = launcher_list()?;
     Ok(Updates {
         horizon,
-        launcher: launcher_update(&launchers(&list)),
+        launcher: launcher_update(&launchers(&own)),
     })
 }
 
@@ -2961,7 +3001,7 @@ pub fn self_update(release: &Release, progress: impl Fn(f32)) -> Result<(), Stri
         progress(1.0);
         return Ok(());
     }
-    let sha256 = signed_digest(&release.tag, launcher_asset().unwrap_or_default())?;
+    let sha256 = launcher_signed_digest(&release.tag, launcher_asset().unwrap_or_default())?;
     let work = data_dir().join(".launcher-update");
     let _ = fs::remove_dir_all(&work);
     fs::create_dir_all(&work).map_err(|e| e.to_string())?;
@@ -3151,7 +3191,7 @@ pub enum Msg {
     Keychain(Option<String>),
     /// Whether an account in the launcher owned the game at its last check (the owner gate).
     Owner(bool),
-    /// Credential-free result from a background account operation.
+    /// Credential-free account status from a background operation.
     AccountStatus(String, u64, crate::account::session::Status),
     AccountProgress(String, u64, crate::account::session::Phase),
     AccountHead(String, Option<String>, Option<Vec<[u8; 4]>>, bool),
@@ -3660,6 +3700,33 @@ mod tests {
         }
         assert!(asked.lock().unwrap().is_empty());
         assert!(!dir.exists());
+
+        // A playable Horizon session without a confirmed Java owner must not authorize
+        // any Mojang download. This is the Launch shape used for an Ely.by account.
+        let ely = account::Account {
+            uuid: "11111111111111111111111111111111".into(),
+            name: "ElyPlayer".into(),
+            skin: None,
+            cape: None,
+        };
+        let ely_secrets: account::Secrets = serde_json::from_value(serde_json::json!({
+            "refresh_token": "fixture-refresh",
+            "minecraft_token": "fixture-access",
+            "minecraft_expires_at": 9999999999u64,
+            "owns": false,
+            "plays": true
+        }))
+        .unwrap();
+        let playable_without_owner = Ok(account::Launch {
+            session: Some((ely, ely_secrets)),
+            ..Default::default()
+        });
+        assert!(download_for(&pins, &dir, playable_without_owner, true, &fetch, &log).is_err());
+        assert!(
+            asked.lock().unwrap().is_empty(),
+            "a playable session must never authorize a Mojang download"
+        );
+
         // An owner: Mojang is asked (and the download fails here, without network).
         let owner = account::Account {
             uuid: "069a79f444e94726a5befca90e38aaf5".into(),
