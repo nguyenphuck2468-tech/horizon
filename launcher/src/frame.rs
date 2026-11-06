@@ -649,6 +649,32 @@ impl Launcher {
                 &t,
             )
         });
+        // The second way in, when this build signs in through Ely.by.
+        let ely_sign_in = (!matches!(self.accounts.player(), Player::Microsoft(_))
+            && account::ely_configured())
+        .then(|| {
+            keyboard(
+                div()
+                    .id("topbar-sign-in-elyby")
+                    .flex()
+                    .items_center()
+                    .h(px(44.))
+                    .px(px(16.))
+                    .rounded(px(radius::ROW))
+                    .bg(white(0.08))
+                    .hover(|s| s.bg(white(0.11)))
+                    .cursor_pointer()
+                    .child(
+                        ui::text(14., FontWeight::MEDIUM, ink::FULL)
+                            .child(tr("Sign in with Ely.by")),
+                    )
+                    .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                        this.start_ely_sign_in();
+                        cx.notify();
+                    })),
+                &t,
+            )
+        });
         let settings = ui::icon_button(
             "nav-Settings",
             "sliders-horizontal",
@@ -706,6 +732,7 @@ impl Launcher {
                     .children(build_log)
                     .child(account)
                     .children(sign_in)
+                    .children(ely_sign_in)
                     .child(settings),
             )
     }

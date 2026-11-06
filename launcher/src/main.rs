@@ -341,6 +341,8 @@ struct Launcher {
     /// When page switches last checked every account's sign-in.
     auth_checked: Option<Instant>,
     sign_in_target: Option<account::Account>,
+    /// The sign-in under way goes to Ely.by instead of Microsoft (`start_ely_sign_in`).
+    sign_in_ely: bool,
     auth_busy: HashMap<String, u64>,
     auth_next: u64,
     sign_in: Option<SignIn>,
@@ -639,6 +641,7 @@ impl Launcher {
             profile_heads: profile_heads::Heads::default(),
             auth_checked: None,
             sign_in_target: None,
+            sign_in_ely: false,
             auth_busy: HashMap::new(),
             auth_next: 0,
             sign_in: None,
@@ -1848,6 +1851,7 @@ impl Launcher {
         self.cancel_sign_in();
         self.sign_in = Some(SignIn::start_ely());
         self.sign_in_target = None;
+        self.sign_in_ely = true;
         self.sign_in_state = Some(SignInState::Starting);
     }
 
@@ -1864,6 +1868,7 @@ impl Launcher {
             None => SignIn::start(),
         });
         self.sign_in_target = target;
+        self.sign_in_ely = false;
         self.sign_in_state = Some(SignInState::Starting);
     }
 
@@ -4173,7 +4178,11 @@ impl Launcher {
                 .as_ref()
                 .filter(|a| a.uuid == uuid)
                 .and_then(|_| match self.sign_in_state.as_ref() {
-                    Some(SignInState::Starting) => Some("Asking Microsoft…"),
+                    Some(SignInState::Starting) => Some(if self.sign_in_ely {
+                        "Asking Ely.by…"
+                    } else {
+                        "Asking Microsoft…"
+                    }),
                     Some(SignInState::Code(_)) => Some("Waiting for browser sign-in…"),
                     Some(SignInState::Working(phase)) => Some(phase.label()),
                     _ => None,
@@ -4271,7 +4280,14 @@ impl Launcher {
         );
         let detail = match &self.sign_in_state {
             _ if !configured => div().child(tr("This build has no configured account provider.")),
-            Some(SignInState::Starting) => div().child(tr("Asking Microsoft…")),
+            Some(SignInState::Starting) => {
+                let asked = if self.sign_in_ely {
+                    tr("Asking Ely.by…")
+                } else {
+                    tr("Asking Microsoft…")
+                };
+                div().child(asked)
+            }
             Some(SignInState::Working(phase)) => div().child(tr(phase.label())),
             Some(SignInState::Code(code)) => div()
                 .flex()
@@ -4299,13 +4315,18 @@ impl Launcher {
             None => div().child(tr("Add another account.")),
         };
         let detail = if let Some(target) = &self.sign_in_target {
+            let provider: String = if self.sign_in_ely {
+                "Ely.by".into()
+            } else {
+                "Microsoft".into()
+            };
             div()
                 .flex()
                 .flex_col()
                 .gap(px(4.))
                 .child(trf(
-                    "Use the Microsoft account for {name}.",
-                    &[("name", &target.name)],
+                    "Use the {provider} account for {name}.",
+                    &[("provider", &provider), ("name", &target.name)],
                 ))
                 .child(detail)
         } else {

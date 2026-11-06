@@ -651,7 +651,6 @@
   "Saving sign-in…": "Salvo signo-in…",
   "Signing out…": "Signando...",
   "Waiting for browser sign-in…": "Expectans pasco sign-in…",
-  "Use the Microsoft account for {name}.": "utereMicrosoftideo pro *{name}.",
   "Sign in again as {name}": "Subscri iterum as{name}",
   "Ready for online play": "Promptus pro online fabula",
   "Needs refresh": "Renovare oportet",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Ad eximendos Mojang atque exempla Java Edition opus est computo Microsoftio, qui Minecraft: Java Edition possidet.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Computationes Ely.by possunt Horizon Client in servatoribus qui Ely.by admittunt ludere, sed eximendos Mojang neque exempla Java Edition permittunt.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Nulla accessio Microsoftii in hac fabricatione ordinata est. Computationes Ely.by Horizon Client ludere possunt, sed dominium Java Edition confirmare nequeunt.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Sine computatione Microsoftia quae ludum possidet, utere installatione Minecraft 26.3 iam facta."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Sine computatione Microsoftia quae ludum possidet, utere installatione Minecraft 26.3 iam facta.",
+  "Sign in with Ely.by": "Inscribe te cum Ely.by",
+  "Asking Ely.by…": "Rogans Ely.by...",
+  "Use the {provider} account for {name}.": "utere ratione {provider} pro {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Pagina inscriptionis in navigatro tuo aperit. Horizon numquam videt verbum tuum secretum."
 }

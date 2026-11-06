@@ -653,7 +653,6 @@
   "Saving sign-in…": "Đang lưu thông tin đăng nhập…",
   "Signing out…": "Đang đăng xuất…",
   "Waiting for browser sign-in…": "Đang chờ đăng nhập vào trình duyệt…",
-  "Use the Microsoft account for {name}.": "Sử dụng tài khoản Microsoft cho {name}.",
   "Sign in again as {name}": "Đăng nhập lại với tên {name}",
   "Ready for online play": "Sẵn sàng để chơi trực tuyến",
   "Needs refresh": "Cần làm mới",
@@ -1095,5 +1094,9 @@
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Bản dựng này chưa cấu hình đăng nhập Microsoft. Tài khoản Ely.by vẫn chơi được Horizon Client, nhưng không thể xác nhận quyền sở hữu Minecraft: Java Edition.",
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Cần tài khoản Microsoft sở hữu Minecraft: Java Edition để tải trò chơi từ Mojang và chạy các phiên bản Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Tài khoản Ely.by có thể chơi Horizon Client trên máy chủ chấp nhận Ely.by, nhưng không thể cấp quyền tải trò chơi từ Mojang hoặc chạy phiên bản Java Edition.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Nếu không có tài khoản Microsoft sở hữu trò chơi, hãy dùng bản cài Minecraft 26.3 hiện có."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Nếu không có tài khoản Microsoft sở hữu trò chơi, hãy dùng bản cài Minecraft 26.3 hiện có.",
+  "Sign in with Ely.by": "Đăng nhập bằng Ely.by",
+  "Asking Ely.by…": "Yêu cầu Ely.by…",
+  "Use the {provider} account for {name}.": "Sử dụng {provider} cho {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Trang đăng nhập mở trong trình duyệt của bạn. Horizon không bao giờ thấy mật khẩu của bạn."
 }

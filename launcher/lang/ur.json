@@ -653,7 +653,6 @@
   "Saving sign-in…": "سائن ان کو محفوظ کیا جا رہا ہے…",
   "Signing out…": "سائن آؤٹ ہو رہا ہے…",
   "Waiting for browser sign-in…": "براؤزر سائن ان کا انتظار کر رہا ہے…",
-  "Use the Microsoft account for {name}.": "{name} کے لیے Microsoft اکاؤنٹ استعمال کریں۔",
   "Sign in again as {name}": "دوبارہ سائن ان کریں بطور {name}",
   "Ready for online play": "آن لائن کھیلنے کے لیے تیار ہیں۔",
   "Needs refresh": "ریفریش کی ضرورت ہے۔",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Mojang ڈاؤن لوڈز اور Java Edition کے نمونوں کے لیے ایک Microsoft اکاؤنٹ کی ضرورت ہے جس کے پاس Minecraft: Java Edition ہو۔",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Ely.by اکاؤنٹس ان سرورز پر Horizon Client کھیل سکتے ہیں جو Ely.by قبول کرتے ہیں، لیکن وہ Mojang ڈاؤن لوڈز یا Java Edition کے نمونوں کی اجازت نہیں دے سکتے۔",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "اس بلڈ میں Microsoft سائن ان ترتیب نہیں دیا گیا۔ Ely.by اکاؤنٹس Horizon Client کھیل سکتے ہیں، لیکن Java Edition کی ملکیت کی تصدیق نہیں کر سکتے۔",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Microsoft مالک اکاؤنٹ کے بغیر، موجودہ Minecraft 26.3 انسٹالیشن استعمال کریں۔"
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Microsoft مالک اکاؤنٹ کے بغیر، موجودہ Minecraft 26.3 انسٹالیشن استعمال کریں۔",
+  "Sign in with Ely.by": "Ely.by کے ساتھ سائن ان کریں۔",
+  "Asking Ely.by…": "Ely.by سے پوچھ رہا ہے…",
+  "Use the {provider} account for {name}.": "{name} کے لیے {provider} استعمال کریں۔",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "سائن ان کا صفحہ آپ کے براؤزر میں کھلتا ہے۔ Horizon کبھی آپ کا پاس ورڈ نہیں دیکھتا۔"
 }

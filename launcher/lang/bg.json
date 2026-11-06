@@ -653,7 +653,6 @@
   "Saving sign-in…": "Входът се запазва...",
   "Signing out…": "Излизане...",
   "Waiting for browser sign-in…": "Изчаква се влизане в браузъра...",
-  "Use the Microsoft account for {name}.": "Използвайте акаунта на Microsoft за {name}.",
   "Sign in again as {name}": "Влезте отново като {name}",
   "Ready for online play": "Готов за онлайн игра",
   "Needs refresh": "Има нужда от освежаване",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "За изтегляния от Mojang и копията на Java Edition е нужен акаунт в Microsoft, който притежава Minecraft: Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Акаунтите в Ely.by могат да играят Horizon Client на сървъри, приемащи Ely.by, но не могат да упълномощят изтеглянията от Mojang или копията на Java Edition.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "В тази сборка няма настроено влизане в Microsoft. Акаунтите в Ely.by могат да играят Horizon Client, но не могат да потвърдят собствеността върху Java Edition.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Без акаунт в Microsoft, който притежава играта, използвайте вече наличната инсталация на Minecraft 26.3."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Без акаунт в Microsoft, който притежава играта, използвайте вече наличната инсталация на Minecraft 26.3.",
+  "Sign in with Ely.by": "Влезте с Ely.by",
+  "Asking Ely.by…": "Питане на Ely.by...",
+  "Use the {provider} account for {name}.": "Използвайте акаунта на {provider} за {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Страницата за влизане се отваря в браузъра ви. Horizon никога не вижда паролата ви."
 }

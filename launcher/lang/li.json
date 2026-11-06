@@ -653,7 +653,6 @@
   "Saving sign-in…": "Aonmelding opsjlaon…",
   "Signing out…": "Aafmelde…",
   "Waiting for browser sign-in…": "Wach op ‘t aanmelde vaan de browser…",
-  "Use the Microsoft account for {name}.": "Gebruik ‘t Microsoft-rekening veur {name}.",
   "Sign in again as {name}": "Meld weer aan es {name}",
   "Ready for online play": "Klaar veur online speule",
   "Needs refresh": "Moet verfrisse",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Vu Mojang-downloads en Java Edition-eksimplare is 'n Microsoft-account nuudig die Minecraft: Java Edition bezit.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Ely.by-accounts kunne Horizon Client spele op servers die Ely.by anneme, mer kinne Mojang-downloads of Java Edition-eksimplare net goodkeure.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Dze build héet gèn Microsoft-aanmelding gesteld. Ely.by-accounts kunne Horizon Client spele, mer kinne 't Java Edition-besit net bevestige.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Sundare en Microsoft-account die 't spul bezit, gebroek 'n beste Minecraft 26.3-installatsie."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Sundare en Microsoft-account die 't spul bezit, gebroek 'n beste Minecraft 26.3-installatsie.",
+  "Sign in with Ely.by": "Meld aan mit Ely.by",
+  "Asking Ely.by…": "Vraog Ely.by…",
+  "Use the {provider} account for {name}.": "Gebruik ‘t {provider} veur {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "'t Aanmeldpagina geit open in eur browser. Horizon zuut noets eur wachtwoord."
 }

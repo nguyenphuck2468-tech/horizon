@@ -651,7 +651,6 @@
   "Saving sign-in…": "ກຳລັງບັນທຶກການເຂົ້າສູ່ລະບົບ...",
   "Signing out…": "ກຳລັງອອກຈາກລະບົບ...",
   "Waiting for browser sign-in…": "ກຳລັງລໍຖ້າການເຂົ້າສູ່ລະບົບຂອງຕົວທ່ອງເວັບ...",
-  "Use the Microsoft account for {name}.": "ໃຊ້ບັນຊີ Microsoft ສໍາລັບ {name}.",
   "Sign in again as {name}": "ເຂົ້າສູ່ລະບົບອີກຄັ້ງເປັນ {name}",
   "Ready for online play": "ກຽມພ້ອມສໍາລັບການຫຼິ້ນອອນໄລນ໌",
   "Needs refresh": "ຕ້ອງການໂຫຼດຂໍ້ມູນຄືນໃໝ່",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "ສໍາລັບການດາວໂຫຼດ Mojang ແລະຕົວຢ່າງ Java Edition, ຕ້ອງການບັນຊີ Microsoft ທີ່ເປັນເຈົ້າຂອງ Minecraft: Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "ບັນຊີ Ely.by ສາມາດຫຼິ້ນ Horizon Client ຢູ່ເຄື່ອງແມ່ຂ່າຍທີ່ຮັບ Ely.by ໄດ້, ແຕ່ບໍ່ສາມາດອະນຸມັດການດາວໂຫຼດ Mojang ຫຼືຕົວຢ່າງ Java Edition ໄດ້.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "ບໍ່ມີການເຂົ້າສູ່ລະບົບ Microsoft ທີ່ຕັ້ງຄ່າໄວ້ໃນຕົວສ້າງນີ້. ບັນຊີ Ely.by ສາມາດຫຼິ້ນ Horizon Client ໄດ້, ແຕ່ບໍ່ສາມາດຢືນຢັນການເປັນເຈົ້າຂອງ Java Edition ໄດ້.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "ຖ້າບໍ່ມີບັນຊີ Microsoft ທີ່ເປັນເຈົ້າຂອງເກມ, ໃຫ້ໃຊ້ການຕິດຕັ້ງ Minecraft 26.3 ທີ່ມີຢູ່ແລ້ວ."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "ຖ້າບໍ່ມີບັນຊີ Microsoft ທີ່ເປັນເຈົ້າຂອງເກມ, ໃຫ້ໃຊ້ການຕິດຕັ້ງ Minecraft 26.3 ທີ່ມີຢູ່ແລ້ວ.",
+  "Sign in with Ely.by": "ເຂົ້າສູ່ລະບົບດ້ວຍ Ely.by",
+  "Asking Ely.by…": "ກຳລັງຖາມ Ely.by…",
+  "Use the {provider} account for {name}.": "ໃຊ້{provider} ສໍາລັບ {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "ໜ້າເຂົ້າສູ່ລະບົບເປີດຢູ່ໃນຕົວທ່ອງເວັບຂອງທ່ານ. Horizon ບໍ່ເຄີຍເຫັນລະຫັດຜ່ານຂອງເຈົ້າ."
 }

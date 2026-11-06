@@ -653,7 +653,6 @@
   "Saving sign-in…": "サインイン情報を保存中…",
   "Signing out…": "サインアウト中…",
   "Waiting for browser sign-in…": "ブラウザでのサインインを待機中…",
-  "Use the Microsoft account for {name}.": "{name} のMicrosoftアカウントを使用します。",
   "Sign in again as {name}": "{name} として再度サインイン",
   "Ready for online play": "オンラインプレイの準備完了",
   "Needs refresh": "更新が必要",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Mojang のダウンロードと Java Edition のインスタンスには、Minecraft: Java Edition を所有している Microsoft アカウントが必要です。",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Ely.by アカウントは、Ely.by を受け入れるサーバーで Horizon Client で遊べますが、Mojang のダウンロードや Java Edition のインスタンスを許可することはできません。",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "このビルドには Microsoft サインインが設定されていません。Ely.by アカウントは Horizon Client で遊べますが、Java Edition の所有権を確認できません。",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Microsoft オーナーアカウントがない場合は、既存の Minecraft 26.3 のインストールをお使いください。"
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Microsoft オーナーアカウントがない場合は、既存の Minecraft 26.3 のインストールをお使いください。",
+  "Sign in with Ely.by": "Ely.byでサインイン",
+  "Asking Ely.by…": "Ely.byに問い合わせ中…",
+  "Use the {provider} account for {name}.": "{name} の{provider}を使用します。",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "サインインページがブラウザで開きます。Horizon がパスワードを見ることはありません。"
 }

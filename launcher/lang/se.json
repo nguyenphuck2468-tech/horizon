@@ -653,7 +653,6 @@
   "Saving sign-in…": "Seailluhit sisaloggen...",
   "Signing out…": "Logahallat eret...",
   "Waiting for browser sign-in…": "Vuordit neahttačujuhusa sisaloggema...",
-  "Use the Microsoft account for {name}.": "Geavat Microsoft-kontu {name} ovddas.",
   "Sign in again as {name}": "Loga sisa fas {name}",
   "Ready for online play": "Gearggus neahttaspealuide",
   "Needs refresh": "Dárbbaša ođasmahttima",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Mojang luđemiid ja Java Edition-doaimmaid várás dárbbaša Microsoft-kontu mii oamasta Minecraft: Java-veršuvnna.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Ely.by-kontut speallit Horizon Client neahttabálvalusain main lea Ely.by, muhto eai sáhte duddjo Mojang luđemiid dahje Java Edition-doaimmaid.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Dán huksenis ii leat Microsoft-sisaš heivehuvvon. Ely.by-kontut speallit Horizon Client, muhto eai sáhte duddjo ahte oažžu Java Edition.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Mas ii leat Microsoft-kontu mii oamasta spealu, geava juo dán Minecraft 26.3-installašuvnna."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Mas ii leat Microsoft-kontu mii oamasta spealu, geava juo dán Minecraft 26.3-installašuvnna.",
+  "Sign in with Ely.by": "Loga sisa Ely.by",
+  "Asking Ely.by…": "Jearan Ely.by…",
+  "Use the {provider} account for {name}.": "Geavat {provider} {name} ovddas.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Sisačoahanji siidu rahppo neahttasiiddus. Horizon ii goassege oainne du beassansáni."
 }

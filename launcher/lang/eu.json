@@ -651,7 +651,6 @@
   "Saving sign-in…": "Saio-hasiera gordetzen…",
   "Signing out…": "Saioa amaitzen…",
   "Waiting for browser sign-in…": "Arakatzailearen saioa hasteko zain...",
-  "Use the Microsoft account for {name}.": "Erabili Microsoft kontua {name}-rako.",
   "Sign in again as {name}": "Hasi saioa berriro {name} gisa",
   "Ready for online play": "Sarean jolasteko prest",
   "Needs refresh": "Freskatu behar da",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Mojangezko deskarga eta Java Edition instantziek Minecraft: Java Edition jabe den Microsoft kontu bat behar dute.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Ely.by kontuek Horizon Client jo dezakete Ely.by onartzen duten zerbitzarietan, baina ezin dituzte Mojang deskargak edo Java Edition instantziak baimendu.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Bertsio honek ez du Microsoft saio-hasierarik konfiguratuta. Ely.by kontuek Horizon Client jo dezakete, baina ez dezakete Java Edition jabetza baieztatu.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Microsoft jabeko kontu gabe, erabili badagoen Minecraft 26.3 instalazio bat."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Microsoft jabeko kontu gabe, erabili badagoen Minecraft 26.3 instalazio bat.",
+  "Sign in with Ely.by": "Hasi saioa Ely.by-rekin",
+  "Asking Ely.by…": "Ely.by-ri galdetzen...",
+  "Use the {provider} account for {name}.": "Erabili {provider} {name}-rako.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Saio-hasierako orria irekitzen da zure arakatzailean. Horizon ez du inoiz zure pasahitza ikusten."
 }

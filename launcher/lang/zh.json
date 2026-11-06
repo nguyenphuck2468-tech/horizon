@@ -653,7 +653,6 @@
   "Saving sign-in…": "正在保存登录信息…",
   "Signing out…": "正在退出登录…",
   "Waiting for browser sign-in…": "正在等待浏览器登录…",
-  "Use the Microsoft account for {name}.": "请使用 {name} 的 Microsoft 账户。",
   "Sign in again as {name}": "重新以 {name} 登录",
   "Ready for online play": "可以在线游玩",
   "Needs refresh": "需要刷新",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "用于 Mojang 下载和 Java Edition 实例时，需要拥有 Minecraft: Java Edition 的 Microsoft 账户。",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Ely.by 账户可以在接受 Ely.by 的服务器上玩 Horizon Client，但无法授权 Mojang 下载或 Java Edition 实例。",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "此版本未配置 Microsoft 登录。Ely.by 账户可以玩 Horizon Client，但无法确认 Java Edition 的所有权。",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "没有拥有游戏的 Microsoft 账户时，请使用现有的 Minecraft 26.3 安装。"
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "没有拥有游戏的 Microsoft 账户时，请使用现有的 Minecraft 26.3 安装。",
+  "Sign in with Ely.by": "使用 Ely.by 账户登录",
+  "Asking Ely.by…": "正在询问 Ely.by…",
+  "Use the {provider} account for {name}.": "请使用 {name} 的 {provider}。",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "登录页面会在浏览器中打开。Horizon 永远看不到你的密码。"
 }

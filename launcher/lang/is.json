@@ -651,7 +651,6 @@
   "Saving sign-in…": "Vistar innskráningu...",
   "Signing out…": "Skráir þig út...",
   "Waiting for browser sign-in…": "Bíður eftir innskráningu vafra…",
-  "Use the Microsoft account for {name}.": "Notaðu Microsoft reikninginn fyrir {name}.",
   "Sign in again as {name}": "Skráðu þig inn aftur sem {name}",
   "Ready for online play": "Tilbúinn fyrir netspilun",
   "Needs refresh": "Þarfnast endurnýjunar",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Fyrir Mojang niðurhal og Java Edition eintök er krafist Microsoft-reiknings sem á Minecraft: Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Ely.by-reikningar geta spilað Horizon Client á netþjónum sem taka Ely.by við, en geta ekki heimilað Mojang-niðurhal né Java Edition-eintök.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Þetta samansafn er ekki með uppsett Microsoft-innskráningu. Ely.by-reikningar geta spilað Horizon Client, en geta ekki staðfest eignarhald á Java Edition.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Án Microsoft-reiknings eiganda, notaðu uppsetningu Minecraft 26.3 sem er þegar til."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Án Microsoft-reiknings eiganda, notaðu uppsetningu Minecraft 26.3 sem er þegar til.",
+  "Sign in with Ely.by": "Skráðu þig inn með Ely.by",
+  "Asking Ely.by…": "Spyr Ely.by…",
+  "Use the {provider} account for {name}.": "Notaðu {provider} fyrir {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Innskráningarsíðan opnast í vafranum þínum. Horizon sér aldrei lykilorðið þitt."
 }

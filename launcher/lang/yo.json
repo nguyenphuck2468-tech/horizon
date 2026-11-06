@@ -651,7 +651,6 @@
   "Saving sign-in…": "Nfi owo-iwọle pamọ…",
   "Signing out…": "Wọlé jade…",
   "Waiting for browser sign-in…": "Nduro fun iwọle ẹrọ aṣawakiri…",
-  "Use the Microsoft account for {name}.": "Lo akọọlẹ Microsoft fun {name}.",
   "Sign in again as {name}": "Wọle lẹẹkansi bi {name}",
   "Ready for online play": "Setan fun online play",
   "Needs refresh": "Nilo isọdọtun",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Fún àyọkà Mojang àti àpẹẹrẹ Java Edition, akọọlẹ Microsoft kan tí o ni Minecraft: Java Ẹya nilo.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Awọn akọọlẹ Ely.by lè fi ṣeré Horizon Client lori awọn olupin tí o gba Ely.by, ṣùgbọ́n kò lè fúnni ayọkà Mojang tàbí àpẹẹrẹ Java Edition.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Èyí kò ní ìwọle Microsoft tí a ṣeto. Àwọn akọọlẹ Ely.by lè fi ṣeré Horizon Client, ṣùgbọ́n kò lè jẹ́risi Java Edition.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Bí kò bá sí akọọlẹ Microsoft oní eré náà, lo Minecraft 26.3 tí ó ti wà."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Bí kò bá sí akọọlẹ Microsoft oní eré náà, lo Minecraft 26.3 tí ó ti wà.",
+  "Sign in with Ely.by": "Wọle pẹlu Ely.by",
+  "Asking Ely.by…": "Béèrè Ely.by…",
+  "Use the {provider} account for {name}.": "Lo {provider} fun {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Oju-iwe iwọle ṣii ni ẹrọ aṣawakiri rẹ. Horizon ko rí ọrọ igbaniwọle rẹ rára."
 }

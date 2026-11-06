@@ -653,7 +653,6 @@
   "Saving sign-in…": "Enregistrement de la connexion…",
   "Signing out…": "Déconnexion…",
   "Waiting for browser sign-in…": "En attente de la connexion dans le navigateur…",
-  "Use the Microsoft account for {name}.": "Utilisez le compte Microsoft de {name}.",
   "Sign in again as {name}": "Se reconnecter en tant que {name}",
   "Ready for online play": "Prêt pour le jeu en ligne",
   "Needs refresh": "Actualisation nécessaire",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Pour les téléchargements Mojang et les instances Java Edition, il faut un compte Microsoft qui possède Minecraft: Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Les comptes Ely.by peuvent jouer à Horizon Client sur des serveurs qui acceptent Ely.by, mais ne peuvent pas autoriser les téléchargements Mojang ni les instances Java Edition.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Ce build n'a pas de connexion Microsoft configurée. Les comptes Ely.by peuvent jouer à Horizon Client, mais ne peuvent pas confirmer la propriété de Java Edition.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Sans un compte Microsoft qui possède le jeu, utilisez une installation existante de Minecraft 26.3."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Sans un compte Microsoft qui possède le jeu, utilisez une installation existante de Minecraft 26.3.",
+  "Sign in with Ely.by": "Se connecter avec Ely.by",
+  "Asking Ely.by…": "Demande Ely.by…",
+  "Use the {provider} account for {name}.": "Utilisez le {provider} de {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "La page de connexion s'ouvre dans ton navigateur. Horizon ne voit jamais ton mot de passe."
 }

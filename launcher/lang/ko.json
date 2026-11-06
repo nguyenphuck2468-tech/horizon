@@ -653,7 +653,6 @@
   "Saving sign-in…": "로그인 정보 저장 중...",
   "Signing out…": "로그아웃 중...",
   "Waiting for browser sign-in…": "브라우저 로그인 대기 중...",
-  "Use the Microsoft account for {name}.": "{name}의 Microsoft 계정을 사용합니다.",
   "Sign in again as {name}": "{name}(으)로 다시 로그인",
   "Ready for online play": "온라인 플레이 준비 완료",
   "Needs refresh": "새로고침 필요",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Mojang 다운로드와 Java Edition 인스턴스에는 Minecraft: Java Edition을 소유한 Microsoft 계정이 필요합니다.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Ely.by 계정은 Ely.by를 수락하는 서버에서 Horizon Client을(를) 플레이할 수 있지만, Mojang 다운로드나 Java Edition 인스턴스를 승인할 수는 없습니다.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "이 빌드에는 Microsoft 로그인이 설정되어 있지 않습니다. Ely.by 계정은 Horizon Client을(를) 플레이할 수 있지만 Java Edition 소유권을 확인할 수 없습니다.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Microsoft 소유자 계정이 없으면 기존의 Minecraft 26.3 설치를 사용하세요."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Microsoft 소유자 계정이 없으면 기존의 Minecraft 26.3 설치를 사용하세요.",
+  "Sign in with Ely.by": "Ely.by로 로그인",
+  "Asking Ely.by…": "Ely.by에 요청 중...",
+  "Use the {provider} account for {name}.": "{name}의 {provider}을 사용합니다.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "로그인 페이지가 브라우저에서 열립니다. Horizon은 비밀번호를 절대 보지 않습니다."
 }

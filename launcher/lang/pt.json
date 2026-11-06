@@ -653,7 +653,6 @@
   "Saving sign-in…": "A guardar o início de sessão…",
   "Signing out…": "A terminar sessão…",
   "Waiting for browser sign-in…": "À espera do início de sessão no browser…",
-  "Use the Microsoft account for {name}.": "Usar a conta Microsoft de {name}.",
   "Sign in again as {name}": "Iniciar sessão novamente como {name}",
   "Ready for online play": "Pronto para jogo online",
   "Needs refresh": "Precisa de atualização",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Para as transferências da Mojang e cópias do Java Edition é necessária uma conta Microsoft que possua o Minecraft: Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "As contas Ely.by podem jogar Horizon Client em servidores que aceitem o Ely.by, mas não podem autorizar transferências da Mojang nem cópias do Java Edition.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Esta versão não tem sessão iniciada da Microsoft configurada. As contas Ely.by podem jogar Horizon Client, mas não podem confirmar a propriedade do Java Edition.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Sem uma conta Microsoft proprietária do jogo, use uma instalação já existente do Minecraft 26.3."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Sem uma conta Microsoft proprietária do jogo, use uma instalação já existente do Minecraft 26.3.",
+  "Sign in with Ely.by": "Iniciar sessão com a Ely.by",
+  "Asking Ely.by…": "A perguntar Ely.by…",
+  "Use the {provider} account for {name}.": "Usar a {provider} de {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "A página de início de sessão abre no teu navegador. O Horizon nunca vê a tua palavra-passe."
 }

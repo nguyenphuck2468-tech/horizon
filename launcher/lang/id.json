@@ -653,7 +653,6 @@
   "Saving sign-in…": "Menyimpan sesi masuk…",
   "Signing out…": "Keluar…",
   "Waiting for browser sign-in…": "Menunggu proses masuk di peramban…",
-  "Use the Microsoft account for {name}.": "Gunakan akun Microsoft untuk {name}.",
   "Sign in again as {name}": "Masuk kembali sebagai {name}",
   "Ready for online play": "Siap untuk bermain online",
   "Needs refresh": "Perlu odsegarkan",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Untuk unduhan Mojang dan contoh Java Edition diperlukan akun Microsoft yang memiliki Minecraft: Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Akun Ely.by dapat memainkan Horizon Client di server yang menerima Ely.by, tetapi tidak dapat mengizinkan unduhan Mojang atau contoh Java Edition.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Build ini tidak memiliki masuk Microsoft yang dikonfigurasikan. Akun Ely.by dapat memainkan Horizon Client, tetapi tidak dapat memastikan kepemilikan Java Edition.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Tanpa akun Microsoft yang memiliki gim, gunakan pemasangan Minecraft 26.3 yang sudah ada."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Tanpa akun Microsoft yang memiliki gim, gunakan pemasangan Minecraft 26.3 yang sudah ada.",
+  "Sign in with Ely.by": "Masuk dengan Ely.by",
+  "Asking Ely.by…": "Menanyakan Ely.by…",
+  "Use the {provider} account for {name}.": "Gunakan {provider} untuk {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Halaman masuk terbuka di browser-mu. Horizon tidak pernah melihat kata sandimu."
 }

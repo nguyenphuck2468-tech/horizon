@@ -651,7 +651,6 @@
   "Saving sign-in…": "Ke mālama nei i ka ʻeʻe ʻana…",
   "Signing out…": "Ke ʻeʻe nei…",
   "Waiting for browser sign-in…": "Ke kali nei no ka hoʻopaʻa inoa pūnaewele…",
-  "Use the Microsoft account for {name}.": "E hoʻohana i ka helu Microsoft no {name}.",
   "Sign in again as {name}": "E ʻeʻe hou me {name}",
   "Ready for online play": "Mākaukau no ka pāʻani pūnaewele",
   "Needs refresh": "Pono e hōʻano hou",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Pono kahi moʻokāki Microsoft nona ka Minecraft: Java Edition no nā hoʻoiho Mojang a me nā wahi Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Hiki i nā moʻokāki Ely.by ke pāʻani i Horizon Client ma nā kikowaena e mālama nei iā Ely.by, akā ʻaʻole hiki iā lākou ke ʻae i nā hoʻoiho Mojang a i ʻole nā wahi Java Edition.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "ʻAʻole hoʻonohonoho ʻia kahi inoa hoʻokela Microsoft i kēia hangahana. Hiki i nā moʻokāki Ely.by ke pāʻani i Horizon Client, akā ʻaʻole hiki iā lākou ke hōʻoia i ka mea nona ka Java Edition.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Me ka moʻokāki Microsoft mea nona ka pāʻani, e hoʻohana i kahi hoʻokomo ʻia Minecraft 26.3."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Me ka moʻokāki Microsoft mea nona ka pāʻani, e hoʻohana i kahi hoʻokomo ʻia Minecraft 26.3.",
+  "Sign in with Ely.by": "E ʻeʻe me Ely.by",
+  "Asking Ely.by…": "Ke nīnau nei Ely.by…",
+  "Use the {provider} account for {name}.": "E hoʻohana i ka {provider} no {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Wehe ʻia ka ʻaoʻao ʻeʻe ʻana ma kāu polokalamu kele pūnaewele. ʻAʻole ʻike ʻo Horizon i kāu ʻōlelo huna."
 }

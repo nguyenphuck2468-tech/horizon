@@ -651,7 +651,6 @@
   "Saving sign-in…": "Síniú isteach á shábháil…",
   "Signing out…": "Ag síniú amach…",
   "Waiting for browser sign-in…": "Ag fanacht le síniú isteach an bhrabhsálaí…",
-  "Use the Microsoft account for {name}.": "Úsáid an cuntas Microsoft le haghaidh {name}.",
   "Sign in again as {name}": "Sínigh isteach arís mar {name}",
   "Ready for online play": "Réidh le haghaidh cluichí ar líne",
   "Needs refresh": "Teastaíonn athnuachan",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Teastaíonn cuntas Microsoft a bhfuil Minecraft: Java Edition aige le haghaidh íoslódálacha Mojang agus cásanna Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Is féidir le cuntais Ely.by Horizon Client a imirt ar fhreastalaithe a ghlacann le Ely.by, ach ní féidir leo íoslódálacha Mojang ná cásanna Java Edition a údarú.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Níl logáil isteach Microsoft socraithe sa leagan seo. Is féidir le cuntais Ely.by Horizon Client a imirt, ach ní féidir leo úinéireacht Java Edition a dhearbhú.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Mura bhfuil cuntas Microsoft agat a bhfuil an cluiche aige, bain úsáid as suiteáil atá ann cheana de Minecraft 26.3."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Mura bhfuil cuntas Microsoft agat a bhfuil an cluiche aige, bain úsáid as suiteáil atá ann cheana de Minecraft 26.3.",
+  "Sign in with Ely.by": "Sínigh isteach le Ely.by",
+  "Asking Ely.by…": "Ag fiafraí Ely.by…",
+  "Use the {provider} account for {name}.": "Úsáid an {provider} le haghaidh {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Osclaíonn an leathanach síniú isteach i do bhrabhsálaí. Ní fheiceann Horizon do phasfhocal riamh."
 }

@@ -651,7 +651,6 @@
   "Saving sign-in…": "O enrollañ an enskrivadur...",
   "Signing out…": "O vont kuit...",
   "Waiting for browser sign-in…": "O c'hortoz mont e-barzh ar merdeer...",
-  "Use the Microsoft account for {name}.": "Implijit ar gont Microsoft evit {name}.",
   "Sign in again as {name}": "En em lugañ en-dro evel {name}",
   "Ready for online play": "Prest da c'hoari enlinenn",
   "Needs refresh": "Ezhomm zo da nevesaat",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Evit pellgargoù Mojang hag aweniadurioù Java Edition eo ret ur gont Microsoft zo perc'hennez war Minecraft: Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Kontoù Ely.by a c'hall c'hoari Horizon Client war servijerien a zegemer Ely.by, met ne c'hallont ket aotreañ pellgargoù Mojang na aweniadurioù Java Edition.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "N'eus kevregadenn Microsoft kefluniet ebet er sevel-mañ. Kontoù Ely.by a c'hall c'hoari Horizon Client, met ne c'hallont ket kadarnaat perc'hennedigezh Java Edition.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Hep ur gont Microsoft perc'hennez war ar c'hoari, implijit ur staliadur Minecraft 26.3 a zo endeo."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Hep ur gont Microsoft perc'hennez war ar c'hoari, implijit ur staliadur Minecraft 26.3 a zo endeo.",
+  "Sign in with Ely.by": "Kevreañ gant Ely.by",
+  "Asking Ely.by…": "Goulenn Ely.by…",
+  "Use the {provider} account for {name}.": "Implijit ar gont {provider} evit {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Pajenn ar gevreañ a zigor en ho merdeer. Horizon ne wel ket ho ker-tremen morse."
 }

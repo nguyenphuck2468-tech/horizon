@@ -327,6 +327,42 @@ impl Launcher {
         } else {
             action.map(|a| div().mt(px(20.)).child(a).into_any_element())
         };
+        // The second way in: Ely.by accounts (servers that take them), right under the
+        // Microsoft button, never while a sign-in is already moving.
+        let ely_button: Option<AnyElement> =
+            if account::ely_configured() && idle && self.sign_in_target.is_none() {
+                Some(
+                    keyboard(
+                        div()
+                            .id("glass-sign-in-elyby")
+                            .flex()
+                            .items_center()
+                            .justify_center()
+                            .h(px(48.))
+                            .w_full()
+                            .mt(px(8.))
+                            .rounded(px(radius::ROW))
+                            .bg(white(0.08))
+                            // On a light plate, the quiet button keeps an edge.
+                            .when(ui::light(), |d| d.border_1().border_color(white(0.15)))
+                            .cursor_pointer()
+                            .hover(|s| s.bg(white(0.12)))
+                            .font_family(horizon_theme::glass::FONT)
+                            .text_size(px(15.))
+                            .font_weight(FontWeight::SEMIBOLD)
+                            .text_color(white(ink::FULL))
+                            .child(tr("Sign in with Ely.by")),
+                        &t,
+                    )
+                    .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                        this.start_ely_sign_in();
+                        cx.notify();
+                    }))
+                    .into_any_element(),
+                )
+            } else {
+                None
+            };
         div()
             .flex()
             .flex_col()
@@ -354,15 +390,21 @@ impl Launcher {
                     .child(note),
             )
             .children(button)
+            .children(ely_button)
             .when(configured, |d| {
                 d.child(
                     ui::text(12., FontWeight::NORMAL, 0.45)
                         .mt(px(12.))
                         .line_height(px(18.))
-                        .child(tr(
-                            "Microsoft's own page opens in your browser. Horizon never sees your \
-                             password.",
-                        )),
+                        .child(if account::ely_configured() {
+                            tr(
+                                "The sign-in page opens in your browser. Horizon never sees \
+                                 your password.",
+                            )
+                        } else {
+                            tr("Microsoft's own page opens in your browser. Horizon never \
+                                 sees your password.")
+                        }),
                 )
             })
     }

@@ -653,7 +653,6 @@
   "Saving sign-in…": "Αποθήκευση σύνδεσης…",
   "Signing out…": "Έξοδος…",
   "Waiting for browser sign-in…": "Αναμονή για σύνδεση στο πρόγραμμα περιήγησης…",
-  "Use the Microsoft account for {name}.": "Χρησιμοποιήστε τον λογαριασμό Microsoft για {name}.",
   "Sign in again as {name}": "Συνδεθείτε ξανά ως {name}",
   "Ready for online play": "Έτοιμοι για online παιχνίδι",
   "Needs refresh": "Χρειάζεται ανανέωση",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Για τις λήψεις Mojang και τις εγκαταστάσεις Java Edition απαιτείται λογαριασμός Microsoft που κατέχει το Minecraft: Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Οι λογαριασμοί Ely.by μπορούν να παίξουν Horizon Client σε διακομιστές που δέχονται Ely.by, αλλά δεν μπορούν να εξουσιοδοτήσουν λήψεις Mojang ή εγκαταστάσεις Java Edition.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Αυτή η έκδοση δεν έχει διαμορφωμένη σύνδεση Microsoft. Οι λογαριασμοί Ely.by μπορούν να παίξουν Horizon Client, αλλά δεν μπορούν να επιβεβαιώσουν την ιδιοκτησία της Java Edition.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Χωρίς λογαριασμό Microsoft που κατέχει το παιχνίδι, χρησιμοποιήστε μια υπάρχουσα εγκατάσταση του Minecraft 26.3."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Χωρίς λογαριασμό Microsoft που κατέχει το παιχνίδι, χρησιμοποιήστε μια υπάρχουσα εγκατάσταση του Minecraft 26.3.",
+  "Sign in with Ely.by": "Συνδεθείτε με Ely.by",
+  "Asking Ely.by…": "Ρωτώντας το Ely.by…",
+  "Use the {provider} account for {name}.": "Χρησιμοποιήστε τον {provider} για {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Η σελίδα σύνδεσης ανοίγει στο πρόγραμμα περιήγησής σας. Το Horizon δεν βλέπει ποτέ τον κωδικό πρόσβασής σας."
 }

@@ -651,7 +651,6 @@
   "Saving sign-in…": "A’ sàbhaladh clàradh a-steach…",
   "Signing out…": "A’ clàradh a-mach…",
   "Waiting for browser sign-in…": "A’ feitheamh ri clàradh a-steach don bhrobhsair…",
-  "Use the Microsoft account for {name}.": "Cleachd an cunntas Microsoft airson {name}.",
   "Sign in again as {name}": "Clàraich a-steach a-rithist mar {name}",
   "Ready for online play": "Geama deiseil airson a chluich air loidhne an",
   "Needs refresh": "Tha feum air ùrachadh",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Feumaidh cunntas Microsoft leis a bheil Minecraft: Java Edition a bhith ann airson luchdaidhean-sìos Mojang agus sgaoilean Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Is urrainn do chunntasan Ely.by Horizon Client a chluich air frithealaichean a ghabhas Ely.by, ach chan urrainn dhaibh cead a thoirt do luchdaidhean-sìos Mojang no sgaoilean Java Edition.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Chan eil clàradh a-steach Microsoft air a rèiteach sa togail seo. Is urrainn do chunntasan Ely.by Horizon Client a chluich, ach chan urrainn dhaibh seilbh Java Edition a dhearbhadh.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Gun cunntas Microsoft leis a bheil an geama, cleachd stàladh de Minecraft 26.3 a tha ann mar-thà."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Gun cunntas Microsoft leis a bheil an geama, cleachd stàladh de Minecraft 26.3 a tha ann mar-thà.",
+  "Sign in with Ely.by": "Log a-steach le Ely.by",
+  "Asking Ely.by…": "A’ faighneachd Ely.by…",
+  "Use the {provider} account for {name}.": "Cleachd an {provider} airson {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Tha an duilleag clàraidh a-steach a' fosgladh sa bhrobhsair agad. Horizon chan fhaic thu am facal-faire agad gu bràth."
 }

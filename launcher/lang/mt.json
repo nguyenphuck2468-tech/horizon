@@ -651,7 +651,6 @@
   "Saving sign-in…": "Jissejvja l-utent...",
   "Signing out…": "Tagħmel l-iffirmar...",
   "Waiting for browser sign-in…": "Qed nistennew li tidħol fil-browser...",
-  "Use the Microsoft account for {name}.": "Uża l-kont Microsoft għal {name}.",
   "Sign in again as {name}": "Idħol mill-ġdid bħala {name}",
   "Ready for online play": "Lest għal-logħob onlajn",
   "Needs refresh": "Jeħtieġ li jġedded",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Għat-tniżżlijiet ta' Mojang u kopji ta' Java Edition jeħtieġ kont Microsoft li jippossjedi Minecraft: Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Il-kontijiet Ely.by jistgħu jilgħabu Horizon Client fuq servers li jaccettaw Ely.by, iżda ma jistgħux jawtorizzaw tniżżlijiet ta' Mojang jew kopji ta' Java Edition.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Dan il-build ma għandux sign-in ta' Microsoft konfigurat. Il-kontijiet Ely.by jistgħu jilgħabu Horizon Client, iżda ma jistgħux jikkonfermaw is-sid ta' Java Edition.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Bla kont Microsoft li jippossjedi l-logħba, utilizza installazzjoni ta' Minecraft 26.3 li diġà teżisti."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Bla kont Microsoft li jippossjedi l-logħba, utilizza installazzjoni ta' Minecraft 26.3 li diġà teżisti.",
+  "Sign in with Ely.by": "Idħol ma' Ely.by",
+  "Asking Ely.by…": "Tistaqsi Ely.by...",
+  "Use the {provider} account for {name}.": "Uża l-{provider} għal {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Il-paġna ta' login tiftaħ fil-browser tiegħek. Horizon qatt ma jara l-password tiegħek."
 }

@@ -653,7 +653,6 @@
   "Saving sign-in…": "Guardando la sesión…",
   "Signing out…": "Cerrando sesión…",
   "Waiting for browser sign-in…": "Esperando el inicio de sesión en el navegador…",
-  "Use the Microsoft account for {name}.": "Usa la cuenta de Microsoft de {name}.",
   "Sign in again as {name}": "Volver a iniciar sesión como {name}",
   "Ready for online play": "Listo para jugar en línea",
   "Needs refresh": "Necesita actualizarse",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Para las descargas de Mojang y las instancias de Java Edition se necesita una cuenta de Microsoft que posea Minecraft: Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Las cuentas de Ely.by pueden jugar a Horizon Client en servidores que acepten Ely.by, pero no pueden autorizar descargas de Mojang ni instancias de Java Edition.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Esta build no tiene configurado el inicio de sesión de Microsoft. Las cuentas de Ely.by pueden jugar a Horizon Client, pero no pueden confirmar la propiedad de Java Edition.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Sin una cuenta de Microsoft que posea el juego, usa una instalación ya existente de Minecraft 26.3."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Sin una cuenta de Microsoft que posea el juego, usa una instalación ya existente de Minecraft 26.3.",
+  "Sign in with Ely.by": "Iniciar sesión con Ely.by",
+  "Asking Ely.by…": "Consultando Ely.by…",
+  "Use the {provider} account for {name}.": "Usa la {provider} de {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "La página de inicio de sesión se abre en tu navegador. Horizon nunca ve tu contraseña."
 }

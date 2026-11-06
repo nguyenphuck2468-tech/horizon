@@ -651,7 +651,6 @@
   "Saving sign-in…": "Sine-save ang pag-sign-in…",
   "Signing out…": "Nagsa-sign out…",
   "Waiting for browser sign-in…": "Naghihintay para sa pag-sign in sa browser…",
-  "Use the Microsoft account for {name}.": "Gamitin ang Microsoft account para sa {name}.",
   "Sign in again as {name}": "Mag-sign in muli bilang {name}",
   "Ready for online play": "Handa para sa online na paglalaro",
   "Needs refresh": "Kailangan ng refresh",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Kailangan ng Microsoft account na nagmamay-ari ng Minecraft: Java Edition para sa mga download ng Mojang at mga instance ng Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Maaaring maglaro ng Horizon Client ang mga Ely.by account sa mga server na tumatanggap ng Ely.by, ngunit hindi nila maipagkakaloob ang mga download ng Mojang o mga instance ng Java Edition.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Walang naka-configure na Microsoft sign-in sa build na ito. Maaaring maglaro ng Horizon Client ang mga Ely.by account, ngunit hindi nila matiyak ang pag-aari ng Java Edition.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Kung walang Microsoft account na may-ari ng laro, gumamit ng kasalukuyang pagkaka-install ng Minecraft 26.3."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Kung walang Microsoft account na may-ari ng laro, gumamit ng kasalukuyang pagkaka-install ng Minecraft 26.3.",
+  "Sign in with Ely.by": "Mag-sign in gamit ang Ely.by",
+  "Asking Ely.by…": "Nagtatanong sa Ely.by...",
+  "Use the {provider} account for {name}.": "Gamitin ang {provider} para sa {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Bubukas ang pahina ng pag-sign in sa iyong browser. Hindi kailanman nakikita ni Horizon ang iyong password."
 }

@@ -651,7 +651,6 @@
   "Saving sign-in…": "Gardando o inicio de sesión...",
   "Signing out…": "Pechando sesión...",
   "Waiting for browser sign-in…": "Agardando o inicio de sesión do navegador...",
-  "Use the Microsoft account for {name}.": "Usa a conta de Microsoft para {name}.",
   "Sign in again as {name}": "Inicia sesión de novo como {name}",
   "Ready for online play": "Listo para xogar en liña",
   "Needs refresh": "Necesita refrescar",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Para as descargas de Mojang e as instancias de Java Edition requírese unha conta de Microsoft que posúa Minecraft: Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "As contas de Ely.by poden xogar a Horizon Client en servidores que acepten Ely.by, pero non poden autorizar descargas de Mojang nin instancias de Java Edition.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Esta versión non ten configurado o acceso de Microsoft. As contas de Ely.by poden xogar a Horizon Client, pero non poden confirmar a propiedade de Java Edition.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Sen unha conta de Microsoft que posúa o xogo, usa unha instalación xa existente de Minecraft 26.3."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Sen unha conta de Microsoft que posúa o xogo, usa unha instalación xa existente de Minecraft 26.3.",
+  "Sign in with Ely.by": "Inicia sesión con Ely.by",
+  "Asking Ely.by…": "Preguntando Ely.by...",
+  "Use the {provider} account for {name}.": "Usa a {provider} para {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "A páxina de inicio de sesión ábrese no teu navegador. Horizon nunca ve o teu contrasinal."
 }

@@ -653,7 +653,6 @@
   "Saving sign-in…": "Salvando l’aceso…",
   "Signing out…": "Lasarse…",
   "Waiting for browser sign-in…": "In attesa de l’aceso del browser…",
-  "Use the Microsoft account for {name}.": "Usa el conto Microsoft per {name}.",
   "Sign in again as {name}": "Entrate ancora come {name}",
   "Ready for online play": "Pronto pa zogar online",
   "Needs refresh": "Bisogna rinfrescar",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Par i scarichi de Mojang e le istanse de Java Edition serve un conta Microsoft che detien Minecraft: Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "I cont Ely.by pol zugar Horizon Client sui server che aceta Ely.by, ma no pol autorizar i scarichi de Mojang né le istanse de Java Edition.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Qesta build no gà nessun acess de Microsoft configurà. I cont Ely.by pol zugar Horizon Client, ma no pol confermar la proprietà de la Java Edition.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Senza un conta Microsoft che detien el zugo, doper na installasion de Minecraft 26.3 che la esiste daré."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Senza un conta Microsoft che detien el zugo, doper na installasion de Minecraft 26.3 che la esiste daré.",
+  "Sign in with Ely.by": "Accedi con Ely.by",
+  "Asking Ely.by…": "Chiedendo Ely.by…",
+  "Use the {provider} account for {name}.": "Usa el {provider} per {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "La pagina de acédar si abre nel tuo browser. Horizon no vede mai la vostra password."
 }
