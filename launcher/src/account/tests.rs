@@ -1408,6 +1408,9 @@ fn files_beside(path: &Path) -> Vec<String> {
     names
 }
 
+// The fallback secrets file only ships on these systems ([Layered]);
+// elsewhere there is no machine identity to seal it with (see file_key).
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
 #[test]
 fn the_secrets_file_keeps_sign_ins_across_starts() {
     let path = secrets_file("starts");
@@ -1447,6 +1450,9 @@ fn the_secrets_file_keeps_sign_ins_across_starts() {
     remove_secrets_dir(&path);
 }
 
+// The fallback secrets file only ships on these systems ([Layered]);
+// elsewhere there is no machine identity to seal it with (see file_key).
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
 #[test]
 fn a_broken_secrets_file_is_an_error_that_never_shows_it() {
     let path = secrets_file("broken");
@@ -1470,6 +1476,9 @@ fn a_broken_secrets_file_is_an_error_that_never_shows_it() {
     remove_secrets_dir(&path);
 }
 
+// The fallback secrets file only ships on these systems ([Layered]);
+// elsewhere there is no machine identity to seal it with (see file_key).
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
 #[test]
 fn the_secrets_file_is_never_plain_text() {
     let path = secrets_file("sealed");
@@ -1519,6 +1528,9 @@ fn secrets_file_writer() {
     }
 }
 
+// The fallback secrets file only ships on these systems ([Layered]);
+// elsewhere there is no machine identity to seal it with (see file_key).
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
 #[test]
 fn processes_sharing_the_secrets_file_lose_nothing() {
     let path = secrets_file("processes");
@@ -1675,6 +1687,9 @@ fn layered_store_holds_the_shared_account_session_lock() {
     remove_secrets_dir(&path);
 }
 
+// The fallback secrets file only ships on these systems ([Layered]);
+// elsewhere there is no machine identity to seal it with (see file_key).
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
 #[test]
 fn the_keychain_takes_back_what_the_file_kept_while_it_was_away() {
     let path = secrets_file("recovery");
@@ -1705,6 +1720,9 @@ fn the_keychain_takes_back_what_the_file_kept_while_it_was_away() {
     remove_secrets_dir(&path);
 }
 
+// The fallback secrets file only ships on these systems ([Layered]);
+// elsewhere there is no machine identity to seal it with (see file_key).
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
 #[test]
 fn a_launcher_on_the_file_keeps_working_after_another_hands_it_to_the_keychain() {
     let path = secrets_file("running");
@@ -1729,6 +1747,9 @@ fn a_launcher_on_the_file_keeps_working_after_another_hands_it_to_the_keychain()
     remove_secrets_dir(&path);
 }
 
+// The fallback secrets file only ships on these systems ([Layered]);
+// elsewhere there is no machine identity to seal it with (see file_key).
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
 #[test]
 fn launchers_started_on_an_old_file_find_it_after_another_hands_it_over() {
     let path = secrets_file("inherited");
@@ -1750,6 +1771,9 @@ fn launchers_started_on_an_old_file_find_it_after_another_hands_it_over() {
     remove_secrets_dir(&path);
 }
 
+// The fallback secrets file only ships on these systems ([Layered]);
+// elsewhere there is no machine identity to seal it with (see file_key).
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
 #[test]
 fn a_hand_over_by_another_process_right_after_a_start_missed_the_keychain() {
     let path = secrets_file("inherited-race");
@@ -1772,6 +1796,9 @@ fn a_hand_over_by_another_process_right_after_a_start_missed_the_keychain() {
     remove_secrets_dir(&path);
 }
 
+// The fallback secrets file only ships on these systems ([Layered]);
+// elsewhere there is no machine identity to seal it with (see file_key).
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
 #[test]
 fn a_secret_renewed_in_the_file_during_the_hand_over_is_found_after_the_next() {
     let path = secrets_file("renewed-in-file");
@@ -1800,6 +1827,9 @@ fn a_secret_renewed_in_the_file_during_the_hand_over_is_found_after_the_next() {
     remove_secrets_dir(&path);
 }
 
+// The fallback secrets file only ships on these systems ([Layered]);
+// elsewhere there is no machine identity to seal it with (see file_key).
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
 #[test]
 fn a_move_the_keychain_half_refuses_then_a_sign_out_leaves_no_copy() {
     let path = secrets_file("half");
@@ -1839,6 +1869,9 @@ fn a_move_the_keychain_half_refuses_then_a_sign_out_leaves_no_copy() {
     remove_secrets_dir(&path);
 }
 
+// The fallback secrets file only ships on these systems ([Layered]);
+// elsewhere there is no machine identity to seal it with (see file_key).
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
 #[test]
 fn a_keychain_waiting_on_a_prompt_never_holds_the_file_up() {
     let path = secrets_file("prompt");
@@ -1928,6 +1961,9 @@ fn hand_over_racing(
     (keychain, path)
 }
 
+// The fallback secrets file only ships on these systems ([Layered]);
+// elsewhere there is no machine identity to seal it with (see file_key).
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
 #[test]
 fn a_hand_over_never_brings_back_an_account_signed_out_meanwhile() {
     let (keychain, path) = hand_over_racing("race-sign-out", |running| {
@@ -1939,6 +1975,9 @@ fn a_hand_over_never_brings_back_an_account_signed_out_meanwhile() {
     remove_secrets_dir(&path);
 }
 
+// The fallback secrets file only ships on these systems ([Layered]);
+// elsewhere there is no machine identity to seal it with (see file_key).
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
 #[test]
 fn a_hand_over_never_writes_over_a_token_renewed_meanwhile() {
     let (keychain, path) = hand_over_racing("race-renewal", |running| {
@@ -1953,6 +1992,9 @@ fn a_hand_over_never_writes_over_a_token_renewed_meanwhile() {
     remove_secrets_dir(&path);
 }
 
+// The fallback secrets file only ships on these systems ([Layered]);
+// elsewhere there is no machine identity to seal it with (see file_key).
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
 #[test]
 fn the_secrets_file_counts_only_sign_ins() {
     let path = secrets_file("counts");
@@ -1967,6 +2009,9 @@ fn the_secrets_file_counts_only_sign_ins() {
     remove_secrets_dir(&path);
 }
 
+// The fallback secrets file only ships on these systems ([Layered]);
+// elsewhere there is no machine identity to seal it with (see file_key).
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
 #[test]
 fn a_dismissed_prompt_is_asked_once_a_run() {
     let path = secrets_file("dismissed");
@@ -1986,6 +2031,9 @@ fn a_dismissed_prompt_is_asked_once_a_run() {
     remove_secrets_dir(&path);
 }
 
+// The fallback secrets file only ships on these systems ([Layered]);
+// elsewhere there is no machine identity to seal it with (see file_key).
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
 #[test]
 fn signing_out_while_the_keychain_is_away_forgets_its_copy() {
     let path = secrets_file("sign-out");
