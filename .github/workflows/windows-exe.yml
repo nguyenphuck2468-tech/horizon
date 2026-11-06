@@ -66,6 +66,17 @@ jobs:
       - name: Test
         if: github.event_name == 'workflow_dispatch' && inputs.run_tests
         run: cargo test --release --locked
+      - name: Doc reference diagnostic
+        # Regenerate docs/launcher-commands.md on this runner and show what differs from the
+        # committed file, to explain why `the_launcher_reference_is_up_to_date` fails here only.
+        if: always()
+        run: |
+          git diff --no-index --stat -- docs/launcher-commands.md docs/launcher-commands.md || true
+          git diff -- docs/launcher-commands.md | head -200
+          HORIZON_WRITE_DOCS=1 cargo test --release the_launcher_reference || true
+          echo '--- diff after regeneration ---'
+          git diff -- docs/launcher-commands.md | head -200
+          git -C ../ restore docs/launcher-commands.md
       - name: Build
         run: cargo build --release --locked
       - name: Version
