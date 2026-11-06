@@ -4,18 +4,19 @@
 //! with the SHA-256 pinned for it in legacy-releases.txt (a rollback). Anything else is refused
 //! with a message saying why.
 
-use crate::backend::REPO;
+use crate::backend::{LAUNCHER_REPO, REPO};
 use horizon_release_sign::{PublicKey, SIGNATURE, SUMS};
 
 /// Where a release's attached file downloads from (GitHub's fixed address for it).
-pub fn asset_url(tag: &str, name: &str) -> String {
-    format!("https://github.com/{REPO}/releases/download/{tag}/{name}")
+pub fn asset_url(repo: &str, tag: &str, name: &str) -> String {
+    format!("https://github.com/{repo}/releases/download/{tag}/{name}")
 }
 
-/// The signed SHA-256 of `asset` in release `tag`, fetching its SHA256SUMS and SHA256SUMS.sig
-/// with `fetch` (None: the release has no such file), or why the download must be refused. A
-/// release from before signing gets its pinned SHA-256, whatever files it carries now.
-pub fn digest(
+/// The signed SHA-256 of `asset` in release `tag` of `repo`, fetching its SHA256SUMS and
+/// SHA256SUMS.sig with `fetch` (None: the release has no such file), or why the download must be
+/// refused. A release from before signing gets its pinned SHA-256, whatever files it carries now.
+fn digest_from(
+    repo: &str,
     tag: &str,
     asset: &str,
     keys: &[PublicKey],
@@ -24,10 +25,31 @@ pub fn digest(
     if let Some(hex) = horizon_release_sign::legacy_digest(tag, asset) {
         return Ok(hex.to_owned());
     }
-    let sums = fetch(&asset_url(tag, SUMS))?;
-    let signature = fetch(&asset_url(tag, SIGNATURE))?
+    let sums = fetch(&asset_url(repo, tag, SUMS))?;
+    let signature = fetch(&asset_url(repo, tag, SIGNATURE))?
         .map(|bytes| String::from_utf8_lossy(&bytes).into_owned());
     horizon_release_sign::signed_digest(tag, asset, sums.as_deref(), signature.as_deref(), keys)
+}
+
+/// The signed SHA-256 of `asset` in a Horizon release (`REPO`, the game's).
+pub fn digest(
+    tag: &str,
+    asset: &str,
+    keys: &[PublicKey],
+    fetch: impl Fn(&str) -> Result<Option<Vec<u8>>, String>,
+) -> Result<String, String> {
+    digest_from(REPO, tag, asset, keys, fetch)
+}
+
+/// The signed SHA-256 of `asset` in a launcher release: the launcher's own releases
+/// ([`LAUNCHER_REPO`]), verified just as strictly as the game's ([`digest`]).
+pub fn launcher_digest(
+    tag: &str,
+    asset: &str,
+    keys: &[PublicKey],
+    fetch: impl Fn(&str) -> Result<Option<Vec<u8>>, String>,
+) -> Result<String, String> {
+    digest_from(LAUNCHER_REPO, tag, asset, keys, fetch)
 }
 
 /// The signed SHA-256 of `asset` in the Nightly published under `tag` (`nightly`, or a dated
@@ -39,8 +61,8 @@ pub fn nightly_digest(
     keys: &[PublicKey],
     fetch: impl Fn(&str) -> Result<Option<Vec<u8>>, String>,
 ) -> Result<String, String> {
-    let sums = fetch(&asset_url(tag, SUMS))?;
-    let signature = fetch(&asset_url(tag, SIGNATURE))?
+    let sums = fetch(&asset_url(REPO, tag, SUMS))?;
+    let signature = fetch(&asset_url(REPO, tag, SIGNATURE))?
         .map(|bytes| String::from_utf8_lossy(&bytes).into_owned());
     horizon_release_sign::nightly_digest(asset, sums.as_deref(), signature.as_deref(), keys)
 }
@@ -58,6 +80,41 @@ mod tests {
             !horizon_release_sign::trusted_keys().is_empty(),
             "crates/horizon-release-sign/release-keys.txt lists no key"
         );
+    }
+
+    /// A launcher release is verified just as strictly as a game's, but its files are read from
+    /// the launcher's own repository (backend::LAUNCHER_REPO), not the game's.
+    #[test]
+    fn a_launcher_release_is_verified_from_the_launcher_repo() {
+        let (signer, _) = SigningKey::generate().unwrap();
+        let keys = [signer.public()];
+        let archive = "horizon-launcher-windows-x64.zip";
+        let sums = sums_file(&[(archive.into(), sha256_hex(b"launcher"))]);
+        let signature = signer.sign("launcher@99.0.0", sums.as_bytes());
+        let (other, _) = SigningKey::generate().unwrap();
+        let served = |url: &str| -> Result<Option<Vec<u8>>, String> {
+            assert!(url
+                .starts_with("https://github.com/nguyenphuck2468-tech/horizon/releases/download/"));
+            Ok(Some(
+                if url.ends_with(".sig") {
+                    signature.clone()
+                } else {
+                    sums.clone()
+                }
+                .into_bytes(),
+            ))
+        };
+        assert_eq!(
+            launcher_digest("launcher@99.0.0", archive, &keys, served),
+            Ok(sha256_hex(b"launcher"))
+        );
+        // Signed for another tag or by another key: refused.
+        assert!(launcher_digest("launcher@99.0.1", archive, &keys, served).is_err());
+        assert!(launcher_digest("launcher@99.0.0", archive, &[other.public()], served).is_err());
+        // No checksums (an unsigned release): refused, saying so.
+        let unsigned = |_: &str| -> Result<Option<Vec<u8>>, String> { Ok(None) };
+        let refused = launcher_digest("launcher@99.0.0", archive, &keys, unsigned).unwrap_err();
+        assert!(refused.contains("not signed"), "{refused}");
     }
 
     #[test]

@@ -737,6 +737,18 @@ fn signed_digest(tag: &str, asset: &str) -> Result<String, String> {
     )
 }
 
+/// The SHA-256 the launcher release's signed checksums (this repo's, [`LAUNCHER_REPO`]) give for
+/// `asset`, or why the launcher must not replace itself with the download: verified just as the
+/// game's downloads are ([`signed_digest`]).
+fn launcher_signed_digest(tag: &str, asset: &str) -> Result<String, String> {
+    crate::signed::launcher_digest(
+        tag,
+        asset,
+        &horizon_release_sign::trusted_keys(),
+        fetch_small,
+    )
+}
+
 /// Downloads `url` into `to`; the file is kept only if its SHA-256 is `sha256`, the signed (or
 /// pinned) one. A `size` of 0 takes the server's Content-Length for the progress.
 pub(crate) fn download(
@@ -2989,7 +3001,7 @@ pub fn self_update(release: &Release, progress: impl Fn(f32)) -> Result<(), Stri
         progress(1.0);
         return Ok(());
     }
-    let sha256 = signed_digest(&release.tag, launcher_asset().unwrap_or_default())?;
+    let sha256 = launcher_signed_digest(&release.tag, launcher_asset().unwrap_or_default())?;
     let work = data_dir().join(".launcher-update");
     let _ = fs::remove_dir_all(&work);
     fs::create_dir_all(&work).map_err(|e| e.to_string())?;
