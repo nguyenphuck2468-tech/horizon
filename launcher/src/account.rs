@@ -15,6 +15,7 @@
 //! build time, or at run time to override it. Without one, sign-in says it is not configured.
 pub mod session;
 
+use crate::config::{msa_client_id_from_config, resolve_client_id};
 use serde_json::{json, Value};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -24,6 +25,10 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 /// The keychain service name every secret is stored under.
 pub const SERVICE: &str = "dev.playhorizon.launcher";
 const SCOPE: &str = "XboxLive.signin offline_access";
+
+/// Public client ID of the Horizon-registered Microsoft Azure app.
+/// Replace this value if you register your own application.
+const DEFAULT_MSA_CLIENT_ID: &str = "36132831-5d53-436d-8730-1c7904bc84f6";
 pub const NOT_CONFIGURED: &str = "This build of the launcher has no Microsoft sign-in (HORIZON_MSA_CLIENT_ID), so it can't start the game.";
 /// What every Play says while no account in the launcher owns the game.
 pub const NEEDS_OWNER: &str =
@@ -37,14 +42,14 @@ const SIGN_IN_AGAIN: &str = "Your Microsoft sign-in expired. Sign in again.";
 /// The Minecraft token is renewed when it has less than this left.
 const RENEW_BEFORE: u64 = 3600;
 
-/// The configured Azure app, if any: the run-time variable wins over the build-time one, and an
-/// empty value means none.
+/// The configured Azure app, if any.
+/// Priority: sidecar config file > env var > build-time default.
 pub fn client_id() -> Option<String> {
-    std::env::var("HORIZON_MSA_CLIENT_ID")
-        .ok()
-        .or_else(|| option_env!("HORIZON_MSA_CLIENT_ID").map(str::to_owned))
-        .map(|id| id.trim().to_owned())
-        .filter(|id| !id.is_empty())
+    resolve_client_id(
+        msa_client_id_from_config().as_deref(),
+        std::env::var("HORIZON_MSA_CLIENT_ID").ok().as_deref(),
+        DEFAULT_MSA_CLIENT_ID,
+    )
 }
 
 pub fn ely_configured() -> bool {

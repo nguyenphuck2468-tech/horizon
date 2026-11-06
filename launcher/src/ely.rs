@@ -4,6 +4,7 @@
 //! The loopback Authorization Code flow remains available only when an
 //! explicitly configured client secret is present.
 
+use crate::config::{ely_client_id_from_config, resolve_client_id};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::net::{TcpListener, TcpStream};
@@ -17,6 +18,10 @@ const INFO_URL: &str = "https://account.ely.by/api/account/v1/info";
 const DEFAULT_PORT: u16 = 39871;
 const SCOPES: &str = "account_info offline_access minecraft_server_session";
 const DEVICE_GRANT: &str = "urn:ietf:params:oauth:grant-type:device_code";
+
+/// Public client ID of the Horizon-registered Ely.by application.
+/// Replace this value if you register your own application.
+const DEFAULT_ELY_CLIENT_ID: &str = "horizon-launcher2";
 
 #[derive(Clone, Debug)]
 pub struct Profile {
@@ -93,22 +98,15 @@ fn backoff_poll_interval(seconds: u64) -> u64 {
     seconds.saturating_mul(2).min(MAX_POLL_INTERVAL)
 }
 
-fn choose_client_id(runtime: Option<String>, built_in: Option<&str>) -> Option<String> {
-    runtime
-        .map(|value| value.trim().to_owned())
-        .filter(|value| !value.is_empty())
-        .or_else(|| {
-            built_in
-                .map(str::trim)
-                .filter(|value| !value.is_empty())
-                .map(str::to_owned)
-        })
+fn choose_client_id(config: Option<&str>, runtime: Option<&str>, built_in: &str) -> Option<String> {
+    resolve_client_id(config, runtime, built_in)
 }
 
 pub fn client_id() -> Option<String> {
     choose_client_id(
-        std::env::var("HORIZON_ELY_CLIENT_ID").ok(),
-        option_env!("HORIZON_ELY_CLIENT_ID"),
+        ely_client_id_from_config().as_deref(),
+        std::env::var("HORIZON_ELY_CLIENT_ID").ok().as_deref(),
+        DEFAULT_ELY_CLIENT_ID,
     )
 }
 
