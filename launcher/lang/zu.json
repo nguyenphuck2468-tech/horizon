@@ -651,7 +651,6 @@
   "Saving sign-in…": "Ilondoloza ukungena ngemvume...",
   "Signing out…": "Iyaphuma...",
   "Waiting for browser sign-in…": "Ilinde ukungena ngemvume kwesiphequluli...",
-  "Use the Microsoft account for {name}.": "Sebenzisa i-akhawunti ethi Microsoft ukuze {name}.",
   "Sign in again as {name}": "Ngena ngemvume futhi njengo-{name}",
   "Ready for online play": "Ilungele ukudlala ku-inthanethi",
   "Needs refresh": "Idinga ukuvuselelwa",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Ukulandelela kwe-Mojang noma izibonelo ze-Java Edition kudingeka i-akhawunti ye-Microsoft enamandla okungumnikazi we-Minecraft: Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "I-akhawunti ze-Ely.by zingadlala i-Horizon Client kumaseva ayamukela i-Ely.by, kodwa ngeke zigunyaze ukulandelana kwe-Mojang noma izibonelo ze-Java Edition.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Lesi sakhiwo asinawo ukungena kwe-Microsoft okuhleliwe. I-akhawunti ze-Ely.by zingadlala i-Horizon Client, kodwa ngeke ziqinisekise ubunikazi be-Java Edition.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Ngaphandle kwe-akhawunti ye-Microsoft engumnikazi womdlalo, sebenzisa ukufakwa kwe-Minecraft 26.3 okusekhona."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Ngaphandle kwe-akhawunti ye-Microsoft engumnikazi womdlalo, sebenzisa ukufakwa kwe-Minecraft 26.3 okusekhona.",
+  "Sign in with Ely.by": "Ngena ngemvume Ely.by",
+  "Asking Ely.by…": "Iyabuza i-Ely.by…",
+  "Use the {provider} account for {name}.": "Sebenzisa i-akhawunti {provider} ukuze {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Ikhasi lokungena liyavuleka esipheqululini sakho. Horizon akalokothi ayibone iphasiwedi yakho."
 }

@@ -653,7 +653,6 @@
   "Saving sign-in…": "Tallennetaan kirjautumista…",
   "Signing out…": "Kirjaudutaan ulos…",
   "Waiting for browser sign-in…": "Odotetaan selaimen sisäänkirjautumista…",
-  "Use the Microsoft account for {name}.": "Käytä Microsoft-tiliä verkkotunnukselle {name}.",
   "Sign in again as {name}": "Kirjaudu uudelleen sisään käyttäjänä {name}",
   "Ready for online play": "Valmiina online-peliin",
   "Needs refresh": "Tarvitsee päivitystä",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Mojang-latauksia ja Java Edition-ilmentymiä varten tarvitaan Microsoft-tili, joka omistaa Minecraft: Java Editionin.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Ely.by-tilit voivat pelata Horizon Clientia palvelimilla, jotka hyväksyvät Ely.by:n, mutta ne eivät voi valtuuttaa Mojang-latauksia tai Java Edition-ilmentymiä.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Tässä koosteessa ei ole määritettyä Microsoft-kirjautumista. Ely.by-tilit voivat pelata Horizon Clientia, mutta ne eivät voi vahvistaa Java Editionin omistajuutta.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Vailla Microsoft-omistajatiliä käytä olemassa olevaa Minecraft 26.3 -asennusta."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Vailla Microsoft-omistajatiliä käytä olemassa olevaa Minecraft 26.3 -asennusta.",
+  "Sign in with Ely.by": "Kirjaudu sisään Ely.by",
+  "Asking Ely.by…": "Kysytään Ely.by…",
+  "Use the {provider} account for {name}.": "Käytä {provider} verkkotunnukselle {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Kirjautumissivu avautuu selaimessasi. Horizon ei koskaan näe salasanaasi."
 }

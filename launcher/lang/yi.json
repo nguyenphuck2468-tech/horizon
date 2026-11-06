@@ -651,7 +651,6 @@
   "Saving sign-in…": "היט זיך איינשרייבן...",
   "Signing out…": "זיך אויסשרייבן...",
   "Waiting for browser sign-in…": "ווארטן פֿאַר בלעטערער צייכן אין...",
-  "Use the Microsoft account for {name}.": "ניצן די Microsoft חשבון פֿאַר {name}.",
   "Sign in again as {name}": "צייכן אין ווידער ווי {name}",
   "Ready for online play": "גרייט פֿאַר אָנליין שפּיל",
   "Needs refresh": "דאַרף דערפרישן",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "פאר Mojang אראפלאדן און Java Edition ביישפילן דארף א Microsoft חשבון וואס איז בעלים אויף Minecraft: Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Microsoft חשבונות אויף Ely.by קענען שפילן Horizon Client אויף סערווערס וואס נעמען אן Ely.by, אבער קענען נישט ארויסגעבן היתר Mojang אראפלאדן אדער Java Edition ביישפילן.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "דער build האט נישט קיין פארקונפיגורטער Microsoft אריינלאגן. Ely.by חשבונות קענען שפילן Horizon Client, אבער קענען נישט באשטעטיגן Java Edition בעלות.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "אן א Microsoft חשבון בעלים, ניצט אן עקזיסטירטער Minecraft 26.3 אינסטאלאציע."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "אן א Microsoft חשבון בעלים, ניצט אן עקזיסטירטער Minecraft 26.3 אינסטאלאציע.",
+  "Sign in with Ely.by": "צייכן אין מיט Ely.by",
+  "Asking Ely.by…": "פרעגן Ely.by…",
+  "Use the {provider} account for {name}.": "ניצן די {provider} פֿאַר {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "די ארײַנשרײַב בלאַט עפֿנט זיך אין דיין בלעטערער. Horizon קיינמאָל זעט דיין פּאַראָל."
 }

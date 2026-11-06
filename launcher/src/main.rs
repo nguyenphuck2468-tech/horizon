@@ -4281,11 +4281,12 @@ impl Launcher {
         let detail = match &self.sign_in_state {
             _ if !configured => div().child(tr("This build has no configured account provider.")),
             Some(SignInState::Starting) => {
-                div().child(tr(if self.sign_in_ely {
-                    "Asking Ely.by…"
+                let asked = if self.sign_in_ely {
+                    tr("Asking Ely.by…")
                 } else {
-                    "Asking Microsoft…"
-                }))
+                    tr("Asking Microsoft…")
+                };
+                div().child(asked)
             }
             Some(SignInState::Working(phase)) => div().child(tr(phase.label())),
             Some(SignInState::Code(code)) => div()

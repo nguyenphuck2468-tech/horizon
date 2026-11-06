@@ -653,7 +653,6 @@
   "Saving sign-in…": "Bejelentkezés mentése…",
   "Signing out…": "Kijelentkezés…",
   "Waiting for browser sign-in…": "Várakozás a böngésző bejelentkezésére…",
-  "Use the Microsoft account for {name}.": "Használja a Microsoft-fiókot a következőhöz: {name}.",
   "Sign in again as {name}": "Jelentkezzen be újra mint {name}",
   "Ready for online play": "Készen áll az online játékra",
   "Needs refresh": "Frissítésre szorul",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "A Mojang-letöltésekhez és a Java Edition-példányokhoz olyan Microsoft-fiók szükséges, amelynek birtokában van a Minecraft: Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Az Ely.by-fiókok játszhatnak Horizon Client az Ely.by-t elfogadó szervereken, de nem engedélyezhetnek Mojang-letöltéseket vagy Java Edition-példányokat.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Ebben a build-ben nincs beállítva Microsoft-bejelentkezés. Az Ely.by-fiókok játszhatnak Horizon Client, de nem erősíthetik meg a Java Edition tulajdonlását.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Microsoft-tulajdonos-fiók nélkül használja a már meglévő Minecraft 26.3 telepítést."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Microsoft-tulajdonos-fiók nélkül használja a már meglévő Minecraft 26.3 telepítést.",
+  "Sign in with Ely.by": "Jelentkezzen be Ely.by-val",
+  "Asking Ely.by…": "Az Ely.by megkérdezése…",
+  "Use the {provider} account for {name}.": "Használja a {provider} a következőhöz: {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "A bejelentkezési oldal nyílik meg a böngészőjében. A Horizon soha nem látja a jelszavát."
 }

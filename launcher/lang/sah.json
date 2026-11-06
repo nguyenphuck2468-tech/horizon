@@ -653,7 +653,6 @@
   "Saving sign-in…": "Киириини харыстыыр...",
   "Signing out…": "Тахсан эрэбин...",
   "Waiting for browser sign-in…": "Браузерга киириини кэтэһэбин...",
-  "Use the Microsoft account for {name}.": "Microsoft учуоту {name}-га туттуҥ.",
   "Sign in again as {name}": "Эмиэ киирэн {name}",
   "Ready for online play": "Онлайн оонньууга бэлэм",
   "Needs refresh": "Саҥардыы наада",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Mojang хачайдааһытын уонна Java Edition көрүҥнэрин ыларга Minecraft: Java Edition бас билээччитэ буолар Microsoft аккаунт наада.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Ely.by аккаунттар Ely.byны ылар сервердарга Horizon Client оонньуоллар, ол эрээри Mojang хачайдааһынын эбэтэр Java Edition көрүҥнэрин көҥүллэбэттэр.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Бу оҥоһукка Microsoft входа туруоруллубатах. Ely.by аккаунттар Horizon Client оонньуоллар, ол эрээри Java Edition бас билээччитэ буолууну бигэргэппэттэр.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Microsoft бас билээччитэ аккаунт суох буоллаҕына, баар Minecraft 26.3 оҥоһугун туттуҥ."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Microsoft бас билээччитэ аккаунт суох буоллаҕына, баар Minecraft 26.3 оҥоһугун туттуҥ.",
+  "Sign in with Ely.by": "Киирэн Ely.by",
+  "Asking Ely.by…": "Ely.by ыйытабын...",
+  "Use the {provider} account for {name}.": "{provider} {name}-га туттуҥ.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Киирэр страница браузергар арыллар. Horizon парольгун хаһан да көрбөт."
 }

@@ -653,7 +653,6 @@
   "Saving sign-in…": "שומר את הכניסה...",
   "Signing out…": "יוצא...",
   "Waiting for browser sign-in…": "ממתין לכניסה לדפדפן...",
-  "Use the Microsoft account for {name}.": "השתמש בחשבון Microsoft עבור {name}.",
   "Sign in again as {name}": "היכנס שוב בתור {name}",
   "Ready for online play": "מוכן למשחק מקוון",
   "Needs refresh": "זקוק לרענון",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "נדרש חשבון Microsoft שבבעלותו Minecraft: Java Edition עבור הורדות Mojang ועותקים של Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "חשבונות Ely.by יכולים לשחק ב-Horizon Client בשרתים שמקבלים Ely.by, אבל אינם יכולים לאשר הורדות Mojang או עותקים של Java Edition.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "למהדורה הזו אין כניסה מוגדרת של Microsoft. חשבונות Ely.by יכולים לשחק ב-Horizon Client, אבל אינם יכולים לאשר בעלות על Java Edition.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "ללא חשבון Microsoft בעלים, השתמשו בהתקנה קיימת של Minecraft 26.3."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "ללא חשבון Microsoft בעלים, השתמשו בהתקנה קיימת של Minecraft 26.3.",
+  "Sign in with Ely.by": "היכנס עם Ely.by",
+  "Asking Ely.by…": "Asking Ely.by…",
+  "Use the {provider} account for {name}.": "השתמש ב{provider} עבור {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "דף הכניסה נפתח בדפדפן שלך. Horizon אף פעם לא רואה את הסיסמה שלך."
 }

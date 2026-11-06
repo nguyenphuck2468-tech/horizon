@@ -651,7 +651,6 @@
   "Saving sign-in…": "S'està desant l'inici de sessió...",
   "Signing out…": "Tancant la sessió...",
   "Waiting for browser sign-in…": "S'està esperant l'inici de sessió del navegador...",
-  "Use the Microsoft account for {name}.": "Utilitzeu el compte de Microsoft per a {name}.",
   "Sign in again as {name}": "Torna a iniciar la sessió com a {name}",
   "Ready for online play": "A punt per jugar en línia",
   "Needs refresh": "Necessita refrescar",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Per a les baixades de Mojang i les instàncies de Java Edition cal un compte de Microsoft que tingui Minecraft: Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Els comptes d'Ely.by poden jugar a Horizon Client en servidors que accepten Ely.by, però no poden autoritzar baixades de Mojang ni instàncies de Java Edition.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Aquesta versió no té cap inici de sessió de Microsoft configurat. Els comptes d'Ely.by poden jugar a Horizon Client, però no poden confirmar la propietat de Java Edition.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Sense un compte propietari de Microsoft, feu servir una instal·lació de Minecraft 26.3 que ja tingueu."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Sense un compte propietari de Microsoft, feu servir una instal·lació de Minecraft 26.3 que ja tingueu.",
+  "Sign in with Ely.by": "Inicieu la sessió amb Ely.by",
+  "Asking Ely.by…": "Preguntant Ely.by...",
+  "Use the {provider} account for {name}.": "Utilitzeu el {provider} per a {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "La pàgina d'inici de sessió s'obre al navegador. Horizon no veu mai la teva contrasenya."
 }

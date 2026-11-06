@@ -653,7 +653,6 @@
   "Saving sign-in…": "Zachowowanie zalogowanio...",
   "Signing out…": "Wylogowanie sie...",
   "Waiting for browser sign-in…": "Ôczekujōm na zalogowanie sie przeglōncznika...",
-  "Use the Microsoft account for {name}.": "Użyj kōnta Microsoft do {name}.",
   "Sign in again as {name}": "Zalogowaj sie zaś za {name}",
   "Ready for online play": "Gotowy do gry w internecie",
   "Needs refresh": "Potrzebuje ôdświeżynio",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Do poblyniy Mojang a instancyje Java Edition wymagany je kōnta Microsoft, co posiado Minecraft: Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Kōnta Ely.by mogōm zagrać Horizon Client na serwerach, co przijmujōm Ely.by, ale niy mogōm dowolić poblyniy Mojang ani instancyje Java Edition.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Tyn build niy mo sztelowanego zalogowanio Microsoft. Kōnta Ely.by mogōm zagrać Horizon Client, ale niy mogōm potwierdzić posiadaniy Java Edition.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Bez Microsoft kōnta, co posiado graca, użyj instancyje Minecraft 26.3, co już je."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Bez Microsoft kōnta, co posiado graca, użyj instancyje Minecraft 26.3, co już je.",
+  "Sign in with Ely.by": "Zalogować sie ze pōmocōm Ely.by",
+  "Asking Ely.by…": "Pytajōnc Ely.by...",
+  "Use the {provider} account for {name}.": "Użyj {provider} do {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Strōna logowanio otworzi sie w przeglōndarzu. Horizon nikej niy widzi twojigo hasła."
 }

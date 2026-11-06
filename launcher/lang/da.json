@@ -653,7 +653,6 @@
   "Saving sign-in…": "Gemmer login...",
   "Signing out…": "Logger ud...",
   "Waiting for browser sign-in…": "Venter på browserlogin...",
-  "Use the Microsoft account for {name}.": "Brug Microsoft-kontoen til {name}.",
   "Sign in again as {name}": "Log ind igen som {name}",
   "Ready for online play": "Klar til onlinespil",
   "Needs refresh": "Trænger til en opfriskning",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "En Microsoft-konto, der ejer Minecraft: Java Edition, er påkrævet til Mojang-downloads og Java Edition-instanser.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Ely.by-konti kan spille Horizon Client på servere, der accepterer Ely.by, men kan ikke tillade Mojang-downloads eller Java Edition-instanser.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Denne build har ingen konfigureret Microsoft-login. Ely.by-konti kan spille Horizon Client, men kan ikke bekræfte ejerskab af Java Edition.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Hvis du ikke har en Microsoft-konto, der ejer spillet, skal du bruge en eksisterende installation af Minecraft 26.3."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Hvis du ikke har en Microsoft-konto, der ejer spillet, skal du bruge en eksisterende installation af Minecraft 26.3.",
+  "Sign in with Ely.by": "Log ind med Ely.by",
+  "Asking Ely.by…": "Spørger Ely.by...",
+  "Use the {provider} account for {name}.": "Brug {provider} til {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Logonsiden åbner i din browser. Horizon ser aldrig din adgangskode."
 }

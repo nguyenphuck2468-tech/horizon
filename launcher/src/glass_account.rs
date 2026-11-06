@@ -396,13 +396,15 @@ impl Launcher {
                     ui::text(12., FontWeight::NORMAL, 0.45)
                         .mt(px(12.))
                         .line_height(px(18.))
-                        .child(tr(if account::ely_configured() {
-                            "The sign-in page opens in your browser. Horizon never sees your \
-                             password."
+                        .child(if account::ely_configured() {
+                            tr(
+                                "The sign-in page opens in your browser. Horizon never sees \
+                                 your password.",
+                            )
                         } else {
-                            "Microsoft's own page opens in your browser. Horizon never sees your \
-                             password."
-                        })),
+                            tr("Microsoft's own page opens in your browser. Horizon never \
+                                 sees your password.")
+                        }),
                 )
             })
     }

@@ -651,7 +651,6 @@
   "Saving sign-in…": "Wrthi'n cadw mewngofnodi…",
   "Signing out…": "Wrthi'n allgofnodi…",
   "Waiting for browser sign-in…": "Aros am fewngofnodi i'r porwr…",
-  "Use the Microsoft account for {name}.": "Defnyddiwch y cyfrif Microsoft am {name}.",
   "Sign in again as {name}": "Mewngofnodwch eto fel {name}",
   "Ready for online play": "Yn barod ar gyfer chwarae ar-lein",
   "Needs refresh": "Angen adnewyddu",
@@ -1095,5 +1094,9 @@
   "A Microsoft account that owns Minecraft: Java Edition is needed for Mojang downloads and Java Edition instances.": "Mae angen cyfrif Microsoft sy'n berchen ar Minecraft: Java Edition ar gyfer lawrlwythiadau Mojang ac enghreifftiau Java Edition.",
   "Ely.by accounts can play Horizon Client on servers that accept Ely.by, but cannot authorize Mojang downloads or Java Edition instances.": "Gall cyfrifon Ely.by chwarae Horizon Client ar weinyddion sy'n derbyn Ely.by, ond ni allant awdurdodi lawrlwythiadau Mojang na enghreifftiau Java Edition.",
   "This build has no configured Microsoft sign-in. Ely.by accounts can play Horizon Client, but cannot confirm Java Edition ownership.": "Nid oes mewngofnodi Microsoft wedi'i ffurfweddu yn y build hwn. Gall cyfrifon Ely.by chwarae Horizon Client, ond ni allant gadarnhau perchenogaeth Java Edition.",
-  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Heb gyfrif Microsoft sy'n berchen ar y gêm, defnyddiwch osodiad Minecraft 26.3 sy'n bodoli'n barod."
+  "Without a Microsoft owner account, use an existing Minecraft 26.3 installation.": "Heb gyfrif Microsoft sy'n berchen ar y gêm, defnyddiwch osodiad Minecraft 26.3 sy'n bodoli'n barod.",
+  "Sign in with Ely.by": "Mewngofnodwch gyda Ely.by",
+  "Asking Ely.by…": "Wrth ofyn Ely.by…",
+  "Use the {provider} account for {name}.": "Defnyddiwch y {provider} am {name}.",
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Mae'r dudalen mewngofnodi yn agor yn eich porwr. Nid yw Horizon byth yn gweld eich cyfrinair."
 }
