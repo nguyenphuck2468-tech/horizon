@@ -66,22 +66,6 @@ jobs:
       - name: Test
         if: github.event_name == 'workflow_dispatch' && inputs.run_tests
         run: cargo test --release --locked
-      - name: Doc reference diagnostic
-        # Regenerate docs/launcher-commands.md on this runner and upload it, to explain why
-        # `the_launcher_reference_is_up_to_date` fails here while the upstream Linux CI passes.
-        if: always()
-        run: |
-          HORIZON_WRITE_DOCS=1 cargo test --release the_launcher_reference || true
-          mkdir -p ../doc_diag
-          cp ../docs/launcher-commands.md ../doc_diag/launcher-commands.md
-          git -C .. restore docs/launcher-commands.md
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: launcher-commands-regenerated
-          path: doc_diag/*
-          if-no-files-found: error
-          retention-days: 5
       - name: Build
         run: cargo build --release --locked
       - name: Version
