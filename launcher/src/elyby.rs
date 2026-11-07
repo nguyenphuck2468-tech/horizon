@@ -16,11 +16,6 @@ const STROKES: [(f32, f32, f32, f32); 4] = [
     (1., 15., 19., 5.),
 ];
 
-/// The glyph, 21 pixels square.
-pub(super) fn symbol() -> Div {
-    logo(21.)
-}
-
 /// The glyph at `size` pixels square.
 pub(super) fn logo(size: f32) -> Div {
     let u = size / 21.;
