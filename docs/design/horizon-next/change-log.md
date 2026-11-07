@@ -20,3 +20,23 @@
 - Environment: the codespace moved from basicLinux32gb (2 cores / 8 GB) to standardLinux32gb
   (4 cores / 16 GB) with the user's go-ahead; bin-target tests became practical
   (95 passed / 0 failed).
+- `412b199fe` test(servers): pin the server-state dot tone the glass mockup writes
+  (running+clean → Live, running+crashed → Warn, stopped → Off, else → Busy).
+- `5a74dcf22` refactor(palette): extract the query filter into the pure `palette_filter`,
+  match queries case-insensitively, unit-test the cap/order/matching, and pin the documented
+  CLI play command (`--instance`). Phase 2 (Home) audited: no missing feature
+  (`glass-home-audit.md`).
+- `e1807894e` test(versions): pin the release-day formatting (`Nov 1`, `Mar 9, 14:30 UTC`)
+  shared by Home and Versions.
+- `23f57c00e` refactor(mods): extract the search placeholder and unit-test its every branch.
+- Phase 0 closed with the outcome of run 42375384481 (p0-summary.md 8.3): `verify` green at
+  baseline, `launcher` failing in the fence step exactly as forecast; fixes already on the
+  horizon-next branch.
+- `c78ee124b` docs(horizon-next): phase A1 glass-ui audit + change log + baseline forecast.
+- `613843fae` fix(elyby): drop the unused `symbol()` wrapper (dead_code the CI fence refuses).
+- `c05e82203` refactor(glass): route the sign-in ink through the design token and unit-test
+  the appearance helpers.
+- `e09ef7c32` fix(clippy): drop the needless borrow in the release-loading test binding.
+- Environment: the codespace moved from basicLinux32gb (2 cores / 8 GB) to standardLinux32gb
+  (4 cores / 16 GB) with the user's go-ahead; bin-target tests became practical
+  (95+ passed / 0 failed).
