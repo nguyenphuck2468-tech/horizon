@@ -313,7 +313,7 @@ impl Launcher {
                         .font_family(horizon_theme::glass::FONT)
                         .text_size(px(15.))
                         .font_weight(FontWeight::SEMIBOLD)
-                        .text_color(gpui::rgb(0x100a1f))
+                        .text_color(ui::color(horizon_theme::glass::ON_LIGHT))
                         .child(microsoft::logo(18.))
                         .child(tr("Sign in with Microsoft")),
                     &t,

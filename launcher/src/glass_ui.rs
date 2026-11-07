@@ -1009,3 +1009,28 @@ pub fn card_note(label: impl Into<SharedString>) -> Div {
         .line_height(px(19.5))
         .child(label.into())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_light_appearance_swaps_ink_for_paper() {
+        set_light(false);
+        assert_eq!(paper(), gpui::white());
+        set_light(true);
+        assert_eq!(paper(), color(INK));
+        assert_eq!(color(INK), gpui::rgb(0x100a1f).into());
+        set_light(false);
+    }
+
+    #[test]
+    fn tone_colours_stay_the_token_ledgers_in_both_appearances() {
+        // In dark the helpers pass the crate's glass tokens through untouched.
+        set_light(false);
+        assert_eq!(live(), color(horizon_theme::glass::LIVE));
+        assert_eq!(warn(), color(horizon_theme::glass::WARN));
+        assert_eq!(danger(), color(horizon_theme::glass::DANGER));
+        set_light(false);
+    }
+}
