@@ -125,11 +125,7 @@ impl Launcher {
                 });
             }
         }
-        all.retain(|c| {
-            q.is_empty() || c.label.to_lowercase().contains(q) || c.hint.to_lowercase().contains(q)
-        });
-        all.truncate(SHOWN);
-        all
+        palette_filter(all, q)
     }
 
     fn palette_run(&mut self, run: Run, window: &mut Window, cx: &mut Context<Self>) {
@@ -359,5 +355,60 @@ impl Launcher {
                 )
                 .child(card),
         )
+    }
+}
+
+/// The palette's commands for a query: when it is empty, everything (at most [`SHOWN`]);
+/// otherwise only the entries whose label or hint contain it, matching letters in any case.
+fn palette_filter(mut all: Vec<Command>, q: &str) -> Vec<Command> {
+    let q = q.to_lowercase();
+    all.retain(|c| {
+        q.is_empty() || c.label.to_lowercase().contains(&q) || c.hint.to_lowercase().contains(&q)
+    });
+    all.truncate(SHOWN);
+    all
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Nine command-like entries, one past the cap, labels Open 0.., hints Page 0...
+    fn commands() -> Vec<Command> {
+        (0..9)
+            .map(|n| Command {
+                label: format!("Open {n}"),
+                hint: format!("Page {n}"),
+                run: Run::Go(Page::Play),
+            })
+            .collect()
+    }
+
+    #[test]
+    fn an_empty_query_lists_at_most_shown() {
+        assert_eq!(palette_filter(commands(), "").len(), SHOWN);
+    }
+
+    #[test]
+    fn the_query_matches_the_label_or_hint_in_any_case() {
+        let got = palette_filter(commands(), "page 3");
+        assert_eq!(got.len(), 1);
+        assert_eq!(got[0].label, "Open 3");
+        assert_eq!(got[0].hint, "Page 3");
+        let caps = palette_filter(commands(), "OPEN 4");
+        assert_eq!(caps.len(), 1);
+        assert_eq!(caps[0].label, "Open 4");
+        let misses = palette_filter(commands(), "hidden");
+        assert!(misses.is_empty());
+    }
+
+    #[test]
+    fn matches_stay_in_place_and_the_list_is_capped() {
+        // Every entry has an "e" (Open, Page): nine match, the cap keeps the first eight.
+        let got = palette_filter(commands(), "e");
+        assert_eq!(got.len(), SHOWN);
+        assert_eq!(got[0].label, "Open 0");
+        assert_eq!(got[0].hint, "Page 0");
+        assert_eq!(got[7].label, "Open 7");
     }
 }

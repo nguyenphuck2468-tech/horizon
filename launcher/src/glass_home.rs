@@ -956,4 +956,12 @@ mod tests {
         assert_eq!(since(m(30 * 60), 1, "2026-11-02"), "yesterday");
         assert_eq!(since(m(3 * 24 * 60), 3, "2026-10-31"), "Oct 31");
     }
+
+    #[test]
+    fn the_play_command_is_the_documented_cli_call() {
+        assert_eq!(
+            launch_command("mine"),
+            "horizon-launcher play --instance mine"
+        );
+    }
 }
