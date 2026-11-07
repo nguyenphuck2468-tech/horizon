@@ -40,3 +40,8 @@
 - Environment: the codespace moved from basicLinux32gb (2 cores / 8 GB) to standardLinux32gb
   (4 cores / 16 GB) with the user's go-ahead; bin-target tests became practical
   (95+ passed / 0 failed).
+- `6907b3759` test(toast): pin the tilde home-folder shortening (`/home/player/a/b` -> `~/a/b`).
+- `11cad3af5` refactor(java): extract the loader note and unit-test its five branches
+  (fabric/quilt/neoforge/forge/other).
+- `e32535bfe` refactor(account): extract the player status tone/line and unit-test its branches
+  (Microsoft -> Live/online servers; Offline/GameName -> Offline/single player).
