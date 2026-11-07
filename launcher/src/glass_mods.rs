@@ -494,11 +494,7 @@ impl Launcher {
         if !p.license.is_empty() {
             by.push(p.license.clone());
         }
-        let (tone, reason) = match &support {
-            Support::Works => (ui::live(), None),
-            Support::Partial(_) => (ui::warn(), support.reason()),
-            Support::No(_) => (white(0.55), support.reason()),
-        };
+        let (tone, reason) = support_tone_and_reason(&support);
         let about = m
             .about
             .get(&p.id)
@@ -729,6 +725,17 @@ fn placeholder_for(
     }
 }
 
+/// The dot color and the optional reason line a project's support state shows, as the mockup
+/// writes it: works is live, partly/unsupported are off with their reason.
+fn support_tone_and_reason(support: &Support) -> (gpui::Hsla, Option<String>) {
+    let tone = match support {
+        Support::Works => ui::live(),
+        Support::Partial(_) => ui::warn(),
+        Support::No(_) => white(0.55),
+    };
+    (tone, support.reason().map(|r| r.to_string()))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -843,5 +850,21 @@ mod tests {
             .to_string(),
             "Search, then Enter"
         );
+    }
+
+    #[test]
+    fn a_project_support_state_reads_as_the_mockup_writes_it() {
+        // Works: live dot, no reason.
+        let (tone, reason) = support_tone_and_reason(&Support::Works);
+        assert_eq!(tone, ui::live());
+        assert_eq!(reason, None);
+        // Partial: warn dot and the reason.
+        let (tone, reason) = support_tone_and_reason(&Support::Partial("needs Java 21".into()));
+        assert_eq!(tone, ui::warn());
+        assert_eq!(reason.as_deref(), Some("needs Java 21"));
+        // No: off dot and the reason.
+        let (tone, reason) = support_tone_and_reason(&Support::No("Horizon-only build".into()));
+        assert_eq!(tone, white(0.55));
+        assert_eq!(reason.as_deref(), Some("Horizon-only build"));
     }
 }
