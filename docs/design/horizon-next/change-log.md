@@ -45,3 +45,7 @@
   (fabric/quilt/neoforge/forge/other).
 - `e32535bfe` refactor(account): extract the player status tone/line and unit-test its branches
   (Microsoft -> Live/online servers; Offline/GameName -> Offline/single player).
+- `b4412c2de` refactor(instance): extract the instance dialog's primary button label and unit-test it (Save changes / Copying… / Create instance).
+- `a432bbd04` refactor(mods): extract the project support tone/reason mapping and unit-test it (Works/Partial/No).
+- `8af6be187` refactor(home): extract the multiplayer server reach status and unit-test its rows (Online/Offline/Asking).
+- `b4412c2de` is the 13th independent commit on the branch; every commit carries its own fence run.
