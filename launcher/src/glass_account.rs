@@ -28,38 +28,23 @@ impl Launcher {
     fn glass_who_plays(&mut self, cx: &mut Context<Self>) -> Div {
         let t = self.theme;
         let now = self.accounts.player();
-        let (uuid, name, status) = match &now {
-            Player::Microsoft(uuid) => {
-                let elyby = account::is_ely_account(uuid);
-                (
-                    Some(uuid.clone()),
-                    self.accounts
-                        .accounts
-                        .iter()
-                        .find(|a| &a.uuid == uuid)
-                        .map(|a| a.name.clone())
-                        .unwrap_or_default(),
-                    if elyby {
-                        (
-                            Tone::Live,
-                            tr("Ely.by account · servers that accept Ely.by"),
-                        )
-                    } else {
-                        (Tone::Live, tr("Microsoft account · online servers too"))
-                    },
-                )
-            }
-            Player::Offline(name) => (
-                None,
-                name.clone(),
-                (Tone::Off, tr("Offline · single player and LAN worlds")),
+        let (uuid, name) = match &now {
+            Player::Microsoft(uuid) => (
+                Some(uuid.clone()),
+                self.accounts
+                    .accounts
+                    .iter()
+                    .find(|a| &a.uuid == uuid)
+                    .map(|a| a.name.clone())
+                    .unwrap_or_default(),
             ),
+            Player::Offline(name) => (None, name.clone()),
             Player::GameName => (
                 None,
                 self.offline_name.clone().unwrap_or_else(|| "Player".into()),
-                (Tone::Off, tr("Offline · single player and LAN worlds")),
             ),
         };
+        let status = player_status(&now);
         let head = div()
             .flex_none()
             .size(px(80.))
@@ -409,5 +394,61 @@ impl Launcher {
                         }),
                 )
             })
+    }
+}
+
+/// The dot tone and the line under the player's name: live online (Microsoft or Ely.by) or
+/// offline single player/LAN. The Ely.by branch depends on the keychain and reads false in
+/// tests, so it is not pinned here.
+fn player_status(player: &Player) -> (Tone, String) {
+    match player {
+        Player::Microsoft(uuid) => {
+            if account::is_ely_account(uuid) {
+                (
+                    Tone::Live,
+                    tr("Ely.by account · servers that accept Ely.by").to_string(),
+                )
+            } else {
+                (
+                    Tone::Live,
+                    tr("Microsoft account · online servers too").to_string(),
+                )
+            }
+        }
+        Player::Offline(_) => (
+            Tone::Off,
+            tr("Offline · single player and LAN worlds").to_string(),
+        ),
+        Player::GameName => (
+            Tone::Off,
+            tr("Offline · single player and LAN worlds").to_string(),
+        ),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use account::Player;
+
+    #[test]
+    fn a_microsoft_player_is_live_for_online_servers() {
+        let (tone, line) = player_status(&Player::Microsoft("some-uuid".into()));
+        assert!(matches!(tone, Tone::Live));
+        assert!(line.contains("online servers"));
+    }
+
+    #[test]
+    fn an_offline_player_is_off_for_single_player_and_lan() {
+        let (tone, line) = player_status(&Player::Offline("Nguyen".into()));
+        assert!(matches!(tone, Tone::Off));
+        assert!(line.contains("single player"));
+    }
+
+    #[test]
+    fn a_made_up_game_name_is_off_for_single_player_and_lan() {
+        let (tone, line) = player_status(&Player::GameName);
+        assert!(matches!(tone, Tone::Off));
+        assert!(line.contains("LAN worlds"));
     }
 }
