@@ -200,3 +200,31 @@ HORIZON_ELY_CLIENT_ID = 123
         assert_eq!(id, Some("env".to_owned()));
     }
 }
+
+#[test]
+fn parse_config_text_reads_both_client_ids_from_toml() {
+    let cfg = parse_config_text(
+        r#"HORIZON_MSA_CLIENT_ID = "msa-id"
+HORIZON_ELY_CLIENT_ID = "ely-id"
+"#,
+    );
+    assert_eq!(cfg.horizon_msa_client_id.as_deref(), Some("msa-id"));
+    assert_eq!(cfg.horizon_ely_client_id.as_deref(), Some("ely-id"));
+}
+
+#[test]
+fn parse_config_text_missing_ids_yield_none() {
+    let cfg = parse_config_text(
+        "# just a comment
+",
+    );
+    assert_eq!(cfg.horizon_msa_client_id, None);
+    assert_eq!(cfg.horizon_ely_client_id, None);
+}
+
+#[test]
+fn parse_config_text_invalid_toml_yields_default() {
+    let cfg = parse_config_text("this is not valid toml {{{");
+    assert_eq!(cfg.horizon_msa_client_id, None);
+    assert_eq!(cfg.horizon_ely_client_id, None);
+}
