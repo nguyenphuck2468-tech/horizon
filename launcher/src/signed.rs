@@ -5,7 +5,7 @@
 //! with a message saying why.
 
 use crate::backend::{LAUNCHER_REPO, REPO};
-use horizon_release_sign::{PublicKey, SIGNATURE, SUMS};
+use horizon_release_sign::{PublicKey, SIGNATURE, SIGNATURE_V2, SUMS};
 
 /// Where a release's attached file downloads from (GitHub's fixed address for it).
 pub fn asset_url(repo: &str, tag: &str, name: &str) -> String {
@@ -54,7 +54,8 @@ pub fn launcher_digest(
 
 /// The signed SHA-256 of `asset` in the Nightly published under `tag` (`nightly`, or a dated
 /// `nightly-<date>`): its checksums must be signed for the nightly channel
-/// (`horizon_release_sign::nightly_digest`), whatever tag serves them.
+/// (`horizon_release_sign::nightly_digest`), whatever tag serves them. Tries the legacy
+/// `SHA256SUMS.sig` first, then falls back to `SHA256SUMS.v2.sig` for newer Nightly builds.
 pub fn nightly_digest(
     tag: &str,
     asset: &str,
@@ -62,9 +63,25 @@ pub fn nightly_digest(
     fetch: impl Fn(&str) -> Result<Option<Vec<u8>>, String>,
 ) -> Result<String, String> {
     let sums = fetch(&asset_url(REPO, tag, SUMS))?;
-    let signature = fetch(&asset_url(REPO, tag, SIGNATURE))?
-        .map(|bytes| String::from_utf8_lossy(&bytes).into_owned());
-    horizon_release_sign::nightly_digest(asset, sums.as_deref(), signature.as_deref(), keys)
+    let sums = sums.as_deref();
+
+    // Try the legacy per-channel signature first.
+    if let Some(sig) = fetch(&asset_url(REPO, tag, SIGNATURE))? {
+        let sig = String::from_utf8_lossy(&sig).into_owned();
+        if let Ok(hex) = horizon_release_sign::nightly_digest(asset, sums, Some(&sig), keys) {
+            return Ok(hex);
+        }
+    }
+
+    // Fall back to the per-version v2 signature.
+    if let Some(sig) = fetch(&asset_url(REPO, tag, SIGNATURE_V2))? {
+        let sig = String::from_utf8_lossy(&sig).into_owned();
+        return horizon_release_sign::nightly_digest(asset, sums, Some(&sig), keys);
+    }
+
+    Err(format!(
+        "{tag}: no signed checksums found (tried SHA256SUMS.sig and SHA256SUMS.v2.sig)"
+    ))
 }
 
 #[cfg(test)]
@@ -138,7 +155,7 @@ mod tests {
         // GitHub as it answers for a signed release (any tag: the files are what a replay would serve).
         let signed = |url: &str| -> Result<Option<Vec<u8>>, String> {
             assert!(url
-                .starts_with("https://github.com/nguyenphuck2468-tech/horizon/releases/download/"));
+                .starts_with("https://github.com/horizon-rust/horizon/releases/download/"));
             Ok(Some(
                 if url.ends_with(".sig") {
                     signature.clone()

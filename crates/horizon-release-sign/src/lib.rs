@@ -20,6 +20,8 @@ use ring::signature::{ED25519, Ed25519KeyPair, KeyPair, UnparsedPublicKey};
 pub const SUMS: &str = "SHA256SUMS";
 /// Its signatures' asset name.
 pub const SIGNATURE: &str = "SHA256SUMS.sig";
+/// The v2 signature asset name for Nightly releases: signed per-version instead of per-channel.
+pub const SIGNATURE_V2: &str = "SHA256SUMS.v2.sig";
 
 const KEYS: &str = include_str!("../release-keys.txt");
 const LEGACY: &str = include_str!("../legacy-releases.txt");
