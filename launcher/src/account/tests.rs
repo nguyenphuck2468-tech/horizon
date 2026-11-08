@@ -3755,6 +3755,7 @@ fn an_account_phase_label_reads_as_written() {
     );
     assert_eq!(session::Phase::Saving.label(), "Saving sign-in…");
     assert_eq!(session::Phase::SigningOut.label(), "Signing out…");
+    assert_eq!(session::Phase::ElyBy.label(), "Renewing Ely.by sign-in…");
 }
 
 #[test]
