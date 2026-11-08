@@ -1,5 +1,23 @@
 # Horizon Next — change log
 
+## 2026-11-08
+
+- `334fbf746` fix(game): read the game, its builds and the mixin registry from
+  `horizon-rust/horizon`; the launcher's own releases stay on the fork (`LAUNCHER_REPO`).
+- `b10dca70a` fix(net): retry 502/503/504 twice (250 ms, 500 ms) before failing a download,
+  with a loopback test that serves 503, 504 then 200.
+- `15e42bd10` fix(nightly): require `SHA256SUMS.v2.sig` signed for the Nightly's own version
+  (`nightly-<date>-<commit>`); the channel signature is refused. Same rule in `horizon-server`.
+- Same three commits cherry-picked to `horizon-next/phase-2-main-experience` (`0f1c2daf4`,
+  `64e4a097f`, `29d6591a4`) and `horizon-next/phase-3-content-experience` (`d50f5705e`,
+  `d67677e1a`, `a7d3d7bbd`).
+- `cb3f7fd19` refactor(palette): match mod queries in any case and unit-test the extracted
+  filter (partial title, nothing matching, list order).
+- Fence on every tip: fmt/clippy clean; lib tests green (551 phase 1, 557 phase 2, 554 phase 3;
+  the environment-dependent binary-replacement test skipped and failing identically at
+  baseline).
+- Evidence and file map: `download-fixes.md`.
+
 ## 2026-11-07
 
 - Phase 0 close-out docs added (p0-summary, preservation-matrix, roadmap). `ccec427`

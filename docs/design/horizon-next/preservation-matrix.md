@@ -19,5 +19,6 @@ Scope: `launcher/` + shared crates. PJPL = the five-step charter in docs/design/
 
 Untested-by-automation (candidates for added tests): parts of glass_* UI states (partially tested in
 glass_home/glass_instance/glass_server_dialog/glass_settings/glass_shot_blur), desktop_seams,
-titled window resize paths. Outstanding: `checks` CI on this branch (run 42375384481) — the
-authoritative regression fence for phases 1+.
+titled window resize paths. Outstanding: `checks` CI on the current tips after the 2026-11-08
+download fixes (`cb3f7fd19` on phase 1, `29d6591a4` on phase 2, `a7d3d7bbd` on phase 3) —
+the authoritative regression fence for phases 1+. Nightly download path: `download-fixes.md`.
