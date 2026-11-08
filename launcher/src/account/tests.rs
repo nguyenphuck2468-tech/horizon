@@ -3728,3 +3728,31 @@ fn an_offline_name_is_valid_from_3_to_16_alphanumeric_underscore_chars() {
     assert!(!valid_offline_name("a b"));
     assert!(!valid_offline_name(""));
 }
+
+#[test]
+fn an_account_phase_label_reads_as_written() {
+    assert_eq!(
+        session::Phase::Queued.label(),
+        "Waiting for account access…"
+    );
+    assert_eq!(session::Phase::Keychain.label(), "Reading keychain…");
+    assert_eq!(
+        session::Phase::Microsoft.label(),
+        "Renewing Microsoft sign-in…"
+    );
+    assert_eq!(session::Phase::Xbox.label(), "Signing in to Xbox Live…");
+    assert_eq!(
+        session::Phase::Minecraft.label(),
+        "Getting Minecraft session…"
+    );
+    assert_eq!(
+        session::Phase::Ownership.label(),
+        "Checking Minecraft ownership…"
+    );
+    assert_eq!(
+        session::Phase::Profile.label(),
+        "Loading Minecraft profile…"
+    );
+    assert_eq!(session::Phase::Saving.label(), "Saving sign-in…");
+    assert_eq!(session::Phase::SigningOut.label(), "Signing out…");
+}
