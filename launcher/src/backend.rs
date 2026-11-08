@@ -713,19 +713,30 @@ fn installed_in(versions: &Path) -> Vec<String> {
 }
 
 /// A small release file (its checksums or their signature), whole; None when it has none.
+///
+/// Retries a few times on transient failures (504 Gateway Timeout, dropped connection)
+/// because GitHub's release asset service can be slow or briefly unavailable.
 pub(crate) fn fetch_small(url: &str) -> Result<Option<Vec<u8>>, String> {
-    let response = match get(url) {
-        Ok(response) => response,
-        Err(e) if e.ends_with("answered 404") => return Ok(None),
-        Err(e) => return Err(e),
-    };
-    let mut body = Vec::new();
-    response
-        .into_reader()
-        .take(1 << 20)
-        .read_to_end(&mut body)
-        .map_err(|e| format!("Download interrupted: {e}"))?;
-    Ok(Some(body))
+    let mut last_err = String::new();
+    for _ in 1..=3 {
+        match get(url) {
+            Ok(response) => {
+                let mut body = Vec::new();
+                response
+                    .into_reader()
+                    .take(1 << 20)
+                    .read_to_end(&mut body)
+                    .map_err(|e| format!("Download interrupted: {e}"))?;
+                return Ok(Some(body));
+            }
+            Err(e) if e.ends_with("answered 404") => return Ok(None),
+            Err(e) => {
+                last_err = e;
+                continue;
+            }
+        }
+    }
+    Err(format!("{url} failed after 3 attempts: {last_err}"))
 }
 
 /// The SHA-256 the release's signed checksums give for `asset`, or why it must not be installed.
