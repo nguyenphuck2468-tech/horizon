@@ -53,13 +53,7 @@ impl Launcher {
                 ),
             );
         }
-        let note = match count {
-            1 => trf("1 pack in {name}", &[("name", &name)]),
-            _ => trf(
-                "{count} packs in {name}",
-                &[("count", &count.to_string()), ("name", &name)],
-            ),
-        };
+        let note = count_note(count, &name, "1 pack in {name}", "{count} packs in {name}");
         let folder = home.join(PackKind::Resource.folder());
         body = body.child(
             ui::list_head(note).child(
@@ -323,5 +317,32 @@ impl Launcher {
                 .child(grid)
                 .children(toggle_all),
         )
+    }
+}
+
+/// "1 pack in {name}" / "{count} packs in {name}" — the mockup's count line for a list's head.
+fn count_note(count: usize, name: &str, singular: &str, plural: &str) -> String {
+    let args = [("name", name), ("count", &count.to_string())];
+    if count == 1 {
+        trf(singular, &args).to_string()
+    } else {
+        trf(plural, &args).to_string()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_home_packs_count_note_reads_as_the_mockup_writes_it() {
+        assert_eq!(
+            count_note(1, "Horizon", "1 pack in {name}", "{count} packs in {name}"),
+            "1 pack in Horizon"
+        );
+        assert_eq!(
+            count_note(5, "Horizon", "1 pack in {name}", "{count} packs in {name}"),
+            "5 packs in Horizon"
+        );
     }
 }
