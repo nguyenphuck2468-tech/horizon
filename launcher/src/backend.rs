@@ -722,12 +722,13 @@ pub(crate) fn fetch_small(url: &str) -> Result<Option<Vec<u8>>, String> {
         match get(url) {
             Ok(response) => {
                 let mut body = Vec::new();
-                response
-                    .into_reader()
-                    .take(1 << 20)
-                    .read_to_end(&mut body)
-                    .map_err(|e| format!("Download interrupted: {e}"))?;
-                return Ok(Some(body));
+                match response.into_reader().take(1 << 20).read_to_end(&mut body) {
+                    Ok(_) => return Ok(Some(body)),
+                    Err(e) => {
+                        last_err = format!("Download interrupted: {e}");
+                        continue;
+                    }
+                }
             }
             Err(e) if e.ends_with("answered 404") => return Ok(None),
             Err(e) => {
