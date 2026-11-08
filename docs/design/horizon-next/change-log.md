@@ -51,3 +51,5 @@
 - `b4412c2de` is the 13th independent commit on the branch; every commit carries its own fence run.
 - `afd8e54d9` refactor(home): extract the packs count note and unit-test it (1 pack / N packs).
 - `068105e03` refactor(home): extract the mods count note and unit-test it (1 mod / N mods).
+- Phase 1 merged into `launcher` @ `5106b8902` via PR #2 (CI run 157 success: launcher + verify).
+- Horizon vẫn phải là Horizon — 100% existing features preserved, all commits independent.
