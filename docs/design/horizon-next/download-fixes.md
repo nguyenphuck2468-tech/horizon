@@ -53,8 +53,17 @@ other two phase branches.
   fails identically at the unmodified baseline in this codespace because its filesystem
   creates files with mode 0646 (umask handling), so it is recorded, not changed here.
 - `cargo test -p horizon-release-sign`: 11 unit + 4 integration tests pass.
-- `cargo check -p horizon-server --all-targets`: passes.
+- `cargo test -p horizon-server --all-targets`: 134 pass, clippy clean.
 - Bin-target palette tests: 7 pass (`cargo test --bin horizon-launcher glass_palette`).
+
+GitHub CI (`checks`) on the three pull requests, after the server test was updated to serve
+`SHA256SUMS.v2.sig`:
+
+| Pull request | Run | `launcher` | `verify` |
+| --- | --- | --- | --- |
+| #5 phase 1 | 42496887060 | pass | pass |
+| #3 phase 2 | 42496930892 | pass | pass |
+| #4 phase 3 | 42496931408 | pass | pass |
 
 Branch tips with the three fixes:
 
