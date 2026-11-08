@@ -843,9 +843,10 @@ fn unpack(archive: &Path, url: &str, to: &Path) -> Result<(), String> {
 pub fn install(release: &Release, progress: impl Fn(f32)) -> Result<(), String> {
     let tag = release.tag.as_str();
     let sha256 = match &release.nightly {
-        // Signed for the Nightly channel, served under its own GitHub tag.
-        Some(published) => crate::signed::nightly_digest(
-            published,
+        // Signed for its own version (SHA256SUMS.v2.sig), served under its own GitHub tag.
+        Some(tag) => crate::signed::nightly_digest(
+            tag,
+            &release.tag,
             ASSET.unwrap_or_default(),
             &horizon_release_sign::trusted_keys(),
             fetch_small,
