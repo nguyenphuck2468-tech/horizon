@@ -5719,4 +5719,86 @@ mod tests {
             .collect();
         assert_eq!(shown, ["0", "7", "999", "1,000", "12,300", "1,234,500"]);
     }
+
+    #[test]
+    fn play_press_returns_play_when_prepared() {
+        use crate::{play_press, PlayPress};
+        assert_eq!(play_press(true, None, false), PlayPress::Play);
+        assert_eq!(play_press(true, Some(true), false), PlayPress::Play);
+        assert_eq!(play_press(true, Some(false), false), PlayPress::Play);
+    }
+
+    #[test]
+    fn play_press_returns_prepare_then_play_when_owner_but_not_prepared() {
+        use crate::{play_press, PlayPress};
+        assert_eq!(
+            play_press(false, Some(true), false),
+            PlayPress::PrepareThenPlay
+        );
+    }
+
+    #[test]
+    fn play_press_returns_nothing_when_not_prepared_and_no_owner() {
+        use crate::{play_press, PlayPress};
+        assert_eq!(play_press(false, None, false), PlayPress::Nothing);
+        assert_eq!(play_press(false, Some(false), false), PlayPress::Nothing);
+    }
+
+    #[test]
+    fn play_press_returns_nothing_when_busy() {
+        use crate::{play_press, PlayPress};
+        assert_eq!(play_press(true, None, true), PlayPress::Nothing);
+        assert_eq!(play_press(false, Some(true), true), PlayPress::Nothing);
+    }
+
+    #[test]
+    fn starts_now_returns_true_only_when_prepared_and_not_busy() {
+        use crate::starts_now;
+        assert!(starts_now(true, false, false));
+        assert!(!starts_now(false, false, false));
+        assert!(!starts_now(true, true, false));
+        assert!(!starts_now(true, false, true));
+        assert!(!starts_now(false, true, true));
+    }
+}
+
+#[test]
+fn play_press_returns_play_when_prepared() {
+    use super::{play_press, PlayPress};
+    assert_eq!(play_press(true, None, false), PlayPress::Play);
+    assert_eq!(play_press(true, Some(true), false), PlayPress::Play);
+    assert_eq!(play_press(true, Some(false), false), PlayPress::Play);
+}
+
+#[test]
+fn play_press_returns_prepare_then_play_when_owner_but_not_prepared() {
+    use super::{play_press, PlayPress};
+    assert_eq!(
+        play_press(false, Some(true), false),
+        PlayPress::PrepareThenPlay
+    );
+}
+
+#[test]
+fn play_press_returns_nothing_when_not_prepared_and_no_owner() {
+    use super::{play_press, PlayPress};
+    assert_eq!(play_press(false, None, false), PlayPress::Nothing);
+    assert_eq!(play_press(false, Some(false), false), PlayPress::Nothing);
+}
+
+#[test]
+fn play_press_returns_nothing_when_busy() {
+    use super::{play_press, PlayPress};
+    assert_eq!(play_press(true, None, true), PlayPress::Nothing);
+    assert_eq!(play_press(false, Some(true), true), PlayPress::Nothing);
+}
+
+#[test]
+fn starts_now_returns_true_only_when_prepared_and_not_busy() {
+    use super::starts_now;
+    assert!(starts_now(true, false, false));
+    assert!(!starts_now(false, false, false));
+    assert!(!starts_now(true, true, false));
+    assert!(!starts_now(true, false, true));
+    assert!(!starts_now(false, true, true));
 }
