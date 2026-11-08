@@ -29,24 +29,15 @@ impl Launcher {
     /// The search's placeholder: the registry's count when it is listed whole.
     pub(super) fn mods_placeholder(&self) -> SharedString {
         let m = &self.mods;
-        let registry = m.source == SourceId::Horizon && m.java.is_none();
-        if registry && m.kind == PackKind::Mod && m.searched && m.text.text().is_empty() {
-            // Results come in pages: only a last page gives the real count.
-            if m.more {
-                return tr("Search Horizon mods").into();
-            }
-            trf(
-                "Search {count} Horizon mods",
-                &[("count", &m.results.len().to_string())],
-            )
-            .into()
-        } else if m.source == SourceId::Modrinth
-            && matches!(m.kind, PackKind::ResourcePack | PackKind::Modpack)
-        {
-            tr("Search resource packs and modpacks").into()
-        } else {
-            tr("Search, then Enter").into()
-        }
+        placeholder_for(
+            m.source,
+            m.java.is_none(),
+            m.kind,
+            m.searched,
+            m.text.text().is_empty(),
+            m.more,
+            m.results.len(),
+        )
     }
 
     pub(super) fn glass_mods_page(&mut self, cx: &mut Context<Self>) -> Div {
@@ -503,11 +494,7 @@ impl Launcher {
         if !p.license.is_empty() {
             by.push(p.license.clone());
         }
-        let (tone, reason) = match &support {
-            Support::Works => (ui::live(), None),
-            Support::Partial(_) => (ui::warn(), support.reason()),
-            Support::No(_) => (white(0.55), support.reason()),
-        };
+        let (tone, reason) = support_tone_and_reason(&support);
         let about = m
             .about
             .get(&p.id)
@@ -703,5 +690,181 @@ fn kind_name(kind: PackKind) -> &'static str {
         PackKind::ResourcePack => "Resource pack",
         PackKind::Shader => "Shader pack",
         PackKind::DataPack => "Data pack",
+    }
+}
+
+/// The mods search's placeholder: a Horizon launcher's whole list says its count (only its last
+/// page can, so a search with more pages asks to keep typing); the Resource pack and Modpack
+/// tabs on Modrinth share a placeholder; everything else says what the field does.
+fn placeholder_for(
+    source: SourceId,
+    over_a_launcher: bool,
+    kind: PackKind,
+    searched: bool,
+    query_empty: bool,
+    more: bool,
+    count: usize,
+) -> SharedString {
+    let registry = source == SourceId::Horizon && over_a_launcher;
+    if registry && kind == PackKind::Mod && searched && query_empty {
+        // Results come in pages: only a last page gives the real count.
+        if more {
+            return tr("Search Horizon mods").into();
+        }
+        trf(
+            "Search {count} Horizon mods",
+            &[("count", &count.to_string())],
+        )
+        .into()
+    } else if source == SourceId::Modrinth
+        && matches!(kind, PackKind::ResourcePack | PackKind::Modpack)
+    {
+        tr("Search resource packs and modpacks").into()
+    } else {
+        tr("Search, then Enter").into()
+    }
+}
+
+/// The dot color and the optional reason line a project's support state shows, as the mockup
+/// writes it: works is live, partly/unsupported are off with their reason.
+fn support_tone_and_reason(support: &Support) -> (gpui::Hsla, Option<String>) {
+    let tone = match support {
+        Support::Works => ui::live(),
+        Support::Partial(_) => ui::warn(),
+        Support::No(_) => white(0.55),
+    };
+    (tone, support.reason().map(|r| r.to_string()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_whole_horizon_list_says_its_count() {
+        let got = placeholder_for(
+            SourceId::Horizon,
+            true,
+            PackKind::Mod,
+            true,
+            true,
+            false,
+            123,
+        );
+        assert_eq!(got.to_string(), "Search 123 Horizon mods");
+    }
+
+    #[test]
+    fn more_pages_ask_for_a_narrower_search() {
+        let got = placeholder_for(
+            SourceId::Horizon,
+            true,
+            PackKind::Mod,
+            true,
+            true,
+            true,
+            200,
+        );
+        assert_eq!(got.to_string(), "Search Horizon mods");
+    }
+
+    #[test]
+    fn the_modrinth_pack_tabs_share_a_placeholder() {
+        let packs = placeholder_for(
+            SourceId::Modrinth,
+            true,
+            PackKind::ResourcePack,
+            false,
+            true,
+            false,
+            0,
+        );
+        assert_eq!(packs.to_string(), "Search resource packs and modpacks");
+        let modpacks = placeholder_for(
+            SourceId::Modrinth,
+            true,
+            PackKind::Modpack,
+            false,
+            true,
+            false,
+            0,
+        );
+        assert_eq!(modpacks.to_string(), "Search resource packs and modpacks");
+    }
+
+    #[test]
+    fn everything_else_says_search_then_enter() {
+        // Not searched yet.
+        assert_eq!(
+            placeholder_for(
+                SourceId::Horizon,
+                true,
+                PackKind::Mod,
+                false,
+                true,
+                false,
+                0
+            )
+            .to_string(),
+            "Search, then Enter"
+        );
+        // A query with text.
+        assert_eq!(
+            placeholder_for(
+                SourceId::Horizon,
+                true,
+                PackKind::Mod,
+                true,
+                false,
+                false,
+                0
+            )
+            .to_string(),
+            "Search, then Enter"
+        );
+        // A Java instance's files (never the launcher's list).
+        assert_eq!(
+            placeholder_for(
+                SourceId::Horizon,
+                false,
+                PackKind::Mod,
+                true,
+                true,
+                false,
+                0
+            )
+            .to_string(),
+            "Search, then Enter"
+        );
+        // Other kinds.
+        assert_eq!(
+            placeholder_for(
+                SourceId::Horizon,
+                true,
+                PackKind::DataPack,
+                true,
+                true,
+                false,
+                0
+            )
+            .to_string(),
+            "Search, then Enter"
+        );
+    }
+
+    #[test]
+    fn a_project_support_state_reads_as_the_mockup_writes_it() {
+        // Works: live dot, no reason.
+        let (tone, reason) = support_tone_and_reason(&Support::Works);
+        assert_eq!(tone, ui::live());
+        assert_eq!(reason, None);
+        // Partial: warn dot and the reason.
+        let (tone, reason) = support_tone_and_reason(&Support::Partial("needs Java 21".into()));
+        assert_eq!(tone, ui::warn());
+        assert_eq!(reason.as_deref(), Some("needs Java 21"));
+        // No: off dot and the reason.
+        let (tone, reason) = support_tone_and_reason(&Support::No("Horizon-only build".into()));
+        assert_eq!(tone, white(0.55));
+        assert_eq!(reason.as_deref(), Some("Horizon-only build"));
     }
 }

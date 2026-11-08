@@ -984,3 +984,41 @@ impl Launcher {
             .into_any_element()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_server_state_reads_as_the_mockup_writes_it() {
+        // Running cleanly is live.
+        assert!(matches!(
+            tone(&Status {
+                phase: "running".into(),
+                crashes: 0,
+                ..Default::default()
+            }),
+            Tone::Live
+        ));
+        // Running but it has crashed is a warning.
+        assert!(matches!(
+            tone(&Status {
+                phase: "running".into(),
+                crashes: 3,
+                ..Default::default()
+            }),
+            Tone::Warn
+        ));
+        // A stopped server is off.
+        assert!(matches!(tone(&Status::stopped()), Tone::Off));
+        // Anything else (starting, stopping, restarting) is busy.
+        assert!(matches!(
+            tone(&Status {
+                phase: "starting".into(),
+                crashes: 0,
+                ..Default::default()
+            }),
+            Tone::Busy
+        ));
+    }
+}

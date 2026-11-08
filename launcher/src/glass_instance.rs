@@ -721,11 +721,7 @@ impl Launcher {
                 .child(tr("Cancel")),
             &t,
         );
-        let label = match (editing.is_some(), busy) {
-            (true, _) => tr("Save changes"),
-            (false, true) if copy => tr("Copying…"),
-            (false, _) => tr("Create instance"),
-        };
+        let label = instance_label(editing.is_some(), busy, copy);
         let accent = ui::color(self.look.accent);
         let lit = gpui::hsla(accent.h, accent.s, (accent.l * 1.1).min(1.), 1.);
         let save = keyboard(
@@ -1031,6 +1027,16 @@ impl Launcher {
     }
 }
 
+/// The label of the instance dialog's primary button: save when editing, copy/create when
+/// creating, as the mockup writes it.
+fn instance_label(editing: bool, busy: bool, copy: bool) -> String {
+    match (editing, busy) {
+        (true, _) => tr("Save changes").to_string(),
+        (false, true) if copy => tr("Copying…").to_string(),
+        (false, _) => tr("Create instance").to_string(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1074,5 +1080,13 @@ mod tests {
         );
         // Offline, or before the list arrives: what is installed.
         assert_eq!(horizon_choices(&[], &installed), installed);
+    }
+    #[test]
+    fn the_instance_dialog_primary_button_label_reads_as_the_mockup_writes_it() {
+        assert_eq!(instance_label(true, false, false), tr("Save changes"));
+        assert_eq!(instance_label(true, true, false), tr("Save changes"));
+        assert_eq!(instance_label(false, true, true), tr("Copying…"));
+        assert_eq!(instance_label(false, false, false), tr("Create instance"));
+        assert_eq!(instance_label(false, true, false), tr("Create instance"));
     }
 }
