@@ -319,15 +319,20 @@ fn pick(
         }
     };
     let sums = attached(horizon_release_sign::SUMS)?;
-    let signature = attached(horizon_release_sign::SIGNATURE)?
-        .map(|bytes| String::from_utf8_lossy(&bytes).into_owned());
-    // A Nightly is signed for its channel, never for a tag, and installs under its date and commit.
+    let text = |bytes: Vec<u8>| String::from_utf8_lossy(&bytes).into_owned();
+    // A Nightly installs under its date and commit, which its title names (strictly: nothing signs
+    // GitHub's publication time), and its SHA256SUMS.v2.sig must sign the checksums for exactly that
+    // version, so an older Nightly can't be served as a newer one.
     let (tag, sha256) = if horizon_release_sign::is_nightly(tag) {
-        let version = horizon_release_sign::nightly_version(
-            release["name"].as_str().unwrap_or_default(),
-            release["published_at"].as_str().unwrap_or_default(),
-        );
+        let title = release["name"].as_str().unwrap_or_default();
+        let version = horizon_release_sign::nightly_title_version(title).ok_or_else(|| {
+            format!(
+                "the Nightly's title {title:?} doesn't name its date and commit, so it can't be checked"
+            )
+        })?;
+        let signature = attached(horizon_release_sign::SIGNATURE_V2)?.map(text);
         let sha256 = horizon_release_sign::nightly_digest(
+            &version,
             name,
             sums.as_deref(),
             signature.as_deref(),
@@ -335,6 +340,7 @@ fn pick(
         )?;
         (version, sha256)
     } else {
+        let signature = attached(horizon_release_sign::SIGNATURE)?.map(text);
         let sha256 = horizon_release_sign::signed_digest(
             tag,
             name,
