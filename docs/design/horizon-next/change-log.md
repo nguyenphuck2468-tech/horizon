@@ -13,6 +13,8 @@
   `d67677e1a`, `a7d3d7bbd`).
 - `cb3f7fd19` refactor(palette): match mod queries in any case and unit-test the extracted
   filter (partial title, nothing matching, list order).
+- test(server): the Nightly pick test now serves `SHA256SUMS.v2.sig`, and covers an older
+  build under tonight's title, a pre-v2 Nightly, and a title that names no build.
 - Fence on every tip: fmt/clippy clean; lib tests green (551 phase 1, 557 phase 2, 554 phase 3;
   the environment-dependent binary-replacement test skipped and failing identically at
   baseline).
