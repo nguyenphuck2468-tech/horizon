@@ -3756,3 +3756,26 @@ fn an_account_phase_label_reads_as_written() {
     assert_eq!(session::Phase::Saving.label(), "Saving sign-in…");
     assert_eq!(session::Phase::SigningOut.label(), "Signing out…");
 }
+
+#[test]
+fn an_accounts_look_returns_the_offline_name_skin_or_default() {
+    let mut accounts = Accounts::default();
+    accounts.offline.push("Nguyen".into());
+    accounts.looks.insert(
+        "nguyen".into(),
+        crate::skins::Look {
+            model: crate::skins::Model::Slim,
+            skin: true,
+            cape: false,
+        },
+    );
+    let look = accounts.look("Nguyen");
+    assert_eq!(look.model, crate::skins::Model::Slim);
+    assert!(look.skin);
+    assert!(!look.cape);
+    // Unknown name falls back to the default look.
+    let default = accounts.look("Nobody");
+    assert_eq!(default.model, crate::skins::Model::Classic);
+    assert!(!default.skin);
+    assert!(!default.cape);
+}
