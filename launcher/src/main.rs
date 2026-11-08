@@ -107,6 +107,7 @@ use theme::Theme;
 #[derive(Clone, Copy, PartialEq)]
 enum Page {
     Play,
+    Accounts,
     Versions,
     /// Mods, resource packs and modpacks (imported ones and the browser's).
     Mods,
@@ -125,6 +126,7 @@ impl Page {
     /// dialog open on Modded; `edit-instance`: the selected one's Edit dialog; `worlds`, `packs`...: Home on that tab, `HomeTab::from_env`).
     fn from_env() -> Page {
         match std::env::var("HORIZON_LAUNCHER_PAGE").as_deref() {
+            Ok("accounts") => Page::Accounts,
             Ok("mods" | "modpacks" | "resourcepacks" | "shaders" | "datapacks") => Page::Mods,
             Ok("servers") => Page::Servers,
             Ok("wardrobe") if horizon_cosmetics::enabled() => Page::Wardrobe,
@@ -137,8 +139,9 @@ impl Page {
 
     /// Every page, with its name and icon: the top bar shows all but Settings, which has its
     /// own button.
-    const ALL: [(Page, &'static str, &'static str); 7] = [
+    const ALL: [(Page, &'static str, &'static str); 8] = [
         (Page::Play, "Home", "home"),
+        (Page::Accounts, "Accounts", "user-multiple-02"),
         (Page::Mods, "Mods", "package"),
         (Page::Servers, "Servers", "server"),
         (Page::Wardrobe, "Wardrobe", "user"),
@@ -4621,6 +4624,26 @@ impl Launcher {
         })
     }
 
+    /// Accounts page: sign-in state, linked providers, offline names, skin/wardrobe link.
+    /// Placeholder until Phase 1 builds the full Account Center UI.
+    fn accounts_page(&mut self, _cx: &mut Context<Self>) -> Div {
+        div()
+            .flex()
+            .flex_col()
+            .gap(px(24.))
+            .p(px(theme::PAGE_GUTTER))
+            .child(crate::glass_ui::page_head(
+                "Accounts",
+                "Sign-in providers, linked profiles, and offline names.",
+            ))
+            .child(
+                div().flex().flex_col().gap(px(12.)).child(
+                    crate::glass_ui::text(14., FontWeight::NORMAL, 1.0)
+                        .child("Coming soon in Phase 1."),
+                ),
+            )
+    }
+
     fn versions_page(&mut self, cx: &mut Context<Self>) -> Div {
         let t = self.theme;
         let header = page_header(
@@ -5089,6 +5112,7 @@ impl Render for Launcher {
         self.window_width = f32::from(size.width);
         let content = match self.page {
             Page::Play => self.play_page(cx),
+            Page::Accounts => self.accounts_page(cx),
             Page::Versions => self.versions_page(cx),
             Page::Mods => self.mods_page(cx),
             Page::Servers => self.servers_page(cx),

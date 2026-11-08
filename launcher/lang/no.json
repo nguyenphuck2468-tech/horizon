@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Logg på med Ely.by",
   "Asking Ely.by…": "Spør Ely.by...",
   "Use the {provider} account for {name}.": "Bruk {provider} for {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Innloggingssiden åpnes i nettleseren din. Horizon ser aldri passordet ditt."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Innloggingssiden åpnes i nettleseren din. Horizon ser aldri passordet ditt.",
+  "Accounts": "Accounts"
 }

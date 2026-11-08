@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Ely.by bilan tizimga kiring",
   "Asking Ely.by…": "Ely.by soʻralmoqda…",
   "Use the {provider} account for {name}.": "{name} uchun {provider} qaydnomasidan foydalaning.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Tizimga kirish sahifasi brauzeringizda ochiladi. Horizon hech qachon parolingizni ko'rmaydi."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Tizimga kirish sahifasi brauzeringizda ochiladi. Horizon hech qachon parolingizni ko'rmaydi.",
+  "Accounts": "Accounts"
 }

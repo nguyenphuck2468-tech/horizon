@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "ลงชื่อเข้าใช้ด้วยEly.by",
   "Asking Ely.by…": "กำลังถาม Ely.by...",
   "Use the {provider} account for {name}.": "ใช้บัญชี {provider} สำหรับ {name}",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "หน้าลงชื่อเข้าใช้จะเปิดในเบราว์เซอร์ของคุณ Horizon ไม่เห็นรหัสผ่านของคุณเลย"
+  "The sign-in page opens in your browser. Horizon never sees your password.": "หน้าลงชื่อเข้าใช้จะเปิดในเบราว์เซอร์ของคุณ Horizon ไม่เห็นรหัสผ่านของคุณเลย",
+  "Accounts": "Accounts"
 }

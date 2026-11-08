@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Ku gal Ely.by",
   "Asking Ely.by…": "Weydiinta Ely.by…",
   "Use the {provider} account for {name}.": "Isticmaal {provider} {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Bogga galitaanka ayaa ka furan biraawsarkaaga. Horizon waligiis ma arko eraygaaga sirta ah."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Bogga galitaanka ayaa ka furan biraawsarkaaga. Horizon waligiis ma arko eraygaaga sirta ah.",
+  "Accounts": "Accounts"
 }

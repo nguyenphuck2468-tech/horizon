@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Увайдзіце ў Ely.by",
   "Asking Ely.by…": "Пытанне да Ely.by...",
   "Use the {provider} account for {name}.": "Выкарыстоўвайце ўліковы запіс {provider} для {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Старонка ўваходу адкрыецца ў вашым браўзеры. Horizon ніколі не бачыць ваш пароль."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Старонка ўваходу адкрыецца ў вашым браўзеры. Horizon ніколі не бачыць ваш пароль.",
+  "Accounts": "Accounts"
 }

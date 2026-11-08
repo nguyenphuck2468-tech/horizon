@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Entrar com a Ely.by",
   "Asking Ely.by…": "Conectando Ely.by…",
   "Use the {provider} account for {name}.": "Use a {provider} de {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "A página de login abre no seu navegador. O Horizon nunca vê sua senha."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "A página de login abre no seu navegador. O Horizon nunca vê sua senha.",
+  "Accounts": "Accounts"
 }

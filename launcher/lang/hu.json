@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Jelentkezzen be Ely.by-val",
   "Asking Ely.by…": "Az Ely.by megkérdezése…",
   "Use the {provider} account for {name}.": "Használja a {provider} a következőhöz: {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "A bejelentkezési oldal nyílik meg a böngészőjében. A Horizon soha nem látja a jelszavát."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "A bejelentkezési oldal nyílik meg a böngészőjében. A Horizon soha nem látja a jelszavát.",
+  "Accounts": "Accounts"
 }

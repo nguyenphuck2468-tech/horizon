@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Log a-steach le Ely.by",
   "Asking Ely.by…": "A’ faighneachd Ely.by…",
   "Use the {provider} account for {name}.": "Cleachd an {provider} airson {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Tha an duilleag clàraidh a-steach a' fosgladh sa bhrobhsair agad. Horizon chan fhaic thu am facal-faire agad gu bràth."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Tha an duilleag clàraidh a-steach a' fosgladh sa bhrobhsair agad. Horizon chan fhaic thu am facal-faire agad gu bràth.",
+  "Accounts": "Accounts"
 }

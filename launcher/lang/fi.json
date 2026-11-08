@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Kirjaudu sisään Ely.by",
   "Asking Ely.by…": "Kysytään Ely.by…",
   "Use the {provider} account for {name}.": "Käytä {provider} verkkotunnukselle {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Kirjautumissivu avautuu selaimessasi. Horizon ei koskaan näe salasanaasi."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Kirjautumissivu avautuu selaimessasi. Horizon ei koskaan näe salasanaasi.",
+  "Accounts": "Accounts"
 }

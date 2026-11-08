@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Idħol ma' Ely.by",
   "Asking Ely.by…": "Tistaqsi Ely.by...",
   "Use the {provider} account for {name}.": "Uża l-{provider} għal {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Il-paġna ta' login tiftaħ fil-browser tiegħek. Horizon qatt ma jara l-password tiegħek."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Il-paġna ta' login tiftaħ fil-browser tiegħek. Horizon qatt ma jara l-password tiegħek.",
+  "Accounts": "Accounts"
 }

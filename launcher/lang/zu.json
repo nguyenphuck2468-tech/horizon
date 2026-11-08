@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Ngena ngemvume Ely.by",
   "Asking Ely.by…": "Iyabuza i-Ely.by…",
   "Use the {provider} account for {name}.": "Sebenzisa i-akhawunti {provider} ukuze {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Ikhasi lokungena liyavuleka esipheqululini sakho. Horizon akalokothi ayibone iphasiwedi yakho."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Ikhasi lokungena liyavuleka esipheqululini sakho. Horizon akalokothi ayibone iphasiwedi yakho.",
+  "Accounts": "Accounts"
 }

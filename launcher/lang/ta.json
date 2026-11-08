@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Ely.by மூலம் உள்நுழை",
   "Asking Ely.by…": "Ely.by கேட்கிறது…",
   "Use the {provider} account for {name}.": "{name}க்கு {provider} பயன்படுத்தவும்.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "உள்நுழைவுப் பக்கம் உங்கள் உலாவியில் திறக்கும். Horizon உங்கள் கடவுச்சொல்லை ஒருபோதும் பார்ப்பதில்லை."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "உள்நுழைவுப் பக்கம் உங்கள் உலாவியில் திறக்கும். Horizon உங்கள் கடவுச்சொல்லை ஒருபோதும் பார்ப்பதில்லை.",
+  "Accounts": "Accounts"
 }

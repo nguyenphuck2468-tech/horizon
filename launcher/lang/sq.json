@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Hyni me Ely.by",
   "Asking Ely.by…": "Duke pyetur Ely.by…",
   "Use the {provider} account for {name}.": "Përdorni {provider} për {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Faqja e hyrjes hapet në shfletuesin tuaj. Horizon nuk e sheh kurrë fjalëkalimin tuaj."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Faqja e hyrjes hapet në shfletuesin tuaj. Horizon nuk e sheh kurrë fjalëkalimin tuaj.",
+  "Accounts": "Accounts"
 }

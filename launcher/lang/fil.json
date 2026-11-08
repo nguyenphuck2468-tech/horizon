@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Mag-sign in gamit ang Ely.by",
   "Asking Ely.by…": "Nagtatanong sa Ely.by...",
   "Use the {provider} account for {name}.": "Gamitin ang {provider} para sa {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Bubukas ang pahina ng pag-sign in sa iyong browser. Hindi kailanman nakikita ni Horizon ang iyong password."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Bubukas ang pahina ng pag-sign in sa iyong browser. Hindi kailanman nakikita ni Horizon ang iyong password.",
+  "Accounts": "Accounts"
 }

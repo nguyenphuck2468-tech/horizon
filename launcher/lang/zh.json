@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "使用 Ely.by 账户登录",
   "Asking Ely.by…": "正在询问 Ely.by…",
   "Use the {provider} account for {name}.": "请使用 {name} 的 {provider}。",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "登录页面会在浏览器中打开。Horizon 永远看不到你的密码。"
+  "The sign-in page opens in your browser. Horizon never sees your password.": "登录页面会在浏览器中打开。Horizon 永远看不到你的密码。",
+  "Accounts": "Accounts"
 }

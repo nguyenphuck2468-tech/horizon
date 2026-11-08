@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Inscribe te cum Ely.by",
   "Asking Ely.by…": "Rogans Ely.by...",
   "Use the {provider} account for {name}.": "utere ratione {provider} pro {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Pagina inscriptionis in navigatro tuo aperit. Horizon numquam videt verbum tuum secretum."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Pagina inscriptionis in navigatro tuo aperit. Horizon numquam videt verbum tuum secretum.",
+  "Accounts": "Accounts"
 }

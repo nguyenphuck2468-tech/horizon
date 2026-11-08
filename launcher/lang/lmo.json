@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Accedi cun Ely.by",
   "Asking Ely.by…": "Dumandand Ely.by...",
   "Use the {provider} account for {name}.": "Dupera el {provider} per {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "La pagina de acess si derva in del browser. Horizon vede mai la tua password."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "La pagina de acess si derva in del browser. Horizon vede mai la tua password.",
+  "Accounts": "Accounts"
 }

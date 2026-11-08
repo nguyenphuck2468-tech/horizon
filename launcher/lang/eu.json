@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Hasi saioa Ely.by-rekin",
   "Asking Ely.by…": "Ely.by-ri galdetzen...",
   "Use the {provider} account for {name}.": "Erabili {provider} {name}-rako.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Saio-hasierako orria irekitzen da zure arakatzailean. Horizon ez du inoiz zure pasahitza ikusten."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Saio-hasierako orria irekitzen da zure arakatzailean. Horizon ez du inoiz zure pasahitza ikusten.",
+  "Accounts": "Accounts"
 }

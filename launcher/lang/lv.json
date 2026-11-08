@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Pierakstieties ar Ely.by",
   "Asking Ely.by…": "Jautā Ely.by…",
   "Use the {provider} account for {name}.": "Izmantojiet {provider} {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Pieteikšanās lapa tiek atvērta jūsu pārlūkā. Horizon nekad neredz jūsu paroli."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Pieteikšanās lapa tiek atvērta jūsu pārlūkā. Horizon nekad neredz jūsu paroli.",
+  "Accounts": "Accounts"
 }

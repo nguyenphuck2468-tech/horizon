@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Masuk dengan Ely.by",
   "Asking Ely.by…": "Menanyakan Ely.by…",
   "Use the {provider} account for {name}.": "Gunakan {provider} untuk {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Halaman masuk terbuka di browser-mu. Horizon tidak pernah melihat kata sandimu."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Halaman masuk terbuka di browser-mu. Horizon tidak pernah melihat kata sandimu.",
+  "Accounts": "Accounts"
 }

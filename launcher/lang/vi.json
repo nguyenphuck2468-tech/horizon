@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Đăng nhập bằng Ely.by",
   "Asking Ely.by…": "Yêu cầu Ely.by…",
   "Use the {provider} account for {name}.": "Sử dụng {provider} cho {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Trang đăng nhập mở trong trình duyệt của bạn. Horizon không bao giờ thấy mật khẩu của bạn."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Trang đăng nhập mở trong trình duyệt của bạn. Horizon không bao giờ thấy mật khẩu của bạn.",
+  "Accounts": "Accounts"
 }

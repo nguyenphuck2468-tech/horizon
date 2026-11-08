@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Ely.byでサインイン",
   "Asking Ely.by…": "Ely.byに問い合わせ中…",
   "Use the {provider} account for {name}.": "{name} の{provider}を使用します。",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "サインインページがブラウザで開きます。Horizon がパスワードを見ることはありません。"
+  "The sign-in page opens in your browser. Horizon never sees your password.": "サインインページがブラウザで開きます。Horizon がパスワードを見ることはありません。",
+  "Accounts": "Accounts"
 }

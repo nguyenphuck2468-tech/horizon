@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Prisijunkite naudodami Ely.by.",
   "Asking Ely.by…": "Ely.by klausia…",
   "Use the {provider} account for {name}.": "Naudokite {provider} {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Prisijungimo puslapis atsidaro jūsų naršyklėje. „Horizon“ niekada nemato jūsų slaptažodžio."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Prisijungimo puslapis atsidaro jūsų naršyklėje. „Horizon“ niekada nemato jūsų slaptažodžio.",
+  "Accounts": "Accounts"
 }

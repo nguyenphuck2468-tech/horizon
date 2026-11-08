@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Ely.byпа кӗрӗр",
   "Asking Ely.by…": "Ely.by ыйтатӑп…",
   "Use the {provider} account for {name}.": "{provider} шучӗпе {name} валли усӑ курӑр.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Кӗрӗ страници сирӗн браузерта уҫӑлать. Horizon сирӗн паролье нихӑҫан та курмасть."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Кӗрӗ страници сирӗн браузерта уҫӑлать. Horizon сирӗн паролье нихӑҫан та курмасть.",
+  "Accounts": "Accounts"
 }

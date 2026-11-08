@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Մուտք գործեք Ely.by",
   "Asking Ely.by…": "Խնդրում ենք Ely.by…",
   "Use the {provider} account for {name}.": "Օգտագործեք {provider} {name}-ի համար:",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Մուտքագրման էջը բացվում է Ձեր բրաուզերում: Horizon երբեք չի տեսնում Ձեր գաղտնաբառը:"
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Մուտքագրման էջը բացվում է Ձեր բրաուզերում: Horizon երբեք չի տեսնում Ձեր գաղտնաբառը:",
+  "Accounts": "Accounts"
 }

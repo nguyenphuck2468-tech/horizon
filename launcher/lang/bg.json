@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Влезте с Ely.by",
   "Asking Ely.by…": "Питане на Ely.by...",
   "Use the {provider} account for {name}.": "Използвайте акаунта на {provider} за {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Страницата за влизане се отваря в браузъра ви. Horizon никога не вижда паролата ви."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Страницата за влизане се отваря в браузъра ви. Horizon никога не вижда паролата ви.",
+  "Accounts": "Accounts"
 }

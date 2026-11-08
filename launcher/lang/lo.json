@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "ເຂົ້າສູ່ລະບົບດ້ວຍ Ely.by",
   "Asking Ely.by…": "ກຳລັງຖາມ Ely.by…",
   "Use the {provider} account for {name}.": "ໃຊ້{provider} ສໍາລັບ {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "ໜ້າເຂົ້າສູ່ລະບົບເປີດຢູ່ໃນຕົວທ່ອງເວັບຂອງທ່ານ. Horizon ບໍ່ເຄີຍເຫັນລະຫັດຜ່ານຂອງເຈົ້າ."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "ໜ້າເຂົ້າສູ່ລະບົບເປີດຢູ່ໃນຕົວທ່ອງເວັບຂອງທ່ານ. Horizon ບໍ່ເຄີຍເຫັນລະຫັດຜ່ານຂອງເຈົ້າ.",
+  "Accounts": "Accounts"
 }

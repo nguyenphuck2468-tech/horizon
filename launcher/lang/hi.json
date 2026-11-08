@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Ely.by के साथ साइन इन करें",
   "Asking Ely.by…": "Ely.by से पूछा जा रहा है…",
   "Use the {provider} account for {name}.": "{name} के लिए {provider} खाते का उपयोग करें।",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "साइन इन पेज आपके ब्राउज़र में खुलता है। Horizon आपका पासवर्ड कभी नहीं देखता।"
+  "The sign-in page opens in your browser. Horizon never sees your password.": "साइन इन पेज आपके ब्राउज़र में खुलता है। Horizon आपका पासवर्ड कभी नहीं देखता।",
+  "Accounts": "Accounts"
 }

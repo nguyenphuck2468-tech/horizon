@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Meld aan met Ely.by",
   "Asking Ely.by…": "Vra Ely.by…",
   "Use the {provider} account for {name}.": "Gebruik die {provider} vir {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Die aanmeldingsblad maak in jou blaaier oop. Horizon sien nooit jou wagwoord nie."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Die aanmeldingsblad maak in jou blaaier oop. Horizon sien nooit jou wagwoord nie.",
+  "Accounts": "Accounts"
 }

@@ -1098,5 +1098,6 @@
   "Sign in with Ely.by": "Skráðu þig inn með Ely.by",
   "Asking Ely.by…": "Spyr Ely.by…",
   "Use the {provider} account for {name}.": "Notaðu {provider} fyrir {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Innskráningarsíðan opnast í vafranum þínum. Horizon sér aldrei lykilorðið þitt."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Innskráningarsíðan opnast í vafranum þínum. Horizon sér aldrei lykilorðið þitt.",
+  "Accounts": "Accounts"
 }
