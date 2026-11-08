@@ -49,3 +49,5 @@
 - `a432bbd04` refactor(mods): extract the project support tone/reason mapping and unit-test it (Works/Partial/No).
 - `8af6be187` refactor(home): extract the multiplayer server reach status and unit-test its rows (Online/Offline/Asking).
 - `b4412c2de` is the 13th independent commit on the branch; every commit carries its own fence run.
+- `afd8e54d9` refactor(home): extract the packs count note and unit-test it (1 pack / N packs).
+- `068105e03` refactor(home): extract the mods count note and unit-test it (1 mod / N mods).
