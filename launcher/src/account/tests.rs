@@ -3715,3 +3715,16 @@ fn renewed_game_handoff_rechecks_the_credential_after_refresh() {
         "a revoked credential must never create a session file"
     );
 }
+
+#[test]
+fn an_offline_name_is_valid_from_3_to_16_alphanumeric_underscore_chars() {
+    assert!(valid_offline_name("abc"));
+    assert!(valid_offline_name("abcdefghijklmnop"));
+    assert!(valid_offline_name("a_b"));
+    assert!(valid_offline_name("ABC123_xyz"));
+    assert!(!valid_offline_name("ab"));
+    assert!(!valid_offline_name("abcdefghijklmnopq"));
+    assert!(!valid_offline_name("a-b"));
+    assert!(!valid_offline_name("a b"));
+    assert!(!valid_offline_name(""));
+}
