@@ -127,10 +127,7 @@ fn retry_transient(request: impl FnMut() -> Answer) -> Answer {
 }
 
 /// The injectable wait keeps retry behavior deterministic in tests.
-fn retry_transient_with(
-    mut request: impl FnMut() -> Answer,
-    mut wait: impl FnMut(u32),
-) -> Answer {
+fn retry_transient_with(mut request: impl FnMut() -> Answer, mut wait: impl FnMut(u32)) -> Answer {
     let mut last_error = None;
     for attempt in 1..=REQUEST_ATTEMPTS {
         match request() {
