@@ -38,6 +38,8 @@ pub(crate) enum Answer {
     NotFound,
     /// 429, or 403 with GitHub's rate-limit headers.
     RateLimited,
+    /// A 502, 503 or 504: worth retrying before falling back to the mirror or saved copy.
+    Transient(String),
     /// Any other status, or no connection: the error to show.
     Failed(String),
 }
@@ -70,7 +72,7 @@ pub(crate) fn json_with(
         .as_ref()
         .map(|k| k.etag.as_str())
         .filter(|e| !e.is_empty());
-    let why = match github(url, etag) {
+    let why = match retry_transient(|| github(url, etag)) {
         Answer::Fresh(body, etag) => {
             write_kept(&file, url, etag.as_deref().unwrap_or(""), &body, now);
             return Ok(body);
@@ -85,16 +87,18 @@ pub(crate) fn json_with(
         },
         Answer::NotFound => return Err(format!("{url} answered 404")),
         Answer::RateLimited => RATE_LIMITED.to_owned(),
+        Answer::Transient(e) => e,
         Answer::Failed(e) => e,
     };
     let from_mirror = match mirror_url(url) {
-        Some(m) => match mirror(&m) {
+        Some(m) => match retry_transient(|| mirror(&m)) {
             Answer::Fresh(body, _) => {
                 write_kept(&file, url, "", &body, now);
                 return Ok(body);
             }
             Answer::NotFound => return Err(format!("{url} answered 404")),
             Answer::RateLimited => Some("too many requests from this network".to_owned()),
+            Answer::Transient(e) => Some(e),
             Answer::Failed(e) => Some(e),
             Answer::NotModified => Some("an unexpected 304".to_owned()),
         },
@@ -112,6 +116,39 @@ pub(crate) fn json_with(
 }
 
 const RATE_LIMITED: &str = "GitHub's rate limit was reached for your network";
+
+/// The first request and two retries. Only transient gateway failures are repeated.
+const REQUEST_ATTEMPTS: u32 = 3;
+
+fn retry_transient(request: impl FnMut() -> Answer) -> Answer {
+    retry_transient_with(request, |attempt| {
+        std::thread::sleep(std::time::Duration::from_millis(250 << (attempt - 1)));
+    })
+}
+
+/// The injectable wait keeps retry behavior deterministic in tests.
+fn retry_transient_with(mut request: impl FnMut() -> Answer, mut wait: impl FnMut(u32)) -> Answer {
+    let mut last_error = None;
+    for attempt in 1..=REQUEST_ATTEMPTS {
+        match request() {
+            Answer::Transient(error) => {
+                last_error = Some(error);
+                if attempt < REQUEST_ATTEMPTS {
+                    wait(attempt);
+                }
+            }
+            answer => return answer,
+        }
+    }
+    Answer::Failed(format!(
+        "{} (after {REQUEST_ATTEMPTS} attempts)",
+        last_error.unwrap_or_else(|| "Transient GitHub request failed".to_owned())
+    ))
+}
+
+fn transient_status(code: u16) -> bool {
+    matches!(code, 502..=504)
+}
 
 /// The mirror's URL for an API URL it serves (Horizon's own repository), or None.
 pub(crate) fn mirror_url(url: &str) -> Option<String> {
@@ -148,7 +185,7 @@ fn github(url: &str, etag: Option<&str>) -> Answer {
             let etag = r.header("ETag").map(str::to_owned);
             match r.into_json() {
                 Ok(body) => Answer::Fresh(body, etag),
-                Err(e) => Answer::Failed(e.to_string()),
+                Err(e) => Answer::Transient(format!("GitHub response could not be read: {e}")),
             }
         }
         Err(e) => failure(url, e),
@@ -159,7 +196,7 @@ fn mirror(url: &str) -> Answer {
     match backend::agent(url).get(url).call() {
         Ok(r) => match r.into_json() {
             Ok(body) => Answer::Fresh(body, None),
-            Err(e) => Answer::Failed(e.to_string()),
+            Err(e) => Answer::Transient(format!("Mirror response could not be read: {e}")),
         },
         Err(e) => failure(url, e),
     }
@@ -168,6 +205,9 @@ fn mirror(url: &str) -> Answer {
 fn failure(url: &str, e: ureq::Error) -> Answer {
     match e {
         ureq::Error::Status(404, _) => Answer::NotFound,
+        ureq::Error::Status(code, _) if transient_status(code) => {
+            Answer::Transient(format!("{url} answered {code}"))
+        }
         ureq::Error::Status(code, r) if rate_limited(code, |h| r.header(h).map(str::to_owned)) => {
             Answer::RateLimited
         }

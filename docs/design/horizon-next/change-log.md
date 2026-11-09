@@ -1,0 +1,148 @@
+# Horizon Next — change log
+
+## 2026-11-09
+- N03: `launcher/src/next_facade.rs` adds the shell-facing compatibility facade. It names
+  use cases for accounts (safe card, finished sign-in, refresh, sign-out, owner check,
+  play-as), release/Nightly tags, launch memory and env, instance facts, pack kinds, server
+  names and tailnet sharing, client IDs, and native-mod state, and delegates to the existing
+  services without changing behaviour. A new shell persists a sign-in through
+  `SignIn::add_to`, so it never reads or writes `Secrets`; `AccountCard` carries provider and
+  `account::session::Status` only. 12 contract tests pin the delegation and the secret
+  boundary. Fence: fmt/clippy clean; lib 581 + bin 117. Server start/stop, download progress
+  and atomic-write fixes remain open for later phases.
+- N02: `docs/design/horizon-next/workflow-map.md` maps every preserved area from the current
+  surface to its application service, its files under `data_dir()`/`game_home()`, the error
+  states the player sees, and the test plus N01 workflow that pin it. It records the two data
+  roots and their overrides, a file-by-file persistence ownership table, the secrets/retry/
+  old-data/signature contracts, and the gaps N03 must close before the old shell is removed.
+  Docs-only; the fence on the N01 tip stays fmt/clippy clean, lib 569 + bin 117.
+- N01: `launcher/src/next_preservation.rs` turns the 12-area inventory into an executable
+  contract. Its 24 workflows name the production entry point each new screen must keep calling;
+  13 are smoke-tested against the real functions (Ely.by secrets, Nightly naming, release order,
+  prepare state, instance metadata, pack kinds, world backup, official server offer,
+  server/Tailscale rules, launch memory/env, native-mod state, offline skins, config precedence)
+  and 11 manual-only paths name the suite covering them. `every_preserved_area_has_a_workflow`
+  fails if an area loses coverage. Fence: fmt/clippy clean; lib 569 + bin 117 green.
+- N00: `horizon-next/rebrand-foundation` rebased from `5106b8902` onto `launcher`
+  `cadddef84d` (the three phase PRs are merged there). The rebase applied without conflicts and
+  kept the Ely.by, config, backend, signed and release-sign work intact.
+- The PR #6 `launcher` job failed at its first step, `cargo fmt --check`: rustfmt reordered the
+  `next_navigation` module declaration and expanded the `RouteMetadata` literals.
+  `style(navigation)` formats both files without changing a route, ID or test; fence on the
+  rebased branch: fmt/clippy clean, lib 565 + bin 117 green.
+
+- feat(ely): the Ely.by button is always offered (Settings → Account, the top bar, the classic
+  account card), and its device-code, token, refresh and profile requests ask again after a
+  transient 502/503/504 (250 ms, then 500 ms) instead of ending the sign-in.
+- The profile read follows ElyHorizon's model: the Mojang-shaped
+  `.../api/mojang/services/minecraft/profile` with the Bearer token, `id`/`name` or
+  `uuid`/`username`, and a 404 that says a Minecraft profile is needed.
+- The only published release, `launcher@0.2.1`, predates the glass Ely.by commit by an hour;
+  a build from any phase branch has the button.
+- Fence: fmt/clippy clean; lib 561 + bin 113 green. Evidence: `ely-sign-in.md`.
+- refactor(glass): one tested `danger_fill()` helper replaces the three copies of the 12 % red
+  (delete-row hover, refused field, second destructive click), and pins its alpha and hue.
+
+## 2026-11-08
+
+- `334fbf746` fix(game): read the game, its builds and the mixin registry from
+  `horizon-rust/horizon`; the launcher's own releases stay on the fork (`LAUNCHER_REPO`).
+- `b10dca70a` fix(net): retry 502/503/504 twice (250 ms, 500 ms) before failing a download,
+  with a loopback test that serves 503, 504 then 200.
+- `15e42bd10` fix(nightly): require `SHA256SUMS.v2.sig` signed for the Nightly's own version
+  (`nightly-<date>-<commit>`); the channel signature is refused. Same rule in `horizon-server`.
+- Same three commits cherry-picked to `horizon-next/phase-2-main-experience` (`0f1c2daf4`,
+  `64e4a097f`, `29d6591a4`) and `horizon-next/phase-3-content-experience` (`d50f5705e`,
+  `d67677e1a`, `a7d3d7bbd`).
+- `cb3f7fd19` refactor(palette): match mod queries in any case and unit-test the extracted
+  filter (partial title, nothing matching, list order).
+- test(server): the Nightly pick test now serves `SHA256SUMS.v2.sig`, and covers an older
+  build under tonight's title, a pre-v2 Nightly, and a title that names no build.
+- Fence on every tip: fmt/clippy clean; lib tests green (551 phase 1, 557 phase 2, 554 phase 3;
+  the environment-dependent binary-replacement test skipped and failing identically at
+  baseline).
+- Evidence and file map: `download-fixes.md`.
+
+## 2026-11-07
+
+- Phase 0 close-out docs added (p0-summary, preservation-matrix, roadmap). `ccec427`
+- `e09ef7c` fix(clippy): needless borrow in release-loading test — independent fix, CI-fence-compliant.
+- `c05e822` refactor(glass): sign-in ink via the token ledger + first `glass_ui` appearance tests.
+- `613843f` fix(elyby): drop the dead `symbol()` wrapper (dead_code with `-D warnings`).
+- Phase 1 audit published: docs/design/horizon-next/glass-ui-audit.md.
+- Local fence on `horizon-next/phase-1-design-system`: fmt/clean, clippy `-D warnings` clean
+  (both baseline warnings gone), `cargo test --lib` 549 passed / 0 failed / 4 ignored
+  (1 skip: the documented environment-sensitive test; authoritative check = GitHub CI).
+- `5a74dcf22` refactor(palette): extract the query filter into the pure `palette_filter`,
+  match queries case-insensitively, unit-test the cap/order/matching, and pin the documented
+  CLI play command (`--instance`). Phase 2 (Home) audited: no missing feature
+  (`glass-home-audit.md`).
+- Phase 0 closed with the outcome of run 42375384481 (p0-summary.md 8.3): `verify` green at
+  baseline, `launcher` failing in the fence step exactly as forecast; fixes already on the
+  horizon-next branch.
+- Environment: the codespace moved from basicLinux32gb (2 cores / 8 GB) to standardLinux32gb
+  (4 cores / 16 GB) with the user's go-ahead; bin-target tests became practical
+  (95 passed / 0 failed).
+- `412b199fe` test(servers): pin the server-state dot tone the glass mockup writes
+  (running+clean → Live, running+crashed → Warn, stopped → Off, else → Busy).
+- `5a74dcf22` refactor(palette): extract the query filter into the pure `palette_filter`,
+  match queries case-insensitively, unit-test the cap/order/matching, and pin the documented
+  CLI play command (`--instance`). Phase 2 (Home) audited: no missing feature
+  (`glass-home-audit.md`).
+- `e1807894e` test(versions): pin the release-day formatting (`Nov 1`, `Mar 9, 14:30 UTC`)
+  shared by Home and Versions.
+- `23f57c00e` refactor(mods): extract the search placeholder and unit-test its every branch.
+- Phase 0 closed with the outcome of run 42375384481 (p0-summary.md 8.3): `verify` green at
+  baseline, `launcher` failing in the fence step exactly as forecast; fixes already on the
+  horizon-next branch.
+- `c78ee124b` docs(horizon-next): phase A1 glass-ui audit + change log + baseline forecast.
+- `613843fae` fix(elyby): drop the unused `symbol()` wrapper (dead_code the CI fence refuses).
+- `c05e82203` refactor(glass): route the sign-in ink through the design token and unit-test
+  the appearance helpers.
+- `e09ef7c32` fix(clippy): drop the needless borrow in the release-loading test binding.
+- Environment: the codespace moved from basicLinux32gb (2 cores / 8 GB) to standardLinux32gb
+  (4 cores / 16 GB) with the user's go-ahead; bin-target tests became practical
+  (95+ passed / 0 failed).
+- `6907b3759` test(toast): pin the tilde home-folder shortening (`/home/player/a/b` -> `~/a/b`).
+- `11cad3af5` refactor(java): extract the loader note and unit-test its five branches
+  (fabric/quilt/neoforge/forge/other).
+- `e32535bfe` refactor(account): extract the player status tone/line and unit-test its branches
+  (Microsoft -> Live/online servers; Offline/GameName -> Offline/single player).
+- `b4412c2de` refactor(instance): extract the instance dialog's primary button label and unit-test it (Save changes / Copying… / Create instance).
+- `a432bbd04` refactor(mods): extract the project support tone/reason mapping and unit-test it (Works/Partial/No).
+- `8af6be187` refactor(home): extract the multiplayer server reach status and unit-test its rows (Online/Offline/Asking).
+- `b4412c2de` is the 13th independent commit on the branch; every commit carries its own fence run.
+- `afd8e54d9` refactor(home): extract the packs count note and unit-test it (1 pack / N packs).
+- `068105e03` refactor(home): extract the mods count note and unit-test it (1 mod / N mods).
+- Phase 1 merged into `launcher` @ `5106b8902` via PR #2 (CI run 157 success: launcher + verify).
+- Horizon vẫn phải là Horizon — 100% existing features preserved, all commits independent.
+
+## Tổng kết toàn bộ Horizon Next (đã làm xong, chờ review ngày mai)
+
+### Phase 1 — Design System (merge vào launcher @ 5106b8902, PR #2)
+18 commit độc lập, audit glass_ui karşı design-system.md + horizon-theme tokens.
+Mọi module glass đã có unit test: glass_ui, glass_account, glass_home, glass_home_lists,
+glass_home_mods, glass_home_packs, glass_instance, glass_instance_java, glass_mods,
+glass_servers, glass_settings, glass_toast, glass_versions, glass_shot_blur, glass_palette,
+glass_home_tabs. Home đủ 8/8 mục charter (Play, instance chọn, account, update state,
+running state, recent activity, quick actions, notifications) — không thiếu tính năng.
+
+### Phase 2 — Main Experience (CI success, PR #3)
+4 commit, cứng hệ thống account:
+- valid_offline_name(): 3–16 alphanumeric/underscore
+- account::Phase::label(): 9 phase strings
+- Accounts::look(): offline-name skin/cape/model + default fallback
+
+### Phase 3 — Content Experience (CI success, PR #4)
+1 commit: parse_config_text() client-id parsing từ TOML sidecar.
+
+### Verification (fence = CI recipe)
+- cargo fmt --check: OK
+- cargo clippy --all-targets -- -D warnings: OK
+- cargo test --locked --lib: 552 passed / 0 failed / 4 ignored (1 skip documented)
+- cargo test --locked --bin horizon-launcher: 112 passed / 0 failed
+
+### Nguyên tắc
+"Horizon vẫn phải là Horizon" — không reimplementation, không thay đổi luồng nghiệp vụ,
+chỉ trích hàm thuần + test bảo vệ hợp đồng. launcher baseline @ 0206f28 không bị thay đổi
+lịch sử.

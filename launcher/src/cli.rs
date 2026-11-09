@@ -115,6 +115,9 @@ enum AccountCmd {
         /// who plays stays the same
         #[arg(long = "for")]
         target: Option<String>,
+        /// Authentication provider
+        #[arg(long, default_value = "microsoft", value_parser = ["microsoft", "elyby"])]
+        provider: String,
     },
     /// Renew an account's session now, even when its access token is still fresh
     Refresh { who: String },
@@ -1920,9 +1923,16 @@ fn account_command(action: AccountCmd, as_json: bool) -> Result<(), String> {
                 (Err(status), false) => return Err(status.message),
             }
         }
-        AccountCmd::SignIn { target: Some(who) } => {
+        AccountCmd::SignIn {
+            target: Some(who),
+            provider,
+        } => {
             let a = find(&accounts, &who)?;
-            let sign_in = account::SignIn::start_for(a.clone());
+            let sign_in = if provider == "elyby" {
+                account::SignIn::start_ely_for(a.clone())
+            } else {
+                account::SignIn::start_for(a.clone())
+            };
             let mut shown = false;
             let signed_in = loop {
                 match sign_in.state() {
@@ -1933,6 +1943,11 @@ fn account_command(action: AccountCmd, as_json: bool) -> Result<(), String> {
                                 "link": code.verification_uri,
                                 "code": code.user_code,
                             }));
+                        } else if code.user_code.is_empty() {
+                            eprintln!(
+                                "To sign {} in again, open {} in a browser",
+                                a.name, code.verification_uri
+                            );
                         } else {
                             eprintln!(
                                 "To sign {} in again, open {} in a browser and enter the code {}",
@@ -1951,7 +1966,46 @@ fn account_command(action: AccountCmd, as_json: bool) -> Result<(), String> {
                 println!("Signed in as {} again.", signed_in.name);
             }
         }
-        AccountCmd::SignIn { target: None } => {
+        AccountCmd::SignIn {
+            target: None,
+            provider,
+        } => {
+            if provider == "elyby" {
+                let sign_in = account::SignIn::start_ely();
+                let mut shown = false;
+                let signed_in = loop {
+                    match sign_in.state() {
+                        account::SignInState::Code(code) if !shown => {
+                            shown = true;
+                            if as_json {
+                                json(serde_json::json!({
+                                    "link": code.verification_uri,
+                                    "code": code.user_code,
+                                }));
+                            } else if code.user_code.is_empty() {
+                                eprintln!(
+                                    "To sign in with Ely.by, open {} in a browser",
+                                    code.verification_uri
+                                );
+                            } else {
+                                eprintln!(
+                                    "To sign in with Ely.by, open {} in a browser and enter the code {}",
+                                    code.verification_uri, code.user_code
+                                );
+                            }
+                        }
+                        account::SignInState::Done(result) => break result?,
+                        _ => {}
+                    }
+                    std::thread::sleep(std::time::Duration::from_millis(200));
+                };
+                if as_json {
+                    json(serde_json::json!({ "signed_in": signed_in.uuid }));
+                } else {
+                    println!("Signed in as {}.", signed_in.name);
+                }
+                return Ok(());
+            }
             let client_id = account::client_id().ok_or(account::NOT_CONFIGURED)?;
             let ep = account::Endpoints::live();
             let code = account::device_code(&ep, &client_id)?;

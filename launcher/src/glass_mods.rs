@@ -6,10 +6,14 @@
 //! instance).
 //!
 //! The mockup's tabs are its sources (Horizon, Modrinth, CurseForge soon); the launcher's page
-//! is by kind (mods and shader packs from Horizon's registry, resource packs and modpacks from
-//! Modrinth), each kind with its sources, so the tabs are the kinds, CurseForge after them as
-//! coming soon. Not in the mockup, kept in its patterns: Show everything, the source switch, the
-//! filters and the sort, which instance or world installs go to (under the search); the
+//! is by kind (mods, modpacks, resource packs, shader packs, data packs), each with its sources,
+//! so the tabs are the kinds and the sources are a switch under the search: Horizon's registry
+//! or Modrinth, CurseForge beside them as coming soon, on the kinds both serve (`switches`):
+//! shader packs are Horizon's registry's only, data packs Modrinth's only, and a Java
+//! instance's files always Modrinth's. Modrinth's Java mods are offered to a Horizon instance
+//! too, each marked Works, Partly or Doesn't run in Horizon. Not in the mockup, kept in its
+//! patterns: Show everything, the filters, which instance or world installs go to (under the
+//! search); the
 //! project's page, its rating and why it runs or not (in the project's card); adding a native mod
 //! from GitHub, the instance's installed list and its native build, imported modpacks and the
 //! install's progress (cards under the two).
@@ -25,22 +29,15 @@ impl Launcher {
     /// The search's placeholder: the registry's count when it is listed whole.
     pub(super) fn mods_placeholder(&self) -> SharedString {
         let m = &self.mods;
-        let registry = m.source == SourceId::Horizon && m.java.is_none();
-        if registry && m.kind == PackKind::Mod && m.searched && m.text.text().is_empty() {
-            // Results come in pages: only a last page gives the real count.
-            if m.more {
-                return tr("Search Horizon mods").into();
-            }
-            trf(
-                "Search {count} Horizon mods",
-                &[("count", &m.results.len().to_string())],
-            )
-            .into()
-        } else if m.source == SourceId::Modrinth {
-            tr("Search resource packs and modpacks").into()
-        } else {
-            tr("Search, then Enter").into()
-        }
+        placeholder_for(
+            m.source,
+            m.java.is_none(),
+            m.kind,
+            m.searched,
+            m.text.text().is_empty(),
+            m.more,
+            m.results.len(),
+        )
     }
 
     pub(super) fn glass_mods_page(&mut self, cx: &mut Context<Self>) -> Div {
@@ -59,10 +56,7 @@ impl Launcher {
         .mb_0();
         let open = self.mods.kind;
         let mut tabs = div().flex().flex_none().items_center().gap(px(4.));
-        for (kind, label, _) in KINDS
-            .into_iter()
-            .filter(|&(kind, ..)| SHOWN.contains(&kind) || kind == open)
-        {
+        for (kind, label, _) in KINDS {
             tabs = tabs.child(
                 small_tab(
                     SharedString::from(format!("mods-tab-{label}")),
@@ -76,25 +70,12 @@ impl Launcher {
                 })),
             );
         }
-        // CurseForge: shown, inert, never searched, as in the mockup.
-        tabs = tabs.child(
-            div()
-                .flex()
-                .items_center()
-                .gap(px(6.))
-                .h(px(32.))
-                .px(px(12.))
-                .text_size(px(13.))
-                .text_color(white(0.35))
-                .child("CurseForge")
-                .child(tr("soon").to_string()),
-        );
         let header = div()
             .flex()
             .items_end()
             .justify_between()
             .gap(px(20.))
-            .pt(px(40.))
+            .pt(px(40. - crate::glass::CONTENT_INSET))
             .mb(px(28.))
             .child(head.min_w_0())
             .child(tabs);
@@ -141,29 +122,45 @@ impl Launcher {
                         })),
                 )
             })
-            .when(
-                source_for(self.mods.kind) == SourceId::Modrinth && !java,
-                |d| d.child(div().flex().child(self.mods_source_switch(cx))),
-            )
+            .when(switches(self.mods.kind) && !java, |d| {
+                d.child(self.glass_source_switch(cx))
+            })
             .children((!registry).then(|| self.mods_filters(cx)))
-            .children(registry.then(|| self.mods_sort_bar(cx)))
             .children(self.mods_target_line(cx));
+        // The search, and the sort on its right.
+        let search = div()
+            .m(px(4.))
+            .mb(px(8.))
+            .flex()
+            .items_center()
+            .gap(px(8.))
+            .child(div().flex_1().min_w_0().child(self.mods_field(cx)))
+            .child(self.glass_mods_sort(cx));
         let list = crate::glass::plate(radius::PANEL)
             .flex()
             .flex_col()
             .flex_1()
             .min_w_0()
             .p(px(8.))
-            .child(div().m(px(4.)).mb(px(8.)).child(self.mods_field(cx)))
+            .child(search)
             .child(extras)
             .child(self.glass_mods_list(cx));
-        let detail = self.glass_mod_detail(&instance, cx);
+        // The card stays in view as the list scrolls (`lg:sticky lg:top-0`, `sticky.rs`).
+        let detail = self.glass_mod_detail(&instance, cx).map(|d| {
+            let down = self.mods_sticky.offset(&self.content_scroll.handle);
+            d.flex_none()
+                .w(px(DETAIL))
+                .top(px(down))
+                .child(self.mods_sticky.panel())
+        });
         let cards = div()
+            .relative()
             .flex()
             .items_start()
             .gap(px(10.))
+            .child(self.mods_sticky.row(&self.content_scroll.handle))
             .child(list)
-            .children(detail.map(|d| d.flex_none().w(px(DETAIL))));
+            .children(detail);
 
         // What the mockup doesn't have, as cards under the two.
         let card = |inner: Div| crate::glass::plate(radius::PANEL).p(px(20.)).child(inner);
@@ -185,6 +182,133 @@ impl Launcher {
                 .mt(px(10.))
                 .children(more),
         )
+    }
+
+    /// The source switch (`switches`): Horizon's registry or Modrinth as small tabs, CurseForge
+    /// after them as coming soon, shown, inert, never searched, as in the mockup.
+    fn glass_source_switch(&mut self, cx: &mut Context<Self>) -> Div {
+        let t = self.theme;
+        let current = self.mods.source;
+        let mut row = div().flex().items_center().gap(px(4.));
+        for (source, label) in SOURCES {
+            row = row.child(
+                small_tab(
+                    SharedString::from(format!("mods-source-{label}")),
+                    source == current,
+                    &t,
+                )
+                .child(tr(label).to_string())
+                .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
+                    if this.mods.source != source {
+                        this.mods.source = source;
+                        this.mods.browse.filters = Default::default();
+                        this.mods.browse.open = None;
+                        this.mods.picked = None;
+                        this.mods_search(0);
+                    }
+                    cx.notify();
+                })),
+            );
+        }
+        row.child(
+            div()
+                .flex()
+                .items_center()
+                .gap(px(6.))
+                .h(px(32.))
+                .px(px(12.))
+                .text_size(px(13.))
+                .text_color(white(0.35))
+                .child("CurseForge")
+                .child(tr("soon").to_string()),
+        )
+    }
+
+    /// The "Sort by" dropdown beside the search: as tall and as round as the search, white at
+    /// 7 % like it; the choices on a glass popover under it, the chosen one ticked.
+    fn glass_mods_sort(&mut self, cx: &mut Context<Self>) -> Div {
+        let t = self.theme;
+        let sorts = self.mods_sorts();
+        let current = self.mods.browse.filters.sort;
+        // A sort the source can't do (Follows, picked on Modrinth) reads as the default.
+        let shown = sorts
+            .iter()
+            .find(|(value, _)| *value == current)
+            .or(sorts.first())
+            .map(|(value, _)| *value);
+        let name = sorts
+            .iter()
+            .find(|(value, _)| Some(*value) == shown)
+            .map_or("", |(_, label)| *label);
+        let open = self.mods.browse.sort_menu;
+        let button = keyboard(
+            div()
+                .id("mods-sort")
+                .flex()
+                .flex_none()
+                .items_center()
+                .gap(px(8.))
+                .h(px(44.))
+                .px(px(14.))
+                .rounded(px(12.))
+                .bg(white(if open { 0.11 } else { 0.07 }))
+                .hover(|s| s.bg(white(0.11)))
+                .cursor_pointer()
+                .font_family(horizon_theme::glass::FONT)
+                .text_size(px(14.))
+                .text_color(white(ink::FULL))
+                .child(trf("Sort by: {order}", &[("order", tr(name))]))
+                .child(
+                    ui::icon("arrow-down-01", 16., white(ink::NOTE)).with_transformation(
+                        gpui::Transformation::rotate(gpui::radians(if open {
+                            std::f32::consts::PI
+                        } else {
+                            0.
+                        })),
+                    ),
+                )
+                .on_click(cx.listener(|this, event: &ClickEvent, _, cx| {
+                    if this.closed_by_this_press(event) {
+                        return;
+                    }
+                    this.mods.browse.sort_menu = !this.mods.browse.sort_menu;
+                    cx.notify();
+                })),
+            &t,
+        );
+        let mut wrap = div().relative().flex_none().child(button);
+        if open {
+            let mut menu = ui::popover(220.)
+                .id("mods-sort-menu")
+                .occlude()
+                .on_mouse_down_out(cx.listener(|this, event: &MouseDownEvent, _, cx| {
+                    this.mods.browse.sort_menu = false;
+                    this.menu_closed_at = Some(event.position);
+                    cx.notify();
+                }));
+            for &(value, label) in &sorts {
+                menu = menu.child(
+                    ui::pick_row(
+                        SharedString::from(format!("mods-sort-pick-{label}")),
+                        tr(label).to_string(),
+                        Some(value) == shown,
+                        &t,
+                    )
+                    .on_click(cx.listener(
+                        move |this, _: &ClickEvent, _, cx| {
+                            this.mods.browse.sort_menu = false;
+                            this.mods_filter(|f| f.sort = value);
+                            cx.notify();
+                        },
+                    )),
+                );
+            }
+            wrap = wrap.child(
+                gpui::deferred(div().absolute().top(px(52.)).right_0().child(menu))
+                    .with_priority(1),
+            );
+        }
+        wrap
     }
 
     /// The search's results as the mockup's rows (`ROW`): a click picks one for the card beside.
@@ -370,11 +494,7 @@ impl Launcher {
         if !p.license.is_empty() {
             by.push(p.license.clone());
         }
-        let (tone, reason) = match &support {
-            Support::Works => (ui::live(), None),
-            Support::Partial(_) => (ui::warn(), support.reason()),
-            Support::No(_) => (white(0.55), support.reason()),
-        };
+        let (tone, reason) = support_tone_and_reason(&support);
         let about = m
             .about
             .get(&p.id)
@@ -570,5 +690,181 @@ fn kind_name(kind: PackKind) -> &'static str {
         PackKind::ResourcePack => "Resource pack",
         PackKind::Shader => "Shader pack",
         PackKind::DataPack => "Data pack",
+    }
+}
+
+/// The mods search's placeholder: a Horizon launcher's whole list says its count (only its last
+/// page can, so a search with more pages asks to keep typing); the Resource pack and Modpack
+/// tabs on Modrinth share a placeholder; everything else says what the field does.
+fn placeholder_for(
+    source: SourceId,
+    over_a_launcher: bool,
+    kind: PackKind,
+    searched: bool,
+    query_empty: bool,
+    more: bool,
+    count: usize,
+) -> SharedString {
+    let registry = source == SourceId::Horizon && over_a_launcher;
+    if registry && kind == PackKind::Mod && searched && query_empty {
+        // Results come in pages: only a last page gives the real count.
+        if more {
+            return tr("Search Horizon mods").into();
+        }
+        trf(
+            "Search {count} Horizon mods",
+            &[("count", &count.to_string())],
+        )
+        .into()
+    } else if source == SourceId::Modrinth
+        && matches!(kind, PackKind::ResourcePack | PackKind::Modpack)
+    {
+        tr("Search resource packs and modpacks").into()
+    } else {
+        tr("Search, then Enter").into()
+    }
+}
+
+/// The dot color and the optional reason line a project's support state shows, as the mockup
+/// writes it: works is live, partly/unsupported are off with their reason.
+fn support_tone_and_reason(support: &Support) -> (gpui::Hsla, Option<String>) {
+    let tone = match support {
+        Support::Works => ui::live(),
+        Support::Partial(_) => ui::warn(),
+        Support::No(_) => white(0.55),
+    };
+    (tone, support.reason().map(|r| r.to_string()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_whole_horizon_list_says_its_count() {
+        let got = placeholder_for(
+            SourceId::Horizon,
+            true,
+            PackKind::Mod,
+            true,
+            true,
+            false,
+            123,
+        );
+        assert_eq!(got.to_string(), "Search 123 Horizon mods");
+    }
+
+    #[test]
+    fn more_pages_ask_for_a_narrower_search() {
+        let got = placeholder_for(
+            SourceId::Horizon,
+            true,
+            PackKind::Mod,
+            true,
+            true,
+            true,
+            200,
+        );
+        assert_eq!(got.to_string(), "Search Horizon mods");
+    }
+
+    #[test]
+    fn the_modrinth_pack_tabs_share_a_placeholder() {
+        let packs = placeholder_for(
+            SourceId::Modrinth,
+            true,
+            PackKind::ResourcePack,
+            false,
+            true,
+            false,
+            0,
+        );
+        assert_eq!(packs.to_string(), "Search resource packs and modpacks");
+        let modpacks = placeholder_for(
+            SourceId::Modrinth,
+            true,
+            PackKind::Modpack,
+            false,
+            true,
+            false,
+            0,
+        );
+        assert_eq!(modpacks.to_string(), "Search resource packs and modpacks");
+    }
+
+    #[test]
+    fn everything_else_says_search_then_enter() {
+        // Not searched yet.
+        assert_eq!(
+            placeholder_for(
+                SourceId::Horizon,
+                true,
+                PackKind::Mod,
+                false,
+                true,
+                false,
+                0
+            )
+            .to_string(),
+            "Search, then Enter"
+        );
+        // A query with text.
+        assert_eq!(
+            placeholder_for(
+                SourceId::Horizon,
+                true,
+                PackKind::Mod,
+                true,
+                false,
+                false,
+                0
+            )
+            .to_string(),
+            "Search, then Enter"
+        );
+        // A Java instance's files (never the launcher's list).
+        assert_eq!(
+            placeholder_for(
+                SourceId::Horizon,
+                false,
+                PackKind::Mod,
+                true,
+                true,
+                false,
+                0
+            )
+            .to_string(),
+            "Search, then Enter"
+        );
+        // Other kinds.
+        assert_eq!(
+            placeholder_for(
+                SourceId::Horizon,
+                true,
+                PackKind::DataPack,
+                true,
+                true,
+                false,
+                0
+            )
+            .to_string(),
+            "Search, then Enter"
+        );
+    }
+
+    #[test]
+    fn a_project_support_state_reads_as_the_mockup_writes_it() {
+        // Works: live dot, no reason.
+        let (tone, reason) = support_tone_and_reason(&Support::Works);
+        assert_eq!(tone, ui::live());
+        assert_eq!(reason, None);
+        // Partial: warn dot and the reason.
+        let (tone, reason) = support_tone_and_reason(&Support::Partial("needs Java 21".into()));
+        assert_eq!(tone, ui::warn());
+        assert_eq!(reason.as_deref(), Some("needs Java 21"));
+        // No: off dot and the reason.
+        let (tone, reason) = support_tone_and_reason(&Support::No("Horizon-only build".into()));
+        assert_eq!(tone, white(0.55));
+        assert_eq!(reason.as_deref(), Some("Horizon-only build"));
     }
 }

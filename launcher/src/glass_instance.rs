@@ -287,14 +287,8 @@ impl Launcher {
     /// loader's logo.
     fn auto_mark(&mut self, kind: NewKind, loader: Loader, size: f32) -> AnyElement {
         let mark = match kind {
-            NewKind::Horizon => {
-                return ui::mark_tile(size, self.look.accent_soft).into_any_element()
-            }
-            NewKind::Vanilla => self.vanilla_icon().and_then(|grass| {
-                self.icon_image("mark:grass".into(), size, false, || {
-                    std::fs::read(grass).ok()
-                })
-            }),
+            NewKind::Horizon => return self.horizon_mark(size),
+            NewKind::Vanilla => self.grass_mark(size),
             NewKind::Modded => self.loader_logo(loader.id(), size),
         };
         match mark {
@@ -727,11 +721,7 @@ impl Launcher {
                 .child(tr("Cancel")),
             &t,
         );
-        let label = match (editing.is_some(), busy) {
-            (true, _) => tr("Save changes"),
-            (false, true) if copy => tr("Copying…"),
-            (false, _) => tr("Create instance"),
-        };
+        let label = instance_label(editing.is_some(), busy, copy);
         let accent = ui::color(self.look.accent);
         let lit = gpui::hsla(accent.h, accent.s, (accent.l * 1.1).min(1.), 1.);
         let save = keyboard(
@@ -858,7 +848,7 @@ impl Launcher {
             .map_or_else(|| "Horizon".into(), |i| i.name.clone());
         let icon = match &selected {
             Some(i) => self.glass_instance_icon(i, 36.),
-            None => ui::mark_tile(36., self.look.accent_soft).into_any_element(),
+            None => self.horizon_mark(36.),
         };
         let card = |on: bool, id: &'static str| {
             choice(id, on, &t)
@@ -948,13 +938,9 @@ impl Launcher {
                 .on_click(pick(None))
                 .into_any_element(),
         );
-        // Minecraft's grass block from the player's own files, then the loaders' logos: each
-        // becomes the instance's picture.
-        let grass = self.vanilla_icon().and_then(|g| std::fs::read(g).ok());
-        let mut logos: Vec<(&'static str, Vec<u8>)> = Vec::new();
-        if let Some(g) = grass {
-            logos.push(("grass", g));
-        }
+        // Our grass block, then the loaders' logos: each becomes the instance's picture.
+        let mut logos: Vec<(&'static str, Vec<u8>)> =
+            vec![("grass", instance_icons::GRASS.to_vec())];
         for id in LOGO_ICONS {
             if let Some(png) = instance_icons::logo_png(id) {
                 logos.push((id, png.to_vec()));
@@ -1041,6 +1027,16 @@ impl Launcher {
     }
 }
 
+/// The label of the instance dialog's primary button: save when editing, copy/create when
+/// creating, as the mockup writes it.
+fn instance_label(editing: bool, busy: bool, copy: bool) -> String {
+    match (editing, busy) {
+        (true, _) => tr("Save changes").to_string(),
+        (false, true) if copy => tr("Copying…").to_string(),
+        (false, _) => tr("Create instance").to_string(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1084,5 +1080,13 @@ mod tests {
         );
         // Offline, or before the list arrives: what is installed.
         assert_eq!(horizon_choices(&[], &installed), installed);
+    }
+    #[test]
+    fn the_instance_dialog_primary_button_label_reads_as_the_mockup_writes_it() {
+        assert_eq!(instance_label(true, false, false), tr("Save changes"));
+        assert_eq!(instance_label(true, true, false), tr("Save changes"));
+        assert_eq!(instance_label(false, true, true), tr("Copying…"));
+        assert_eq!(instance_label(false, false, false), tr("Create instance"));
+        assert_eq!(instance_label(false, true, false), tr("Create instance"));
     }
 }

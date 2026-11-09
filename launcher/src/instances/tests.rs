@@ -531,3 +531,61 @@ fn switching_what_an_instance_plays_keeps_its_worlds_mods_and_settings() {
     assert_eq!(files(&home.join("saves")), home_files);
     fs::remove_dir_all(&root).unwrap();
 }
+
+#[test]
+fn instances_load_validated_rejects_corrupt_json() {
+    let root = std::env::temp_dir().join(format!("horizon-instances-test-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).unwrap();
+    let path = root.join("instances.json");
+    std::fs::write(&path, "{not valid json").unwrap();
+    assert!(matches!(
+        Store::load_validated(&root),
+        Err(crate::persistence::LoadError::Corrupt(_))
+    ));
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+#[test]
+fn instances_atomic_save_keeps_bak_of_previous() {
+    let root = std::env::temp_dir().join(format!("horizon-instances-save-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).unwrap();
+    let path = root.join("instances.json");
+    std::fs::write(&path, "{}").unwrap();
+    let store = Store::default();
+    Store::save(&store, &root).unwrap();
+    assert!(path.with_extension("bak").exists());
+    assert!(path.exists());
+    let loaded = Store::load(&root);
+    assert!(loaded.instances.is_empty());
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+#[test]
+fn instances_save_refuses_to_overwrite_corrupt_file() {
+    let root =
+        std::env::temp_dir().join(format!("horizon-instances-refuse-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).unwrap();
+    let path = root.join("instances.json");
+    std::fs::write(&path, "{not valid json").unwrap();
+    let store = Store::default();
+    assert!(Store::save(&store, &root).is_err());
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+#[test]
+fn instances_recover_from_bak_when_main_is_corrupt() {
+    let root =
+        std::env::temp_dir().join(format!("horizon-instances-recover-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).unwrap();
+    let path = root.join("instances.json");
+    std::fs::write(&path, "{not valid json").unwrap();
+    let bak = path.with_extension("bak");
+    std::fs::write(&bak, "{}").unwrap();
+    let store = Store::load(&root);
+    assert!(store.instances.is_empty());
+    let _ = std::fs::remove_dir_all(&root);
+}

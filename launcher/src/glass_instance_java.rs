@@ -173,13 +173,7 @@ impl Launcher {
                 Some(image) => tile_image(image, 40.),
                 None => letter_tile(white(fill::BUTTON), loader.name(), 40.).into_any_element(),
             };
-            let note = match loader.id() {
-                "fabric" => tr("Light and fast to update"),
-                "quilt" => tr("Fabric mods run here too"),
-                "neoforge" => tr("The big modpacks' home"),
-                "forge" => tr("For older packs"),
-                _ => "",
-            };
+            let note = loader_note(loader.id());
             grid = grid.child(
                 choice(format!("loader-{}", loader.id()), loader == now, &t)
                     .flex_col()
@@ -295,5 +289,30 @@ impl Launcher {
                         ),
                 ),
         )
+    }
+}
+
+/// The one-line note under a loader's name, as the mockup writes it.
+fn loader_note(id: &str) -> &'static str {
+    match id {
+        "fabric" => "Light and fast to update",
+        "quilt" => "Fabric mods run here too",
+        "neoforge" => "The big modpacks' home",
+        "forge" => "For older packs",
+        _ => "",
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn each_loader_note_reads_as_the_mockup_writes_it() {
+        assert_eq!(loader_note("fabric"), "Light and fast to update");
+        assert_eq!(loader_note("quilt"), "Fabric mods run here too");
+        assert_eq!(loader_note("neoforge"), "The big modpacks' home");
+        assert_eq!(loader_note("forge"), "For older packs");
+        assert_eq!(loader_note("whatever-else"), "");
     }
 }

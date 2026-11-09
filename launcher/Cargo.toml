@@ -17,6 +17,7 @@ gpui_platform = { package = "gpui-fast-platform", version = "0.1.13", features =
 ureq = { version = "2", features = ["json", "tls"], default-features = false }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+libc = "0.2"
 # Validate trait injection bindings before passing them to the shared generator.
 syn = { version = "2", features = ["full"] }
 # Checks the client jar and the version file found in other launchers' folders (sources.rs).

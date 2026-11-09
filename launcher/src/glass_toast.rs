@@ -96,10 +96,31 @@ impl Launcher {
                         )
                         .with_animation(
                             ElementId::named_usize("toast", n as usize),
-                            Animation::new(theme::ENTER).with_easing(ease_out_quint()),
-                            |d, p| d.opacity(p).top(px(theme::RISE * (1. - p))),
+                            crate::motion::eased(crate::motion::POP),
+                            |d, p| d.opacity(p).top(px(crate::motion::POP_RISE * (1. - p))),
                         ),
                 ),
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::Path;
+
+    #[test]
+    fn tilde_goms_the_home_folder_to_tilde() {
+        let prev = std::env::var("HOME").ok();
+        std::env::set_var("HOME", "/home/player");
+        assert_eq!(tilde(Path::new("/home/player/a/b")), "~/a/b");
+        assert_eq!(tilde(Path::new("/home/player")), "~");
+        // Anything outside HOME stays as-is.
+        assert_eq!(tilde(Path::new("/etc/x")), "/etc/x");
+        assert_eq!(tilde(Path::new("/tmp/x")), "/tmp/x");
+        match prev {
+            Some(v) => std::env::set_var("HOME", v),
+            None => std::env::remove_var("HOME"),
+        }
     }
 }

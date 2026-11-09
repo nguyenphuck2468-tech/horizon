@@ -20,6 +20,7 @@ pub struct AuthSession {
     pub uuid: u128,
     pub xuid: Option<String>,
     access_token: String,
+    elyby: bool,
 }
 impl std::fmt::Debug for AuthSession {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -47,6 +48,7 @@ impl AuthSession {
             uuid,
             xuid: None,
             access_token: access_token.to_owned(),
+            elyby: false,
         }
     }
     /// The session file's JSON: {"name", "uuid", "access_token", "user_type": "msa", "xuid"}.
@@ -64,14 +66,16 @@ impl AuthSession {
         let access_token = field("access_token")
             .filter(|t| !t.is_empty())
             .ok_or("the session has no access token")?;
-        if field("user_type").is_some_and(|t| t != "msa") {
-            return Err("the session is not a Microsoft account session".into());
+        let elyby = field("user_type") == Some("elyby");
+        if field("user_type").is_some_and(|t| t != "msa" && t != "elyby") {
+            return Err("the session is not a supported account session".into());
         }
         Ok(Self {
             name: name.to_owned(),
             uuid,
             xuid: field("xuid").map(str::to_owned),
             access_token: access_token.to_owned(),
+            elyby,
         })
     }
     /// Read the session file the launcher wrote and delete it at once. It
@@ -226,6 +230,9 @@ pub fn endpoint(doc: &serde_json::Value, service: &str, name: &str) -> Option<St
 /// attributes call falls back to the offline properties, a failed profile call
 /// to no actions, as vanilla does. Blocks: call it off the main thread.
 pub fn fetch_account_status(session: &AuthSession) -> crate::ban_notice::AccountStatus {
+    if session.elyby {
+        return crate::ban_notice::AccountStatus::default();
+    }
     use crate::ban_notice::{AccountStatus, parse_profile_actions, parse_properties};
     let Ok(doc) = discovery() else {
         return AccountStatus::default();
@@ -297,6 +304,9 @@ pub fn join_server(session: &AuthSession, server_hash: &str) -> Result<(), JoinE
 }
 
 fn join_server_once(session: &AuthSession, server_hash: &str) -> Result<(), JoinError> {
+    if session.elyby {
+        return join_ely_server_once(session, server_hash);
+    }
     let doc = discovery()?;
     let url = endpoint(&doc, "session", "join").ok_or(JoinError::Unavailable)?;
     match agent()
@@ -316,6 +326,24 @@ fn join_server_once(session: &AuthSession, server_hash: &str) -> Result<(), Join
         }
         Err(ureq::Error::Transport(e)) => {
             log::warn!("The session service's join: {e}");
+            Err(JoinError::Unavailable)
+        }
+    }
+}
+
+fn join_ely_server_once(session: &AuthSession, server_hash: &str) -> Result<(), JoinError> {
+    match agent()
+        .post("https://authserver.ely.by/session/join")
+        .set("Content-Type", "application/json; charset=utf-8")
+        .send_string(&join_request(session, server_hash))
+    {
+        Ok(_) => Ok(()),
+        Err(ureq::Error::Status(status, response)) => Err(JoinError::from_response(
+            status,
+            &response.into_string().unwrap_or_default(),
+        )),
+        Err(ureq::Error::Transport(e)) => {
+            log::warn!("Ely.by's session service: {e}");
             Err(JoinError::Unavailable)
         }
     }
@@ -419,6 +447,10 @@ pub fn parse_certificates(body: &str) -> Option<ChatKeyPair> {
 /// UserApiService.getKeyPair: the certificates endpoint, POSTed with the
 /// access token.
 pub fn fetch_chat_keys(session: &AuthSession) -> Result<ChatKeyPair, JoinError> {
+    // An Ely.by token is not a Minecraft Services token: never send it there.
+    if session.elyby {
+        return Err(JoinError::Unavailable);
+    }
     let doc = discovery()?;
     let url = endpoint(&doc, "player", "getCertificates").ok_or(JoinError::Unavailable)?;
     let body = match agent()
@@ -523,6 +555,10 @@ const MINECRAFT_PROFILE: &str = "https://api.minecraftservices.com/minecraft/pro
 /// Single-player and integrated servers often send no `textures` property, or
 /// one without the equipped cape; the client asks the profile endpoint once.
 pub fn own_textures(session: &AuthSession) -> Option<crate::skins::Textures> {
+    // An Ely.by token is not a Minecraft Services token: never send it there.
+    if session.elyby {
+        return None;
+    }
     let response = agent()
         .get(MINECRAFT_PROFILE)
         .set("Authorization", &format!("Bearer {}", session.access_token))
@@ -759,6 +795,11 @@ mod tests {
         assert!(AuthSession::parse(r#"{"name":"A","uuid":"069a79f444e94726a5befca90e38aaf5","access_token":"t","user_type":"legacy"}"#).is_err());
         let s = AuthSession::parse(r#"{"name":"A","uuid":"069a79f444e94726a5befca90e38aaf5","access_token":"t","xuid":"25"}"#).unwrap();
         assert_eq!(s.xuid.as_deref(), Some("25"));
+        let ely = AuthSession::parse(
+            r#"{"name":"Ely","uuid":"069a79f444e94726a5befca90e38aaf5","access_token":"t","user_type":"elyby"}"#,
+        )
+        .unwrap();
+        assert_eq!(ely.name, "Ely");
     }
 
     #[test]

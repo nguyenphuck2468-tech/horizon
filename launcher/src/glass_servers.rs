@@ -66,10 +66,13 @@ impl Launcher {
                 .child(main.flex_1().min_w_0())
                 .child(side),
         );
+        // Sculk's banner right under the server, where it is seen without scrolling past the
+        // server's tabs (as before the glass look, under the page's actions).
+        page = page.children(self.glass_sculk(cx));
         if let Some(dir) = &open {
             page = page.child(self.glass_server_tabs(dir, &status, cx));
         }
-        page.children(self.glass_sculk(cx))
+        page
     }
 
     /// The open server's glass: its state, name and numbers, its buttons, then its console.
@@ -979,5 +982,43 @@ impl Launcher {
             )
             .child(step("more", "plus-sign", value + 1, cx))
             .into_any_element()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_server_state_reads_as_the_mockup_writes_it() {
+        // Running cleanly is live.
+        assert!(matches!(
+            tone(&Status {
+                phase: "running".into(),
+                crashes: 0,
+                ..Default::default()
+            }),
+            Tone::Live
+        ));
+        // Running but it has crashed is a warning.
+        assert!(matches!(
+            tone(&Status {
+                phase: "running".into(),
+                crashes: 3,
+                ..Default::default()
+            }),
+            Tone::Warn
+        ));
+        // A stopped server is off.
+        assert!(matches!(tone(&Status::stopped()), Tone::Off));
+        // Anything else (starting, stopping, restarting) is busy.
+        assert!(matches!(
+            tone(&Status {
+                phase: "starting".into(),
+                crashes: 0,
+                ..Default::default()
+            }),
+            Tone::Busy
+        ));
     }
 }

@@ -9,7 +9,12 @@ use std::process::{Child, ChildStdin, Command, Stdio};
 use std::sync::mpsc::Sender;
 use std::sync::{Arc, Mutex};
 
+/// The Horizon game's releases, the mixin registry and links.json: the upstream repository
+/// publishes them, so the game and the launcher both update from it.
 pub const REPO: &str = "horizon-rust/horizon";
+/// The launcher's own releases, published by this repo: the launcher self-updates from them
+/// ([`launcher_releases_in`]) while the game stays on [`REPO`].
+pub const LAUNCHER_REPO: &str = "nguyenphuck2468-tech/horizon";
 pub const README_URL: &str = "https://github.com/horizon-rust/horizon/blob/main/launcher/README.md";
 /// The players' page on connecting an AI agent (the website's docs/agents.md).
 pub const AGENT_DOCS_URL: &str = "https://playhorizon.dev/docs/agents";
@@ -165,7 +170,21 @@ pub fn get_bytes(url: &str) -> Result<Vec<u8>, String> {
     Ok(body)
 }
 
-pub(crate) fn get(url: &str) -> Result<ureq::Response, String> {
+/// Statuses worth asking again for: a proxy or GitHub itself is briefly unavailable.
+fn transient_status(code: u16) -> bool {
+    matches!(code, 502..=504)
+}
+
+/// How many times `get` asks before giving up (the first ask and two retries).
+const GET_ATTEMPTS: u32 = 3;
+
+/// The wait before ask `attempt` (1-based): 250 ms, then 500 ms.
+fn retry_delay(attempt: u32) -> std::time::Duration {
+    std::time::Duration::from_millis(250 << (attempt - 1))
+}
+
+/// One ask, without retrying.
+fn get_once(url: &str) -> Result<ureq::Response, Box<ureq::Error>> {
     let mut request = agent(url).get(url);
     // CI runners share addresses and hit GitHub's anonymous rate limit; they pass their own token.
     if let Some(token) = std::env::var("HORIZON_GITHUB_TOKEN")
@@ -176,16 +195,39 @@ pub(crate) fn get(url: &str) -> Result<ureq::Response, String> {
             request = request.set("Authorization", &format!("Bearer {token}"));
         }
     }
-    request.call().map_err(|e| match e {
-        ureq::Error::Status(code, r)
-            if url.starts_with("https://api.github.com/")
-                && crate::github::rate_limited(code, |h| r.header(h).map(str::to_owned)) =>
-        {
-            "GitHub's rate limit was reached. Try again in a few minutes.".into()
+    request.call().map_err(Box::new)
+}
+
+/// `url`'s answer, asking again while a proxy or GitHub answers 502, 503 or 504 (a deploy or a
+/// proxy's brief outage), rather than failing a download on a status that usually clears at once.
+pub(crate) fn get(url: &str) -> Result<ureq::Response, String> {
+    let mut attempt = 1;
+    loop {
+        match get_once(url) {
+            Ok(response) => return Ok(response),
+            Err(e) => {
+                let e = *e;
+                let retry = matches!(&e, ureq::Error::Status(code, _) if transient_status(*code))
+                    && attempt < GET_ATTEMPTS;
+                if !retry {
+                    return Err(match e {
+                        ureq::Error::Status(code, r)
+                            if url.starts_with("https://api.github.com/")
+                                && crate::github::rate_limited(code, |h| {
+                                    r.header(h).map(str::to_owned)
+                                }) =>
+                        {
+                            "GitHub's rate limit was reached. Try again in a few minutes.".into()
+                        }
+                        ureq::Error::Status(code, _) => format!("{url} answered {code}"),
+                        ureq::Error::Transport(t) => format!("No connection: {t}"),
+                    });
+                }
+            }
         }
-        ureq::Error::Status(code, _) => format!("{url} answered {code}"),
-        ureq::Error::Transport(t) => format!("No connection: {t}"),
-    })
+        std::thread::sleep(retry_delay(attempt));
+        attempt += 1;
+    }
 }
 
 /// A Horizon game tag: `v` then a digit (`v2026.10.13`). Launcher tags never match.
@@ -316,11 +358,20 @@ pub fn compare_versions(a: &str, b: &str) -> std::cmp::Ordering {
     release_order(a).cmp(&release_order(b))
 }
 
-/// Every published release of the repository, both kinds, as GitHub's JSON (kept on disk with its
-/// ETag, and read through Kira's mirror past GitHub's rate limit: [`crate::github`]).
+/// Every published release of the game repository ([`REPO`]), as GitHub's JSON (kept on disk with
+/// its ETag, and read through Kira's mirror past GitHub's rate limit: [`crate::github`]).
 fn release_list() -> Result<serde_json::Value, String> {
     crate::github::json(&format!(
         "https://api.github.com/repos/{REPO}/releases?per_page=100"
+    ))
+}
+
+/// The launcher's own releases ([`LAUNCHER_REPO`]), as GitHub's JSON (kept on disk like the game's
+/// list, read again within [`crate::github::FRESH_SECS`]). Horizon's mirror serves only Horizon's
+/// repository reads, so a fork's list always comes from GitHub itself.
+fn launcher_release_list() -> Result<serde_json::Value, String> {
+    crate::github::json(&format!(
+        "https://api.github.com/repos/{LAUNCHER_REPO}/releases?per_page=100"
     ))
 }
 
@@ -398,10 +449,10 @@ pub(crate) fn game_releases(list: &serde_json::Value) -> Vec<Release> {
     out
 }
 
-/// The launcher releases in `list` (the newest 100 releases). Game releases come out several times
-/// a day, so the newest launcher release can be older than all of those: then the newest
-/// `launcher@` and `launcher-v` tags are looked up one by one (a draft's tag is skipped: it has no
-/// public release).
+/// The launcher releases in the launcher's own list ([`LAUNCHER_REPO`]), the newest 100 releases.
+/// If the newest launcher release falls out of that list (a fork with many other releases), the
+/// newest `launcher@` and `launcher-v` tags are looked up one by one (a draft's tag is skipped: it
+/// has no public release).
 fn launcher_releases_in(list: &serde_json::Value) -> Vec<Release> {
     launcher_releases_in_with(list, |url| crate::github::json(&url))
 }
@@ -414,7 +465,7 @@ fn launcher_releases_in_with(
     if found.iter().any(|r| r.asset.is_some()) {
         return found;
     }
-    let api = format!("https://api.github.com/repos/{REPO}");
+    let api = format!("https://api.github.com/repos/{LAUNCHER_REPO}");
     let mut tags = Vec::new();
     for prefix in [LAUNCHER_TAG_PREFIX, OLD_LAUNCHER_TAG_PREFIX] {
         // Every `launcher@` tag is newer than every `launcher-v` one: those only when there is none.
@@ -698,24 +749,48 @@ fn installed_in(versions: &Path) -> Vec<String> {
 }
 
 /// A small release file (its checksums or their signature), whole; None when it has none.
+/// The request retries gateway failures in `get`; this also retries a body interrupted after
+/// the server accepted the request, starting a fresh response rather than using partial bytes.
 pub(crate) fn fetch_small(url: &str) -> Result<Option<Vec<u8>>, String> {
-    let response = match get(url) {
-        Ok(response) => response,
-        Err(e) if e.ends_with("answered 404") => return Ok(None),
-        Err(e) => return Err(e),
-    };
-    let mut body = Vec::new();
-    response
-        .into_reader()
-        .take(1 << 20)
-        .read_to_end(&mut body)
-        .map_err(|e| format!("Download interrupted: {e}"))?;
-    Ok(Some(body))
+    let mut last_error = String::new();
+    for attempt in 1..=GET_ATTEMPTS {
+        let response = match get(url) {
+            Ok(response) => response,
+            Err(e) if e.ends_with("answered 404") => return Ok(None),
+            // `get` has already exhausted its retries for HTTP 502–504.
+            Err(e) => return Err(e),
+        };
+        let mut body = Vec::new();
+        match response.into_reader().take(1 << 20).read_to_end(&mut body) {
+            Ok(_) => return Ok(Some(body)),
+            Err(e) => {
+                last_error = format!("Download interrupted: {e}");
+                if attempt < GET_ATTEMPTS {
+                    std::thread::sleep(retry_delay(attempt));
+                }
+            }
+        }
+    }
+    Err(format!(
+        "{url} failed after {GET_ATTEMPTS} attempts: {last_error}"
+    ))
 }
 
 /// The SHA-256 the release's signed checksums give for `asset`, or why it must not be installed.
 fn signed_digest(tag: &str, asset: &str) -> Result<String, String> {
     crate::signed::digest(
+        tag,
+        asset,
+        &horizon_release_sign::trusted_keys(),
+        fetch_small,
+    )
+}
+
+/// The SHA-256 the launcher release's signed checksums (this repo's, [`LAUNCHER_REPO`]) give for
+/// `asset`, or why the launcher must not replace itself with the download: verified just as the
+/// game's downloads are ([`signed_digest`]).
+fn launcher_signed_digest(tag: &str, asset: &str) -> Result<String, String> {
+    crate::signed::launcher_digest(
         tag,
         asset,
         &horizon_release_sign::trusted_keys(),
@@ -780,9 +855,10 @@ fn unpack(archive: &Path, url: &str, to: &Path) -> Result<(), String> {
 pub fn install(release: &Release, progress: impl Fn(f32)) -> Result<(), String> {
     let tag = release.tag.as_str();
     let sha256 = match &release.nightly {
-        // Signed for the Nightly channel, served under its own GitHub tag.
-        Some(published) => crate::signed::nightly_digest(
-            published,
+        // Signed for its own version (SHA256SUMS.v2.sig), served under its own GitHub tag.
+        Some(tag) => crate::signed::nightly_digest(
+            tag,
+            &release.tag,
             ASSET.unwrap_or_default(),
             &horizon_release_sign::trusted_keys(),
             fetch_small,
@@ -1644,12 +1720,17 @@ fn download_for(
                 format!("\n  • Horizon tried to download {v} from Mojang for {name}, but: {e}")
             })
         }
-        // An owner by its last answer, who can't be asked now.
-        Ok(pass) => Err(format!(
-            "\n  • Downloading {v} from Mojang needs your Microsoft account, which could not be \
-             checked: {}",
-            pass.offline.unwrap_or_default()
-        )),
+        // A playable Horizon session is not necessarily a Mojang owner (Ely.by, for
+        // example). An offline Microsoft account also cannot authorize a new download until
+        // Minecraft services can confirm ownership again.
+        Ok(pass) => {
+            let reason = pass.offline.unwrap_or_else(|| {
+                "A playable Horizon session does not prove ownership of Minecraft: Java Edition. Sign in with the Microsoft account that owns the game.".into()
+            });
+            Err(format!(
+                "\n  • Downloading {v} from Mojang needs a Microsoft account whose Minecraft ownership can be confirmed: {reason}"
+            ))
+        },
         Err(_) if signed_in => Err(
             "\n  • No signed-in account owns Minecraft: Java Edition, so Horizon can't download it."
                 .into(),
@@ -1725,6 +1806,7 @@ pub(crate) const GLIBC_LOADER: &str = "/lib64/ld-linux-x86-64.so.2";
 /// Runs `cmd` with Java at `home`: JAVA_HOME names it and its `bin` leads the PATH, as the
 /// versions' own preparers look for Java.
 fn with_java(cmd: &mut Command, home: &Path) {
+    crate::process::scrub_secrets(cmd);
     let mut path = vec![home.join("bin")];
     path.extend(
         std::env::var_os("PATH")
@@ -1938,7 +2020,7 @@ pub fn preparer(
             };
             return Ok((Preparer::InProcess(options), minecraft));
         }
-        let mut cmd = Command::new(binary);
+        let mut cmd = crate::process::command(binary);
         with_java(&mut cmd, &java_home);
         cmd.current_dir(&dir).arg("--root").arg(&dir);
         if !reused {
@@ -1947,7 +2029,7 @@ pub fn preparer(
         cmd.arg("--minecraft-dir").arg(&minecraft);
         return Ok((Preparer::Process(cmd), minecraft));
     }
-    let mut cmd = Command::new(python.unwrap());
+    let mut cmd = crate::process::command(python.unwrap());
     with_java(&mut cmd, &java_home);
     cmd.current_dir(&dir)
         .args(["-u", "tools/prepare_native_client.py"]);
@@ -2274,6 +2356,7 @@ pub fn client_command(tag: &str) -> Command {
     let _ = fs::create_dir_all(&home);
     let mut cmd = Command::new(client_program(tag));
     strip_launcher_render_env(&mut cmd);
+    crate::process::scrub_secrets(&mut cmd);
     cmd.current_dir(home).arg("--resources").arg(resources(tag));
     cmd.env_remove("HORIZON_ACCOUNT_SESSIONS");
     // How the game asks for a renewed session (`account session`) while it runs.
@@ -2306,6 +2389,7 @@ fn client_program(tag: &str) -> PathBuf {
 
 pub fn server_command(tag: &str, folder: &Path) -> Command {
     let mut cmd = Command::new(version_dir(tag).join(CLIENT));
+    crate::process::scrub_secrets(&mut cmd);
     cmd.current_dir(folder)
         .arg("--resources")
         .arg(resources(tag))
@@ -2383,7 +2467,7 @@ fn stale_versions(installed: &[String], keep: usize, protected: &[String]) -> Ve
 #[cfg(unix)]
 fn in_use(tag: &str) -> bool {
     let dir = format!("{}/", version_dir(tag).display());
-    Command::new("ps")
+    crate::process::command("ps")
         .args(["-A", "-ww", "-o", "args="])
         .output()
         .ok()
@@ -2633,17 +2717,25 @@ fn launcher_update_from(releases: &[Release], own: &str) -> Option<Release> {
         .cloned()
 }
 
-/// Load the game's release list and both update kinds from the same GitHub response.
-/// Publish the game releases before any fallback lookups for older launcher tags, so those
-/// lookups cannot hold up the release pages or opening animation. A list error reaches both.
+/// Load the game's release list from [`REPO`] and the launcher's own from [`LAUNCHER_REPO`], and
+/// parse both update kinds from the two responses. Publish the game releases before the launcher
+/// list is read, so a slow or failing launcher read cannot hold up the release pages or the
+/// opening animation. A list error reaches both kinds.
 pub fn releases_and_updates(
     on_releases: impl FnOnce(Result<Vec<Release>, String>),
 ) -> Result<Updates, String> {
-    releases_and_updates_with(release_list, installed, launcher_releases_in, on_releases)
+    releases_and_updates_with(
+        release_list,
+        launcher_release_list,
+        installed,
+        launcher_releases_in,
+        on_releases,
+    )
 }
 
 fn releases_and_updates_with(
     load: impl FnOnce() -> Result<serde_json::Value, String>,
+    launcher_list: impl FnOnce() -> Result<serde_json::Value, String>,
     installed: impl FnOnce() -> Vec<String>,
     launchers: impl FnOnce(&serde_json::Value) -> Vec<Release>,
     on_releases: impl FnOnce(Result<Vec<Release>, String>),
@@ -2658,9 +2750,10 @@ fn releases_and_updates_with(
     let releases = game_releases(&list);
     let horizon = horizon_update(&installable_updates(&releases), &installed());
     on_releases(Ok(releases));
+    let own = launcher_list()?;
     Ok(Updates {
         horizon,
-        launcher: launcher_update(&launchers(&list)),
+        launcher: launcher_update(&launchers(&own)),
     })
 }
 
@@ -2958,7 +3051,7 @@ pub fn self_update(release: &Release, progress: impl Fn(f32)) -> Result<(), Stri
         progress(1.0);
         return Ok(());
     }
-    let sha256 = signed_digest(&release.tag, launcher_asset().unwrap_or_default())?;
+    let sha256 = launcher_signed_digest(&release.tag, launcher_asset().unwrap_or_default())?;
     let work = data_dir().join(".launcher-update");
     let _ = fs::remove_dir_all(&work);
     fs::create_dir_all(&work).map_err(|e| e.to_string())?;
@@ -3148,7 +3241,7 @@ pub enum Msg {
     Keychain(Option<String>),
     /// Whether an account in the launcher owned the game at its last check (the owner gate).
     Owner(bool),
-    /// Credential-free result from a background account operation.
+    /// Credential-free account status from a background operation.
     AccountStatus(String, u64, crate::account::session::Status),
     AccountProgress(String, u64, crate::account::session::Phase),
     AccountHead(String, Option<String>, Option<Vec<[u8; 4]>>, bool),
@@ -3505,6 +3598,41 @@ mod tests {
     use std::cmp::Ordering::*;
     use std::ffi::OsStr;
 
+    /// A proxy or GitHub briefly answering 502/503/504 is asked again, and the later answer used.
+    #[test]
+    fn a_transient_status_is_asked_again() {
+        use std::io::{Read, Write};
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let server = std::thread::spawn(move || {
+            for status in ["503", "504", "200"] {
+                let (mut stream, _) = listener.accept().unwrap();
+                let mut request = [0u8; 1024];
+                let _ = stream.read(&mut request);
+                let (length, body) = if status == "200" { (2, "ok") } else { (0, "") };
+                write!(
+                    stream,
+                    "HTTP/1.1 {status} X\r\nContent-Length: {length}\r\nConnection: close\r\n\r\n{body}"
+                )
+                .unwrap();
+            }
+        });
+        assert_eq!(get_bytes(&format!("http://{address}/file")).unwrap(), b"ok");
+        server.join().unwrap();
+    }
+
+    #[test]
+    fn only_a_briefly_unavailable_status_is_asked_again() {
+        for code in [502, 503, 504] {
+            assert!(transient_status(code), "{code}");
+        }
+        for code in [200, 301, 400, 403, 404, 429, 500, 501, 505] {
+            assert!(!transient_status(code), "{code}");
+        }
+        assert_eq!(retry_delay(1).as_millis(), 250);
+        assert_eq!(retry_delay(2).as_millis(), 500);
+    }
+
     #[test]
     #[cfg(windows)]
     fn failed_removal_stays_listed_and_can_be_retried() {
@@ -3657,6 +3785,33 @@ mod tests {
         }
         assert!(asked.lock().unwrap().is_empty());
         assert!(!dir.exists());
+
+        // A playable Horizon session without a confirmed Java owner must not authorize
+        // any Mojang download. This is the Launch shape used for an Ely.by account.
+        let ely = account::Account {
+            uuid: "11111111111111111111111111111111".into(),
+            name: "ElyPlayer".into(),
+            skin: None,
+            cape: None,
+        };
+        let ely_secrets: account::Secrets = serde_json::from_value(serde_json::json!({
+            "refresh_token": "fixture-refresh",
+            "minecraft_token": "fixture-access",
+            "minecraft_expires_at": 9999999999u64,
+            "owns": false,
+            "plays": true
+        }))
+        .unwrap();
+        let playable_without_owner = Ok(account::Launch {
+            session: Some((ely, ely_secrets)),
+            ..Default::default()
+        });
+        assert!(download_for(&pins, &dir, playable_without_owner, true, &fetch, &log).is_err());
+        assert!(
+            asked.lock().unwrap().is_empty(),
+            "a playable session must never authorize a Mojang download"
+        );
+
         // An owner: Mojang is asked (and the download fails here, without network).
         let owner = account::Account {
             uuid: "069a79f444e94726a5befca90e38aaf5".into(),
@@ -4108,7 +4263,7 @@ pub fn {f}("
         assert_eq!(Settings::parse("{}").language, None);
         let fr = Settings::parse(r#"{"language": "fr"}"#);
         assert_eq!(fr.language(), Language::French);
-        let future = Settings::parse(r#"{"language": "eo", "game_args": "--x"}"#);
+        let future = Settings::parse(r#"{"language": "tlh", "game_args": "--x"}"#);
         assert_eq!((future.language, future.game_args.as_str()), (None, "--x"));
         let saved = serde_json::to_value(Settings::default()).unwrap();
         assert!(saved.get("language").is_none(), "unset is left out");

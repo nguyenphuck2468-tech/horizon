@@ -69,7 +69,15 @@ impl Launcher {
         window.focus(&self.root_focus, cx);
     }
 
-    /// The commands for `q` (lower case, trimmed), filtered as the mockup does.
+    /// The mods whose title contains `query`, in any case, in list order.
+    fn palette_mods_matching<'a>(mods: &'a [Project], query: &str) -> Vec<&'a Project> {
+        let query = query.to_lowercase();
+        mods.iter()
+            .filter(|p| p.title.to_lowercase().contains(query.as_str()))
+            .collect()
+    }
+
+    /// The commands for q (lower case, trimmed), filtered as the mockup does.
     fn palette_commands(&self, q: &str) -> Vec<Command> {
         let instance = self
             .selected_instance()
@@ -108,7 +116,7 @@ impl Launcher {
         }
         if q.chars().count() >= 2 {
             let mods = self.palette.as_ref().map_or(&[][..], |p| &p.mods[..]);
-            for p in mods.iter().filter(|p| p.title.to_lowercase().contains(q)) {
+            for p in Self::palette_mods_matching(mods, q) {
                 let has = self.mods_has(p);
                 all.push(Command {
                     label: if has {
@@ -125,11 +133,7 @@ impl Launcher {
                 });
             }
         }
-        all.retain(|c| {
-            q.is_empty() || c.label.to_lowercase().contains(q) || c.hint.to_lowercase().contains(q)
-        });
-        all.truncate(SHOWN);
-        all
+        palette_filter(all, q)
     }
 
     fn palette_run(&mut self, run: Run, window: &mut Window, cx: &mut Context<Self>) {
@@ -359,5 +363,130 @@ impl Launcher {
                 )
                 .child(card),
         )
+    }
+}
+
+/// The palette's commands for a query: when it is empty, everything (at most [`SHOWN`]);
+/// otherwise only the entries whose label or hint contain it, matching letters in any case.
+fn palette_filter(mut all: Vec<Command>, q: &str) -> Vec<Command> {
+    let q = q.to_lowercase();
+    all.retain(|c| {
+        q.is_empty() || c.label.to_lowercase().contains(&q) || c.hint.to_lowercase().contains(&q)
+    });
+    all.truncate(SHOWN);
+    all
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Nine command-like entries, one past the cap, labels Open 0.., hints Page 0...
+    fn commands() -> Vec<Command> {
+        (0..9)
+            .map(|n| Command {
+                label: format!("Open {n}"),
+                hint: format!("Page {n}"),
+                run: Run::Go(Page::Play),
+            })
+            .collect()
+    }
+
+    #[test]
+    fn an_empty_query_lists_at_most_shown() {
+        assert_eq!(palette_filter(commands(), "").len(), SHOWN);
+    }
+
+    #[test]
+    fn the_query_matches_the_label_or_hint_in_any_case() {
+        let got = palette_filter(commands(), "page 3");
+        assert_eq!(got.len(), 1);
+        assert_eq!(got[0].label, "Open 3");
+        assert_eq!(got[0].hint, "Page 3");
+        let caps = palette_filter(commands(), "OPEN 4");
+        assert_eq!(caps.len(), 1);
+        assert_eq!(caps[0].label, "Open 4");
+        let misses = palette_filter(commands(), "hidden");
+        assert!(misses.is_empty());
+    }
+
+    #[test]
+    fn matches_stay_in_place_and_the_list_is_capped() {
+        // Every entry has an "e" (Open, Page): nine match, the cap keeps the first eight.
+        let got = palette_filter(commands(), "e");
+        assert_eq!(got.len(), SHOWN);
+        assert_eq!(got[0].label, "Open 0");
+        assert_eq!(got[0].hint, "Page 0");
+        assert_eq!(got[7].label, "Open 7");
+    }
+
+    fn mod_project(title: &str) -> Project {
+        use horizon_launcher::browser::{Kind, SourceId};
+        Project {
+            source: SourceId::Modrinth,
+            id: title.to_lowercase().replace(' ', "-"),
+            slug: title.to_lowercase().replace(' ', "-"),
+            title: title.to_owned(),
+            summary: String::new(),
+            author: String::new(),
+            downloads: 0,
+            page: String::new(),
+            icon: None,
+            license: String::new(),
+            kind: Kind::Mod,
+            game_versions: vec![],
+            loaders: vec![],
+        }
+    }
+
+    fn mod_titles<'a>(projects: &[&'a Project]) -> Vec<&'a str> {
+        projects.iter().map(|p| p.title.as_str()).collect()
+    }
+
+    #[test]
+    fn palette_mods_matching_ignores_case() {
+        let mods = [
+            mod_project("Sodium"),
+            mod_project("Iris"),
+            mod_project("Oculus"),
+        ];
+        assert_eq!(
+            mod_titles(&Launcher::palette_mods_matching(&mods, "sodium")),
+            ["Sodium"]
+        );
+        assert_eq!(
+            mod_titles(&Launcher::palette_mods_matching(&mods, "SODIUM")),
+            ["Sodium"]
+        );
+        assert!(Launcher::palette_mods_matching(&mods, "optifine").is_empty());
+    }
+
+    #[test]
+    fn palette_mods_matching_matches_a_partial_title() {
+        let mods = [
+            mod_project("Fabric API"),
+            mod_project("Fabric Loader"),
+            mod_project("Sodium"),
+        ];
+        assert_eq!(
+            mod_titles(&Launcher::palette_mods_matching(&mods, "fabric")),
+            ["Fabric API", "Fabric Loader"]
+        );
+    }
+
+    #[test]
+    fn palette_mods_matching_is_empty_when_no_title_contains_the_query() {
+        let mods = [mod_project("Sodium"), mod_project("Iris")];
+        assert!(Launcher::palette_mods_matching(&mods, "forge").is_empty());
+        assert!(Launcher::palette_mods_matching(&mods, "z").is_empty());
+    }
+
+    #[test]
+    fn palette_mods_matching_keeps_the_list_order() {
+        let mods = [mod_project("C"), mod_project("A"), mod_project("B")];
+        assert_eq!(
+            mod_titles(&Launcher::palette_mods_matching(&mods, "")),
+            ["C", "A", "B"]
+        );
     }
 }

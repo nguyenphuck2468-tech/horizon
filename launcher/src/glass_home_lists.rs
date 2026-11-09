@@ -351,23 +351,7 @@ impl Launcher {
             .get(&server.ip)
             .copied()
             .unwrap_or(multiplayer_page::Reach::Asking);
-        let (tone, line) = match reach {
-            multiplayer_page::Reach::Online { players, max } => (
-                ui::Tone::Live,
-                format!(
-                    "{} · {}",
-                    server.ip,
-                    trf(
-                        "{online} of {max}",
-                        &[("online", &players.to_string()), ("max", &max.to_string())]
-                    )
-                ),
-            ),
-            multiplayer_page::Reach::Offline => {
-                (ui::Tone::Off, format!("{} · {}", server.ip, tr("Offline")))
-            }
-            multiplayer_page::Reach::Asking => (ui::Tone::Off, server.ip.clone()),
-        };
+        let (tone, line) = multiplayer_reach_status(&reach, &server.ip);
         let offline = reach == multiplayer_page::Reach::Offline;
         let join = ui::quiet(
             SharedString::from(format!("{key}-join")),
@@ -483,10 +467,59 @@ pub(super) fn danger_button(id: SharedString, label: SharedString) -> Stateful<D
         .px(px(12.))
         .rounded(px(radius::CONTROL))
         .cursor_pointer()
-        .hover(|s| s.bg(gpui::rgba(horizon_theme::glass::DANGER_HOVER << 8 | 0x1f)))
+        .hover(|s| s.bg(ui::danger_fill()))
         .child(
             ui::text(13., FontWeight::MEDIUM, ink::FULL)
                 .text_color(ui::danger())
                 .child(label),
         )
+}
+
+/// The dot tone and the address line a saved server's row shows, as the mockup writes it:
+/// online servers are live with their player count, offline and still-asking ones are off.
+fn multiplayer_reach_status(reach: &multiplayer_page::Reach, ip: &str) -> (ui::Tone, String) {
+    match reach {
+        multiplayer_page::Reach::Online { players, max } => (
+            ui::Tone::Live,
+            format!(
+                "{} · {}",
+                ip,
+                trf(
+                    "{online} of {max}",
+                    &[("online", &players.to_string()), ("max", &max.to_string())]
+                ),
+            ),
+        ),
+        multiplayer_page::Reach::Offline => (ui::Tone::Off, format!("{} · {}", ip, tr("Offline"))),
+        multiplayer_page::Reach::Asking => (ui::Tone::Off, ip.to_string()),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_multiplayer_server_row_reads_its_reach_as_the_mockup_writes_it() {
+        // Online: live dot and "ip · N of M".
+        let (tone, line) = multiplayer_reach_status(
+            &multiplayer_page::Reach::Online {
+                players: 3,
+                max: 10,
+            },
+            "play.example.com",
+        );
+        assert!(matches!(tone, ui::Tone::Live));
+        assert_eq!(line, "play.example.com · 3 of 10");
+        // Offline: off dot and "ip · Offline".
+        let (tone, line) =
+            multiplayer_reach_status(&multiplayer_page::Reach::Offline, "play.example.com");
+        assert!(matches!(tone, ui::Tone::Off));
+        assert_eq!(line, "play.example.com · Offline");
+        // Still asking: off dot and just the address.
+        let (tone, line) =
+            multiplayer_reach_status(&multiplayer_page::Reach::Asking, "play.example.com");
+        assert!(matches!(tone, ui::Tone::Off));
+        assert_eq!(line, "play.example.com");
+    }
 }

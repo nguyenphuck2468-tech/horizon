@@ -14,6 +14,7 @@ mod console_page;
 mod cull;
 mod datapacks_page;
 mod dev_options;
+mod elyby;
 mod export_page;
 mod frame;
 mod game_tools;
@@ -50,6 +51,7 @@ mod microsoft;
 mod modpacks_page;
 mod mods_page;
 mod mods_project;
+mod motion;
 mod multiplayer_page;
 mod native_log_page;
 mod new_instance;
@@ -70,6 +72,7 @@ mod shortcut_page;
 mod skin_page;
 mod sky;
 mod specimen;
+mod sticky;
 mod switch_page;
 mod theme;
 mod themes_page;
@@ -208,6 +211,10 @@ struct Launcher {
     content_scroll: Scrollbar,
     /// The glass Settings page's own scroll: its sections beside their list.
     settings_pane: gpui::ScrollHandle,
+    /// The section the glass Settings list marked when last drawn (`glass_settings`).
+    settings_marked: usize,
+    /// The Mods page's project card, kept in view beside its list.
+    mods_sticky: sticky::Sticky,
     /// The rows of the page's long list (Versions, Patch notes) last drawn.
     long_list: cull::Cull,
     opening: Option<Opening>,
@@ -335,6 +342,8 @@ struct Launcher {
     /// When page switches last checked every account's sign-in.
     auth_checked: Option<Instant>,
     sign_in_target: Option<account::Account>,
+    /// The sign-in under way goes to Ely.by instead of Microsoft (`start_ely_sign_in`).
+    sign_in_ely: bool,
     auth_busy: HashMap<String, u64>,
     auth_next: u64,
     sign_in: Option<SignIn>,
@@ -544,6 +553,8 @@ impl Launcher {
             switches: 0,
             content_scroll: Scrollbar::default(),
             settings_pane: gpui::ScrollHandle::new(),
+            settings_marked: 0,
+            mods_sticky: sticky::Sticky::default(),
             long_list: cull::Cull::default(),
             opening: (!settings.skip_opening).then(|| {
                 let focus = cx.focus_handle();
@@ -631,6 +642,7 @@ impl Launcher {
             profile_heads: profile_heads::Heads::default(),
             auth_checked: None,
             sign_in_target: None,
+            sign_in_ely: false,
             auth_busy: HashMap::new(),
             auth_next: 0,
             sign_in: None,
@@ -828,6 +840,7 @@ impl Launcher {
             self.switches += 1;
             self.content_scroll = Scrollbar::default();
             self.long_list = cull::Cull::default();
+            self.mods_sticky.reset();
             if page == Page::Mods {
                 self.mods.reset_lists();
             }
@@ -1040,9 +1053,6 @@ impl Launcher {
                     self.auth_busy.remove(&uuid);
                     self.auth_progress.remove(&uuid);
                     if self.accounts.find(&uuid).is_some() {
-                        if status.state == account::session::State::Ready {
-                            self.owner = Some(true);
-                        }
                         self.auth_status.insert(uuid, status);
                         // A refresh may have saved a new name or skin: show it now.
                         let saved = Accounts::load();
@@ -1050,6 +1060,7 @@ impl Launcher {
                             self.accounts = saved;
                             self.load_profile_heads();
                         }
+                        self.update_owner_from_auth_statuses();
                     }
                 }
                 Msg::AccountRemoved(uuid, generation, result) => {
@@ -1096,7 +1107,12 @@ impl Launcher {
                     self.load_auth_statuses(false);
                     if let Some(tag) = self.starting_client.take() {
                         let mut cmd = backend::client_command(&tag);
-                        let account::GameSession { file, offline, env } = match session {
+                        let account::GameSession {
+                            owner,
+                            file,
+                            offline,
+                            env,
+                        } = match session {
                             Ok(pass) => pass,
                             Err(account::NoOwner) => {
                                 self.owner = Some(false);
@@ -1108,10 +1124,7 @@ impl Launcher {
                                 continue;
                             }
                         };
-                        // Past the gate by the developer option alone is no owner.
-                        if !self.settings.dev_offline {
-                            self.owner = Some(true);
-                        }
+                        self.owner = Some(owner);
                         if let Some(file) = file {
                             cmd.arg("--session-file").arg(file);
                         }
@@ -1434,15 +1447,10 @@ impl Launcher {
                     self.sign_in_target = None;
                     self.accounts = Accounts::load();
                     self.load_profile_heads();
+                    self.owner = None;
                     self.load_auth_statuses(false);
-                    // Sign-in refuses accounts that don't own the game.
-                    self.owner = Some(true);
                     self.owner_screen_open = false;
                     self.client_error = None;
-                    if !self.settings.owner_notice_seen {
-                        self.settings.owner_notice_seen = true;
-                        self.save_settings();
-                    }
                 }
                 changed = true;
             }
@@ -1797,6 +1805,21 @@ impl Launcher {
         }
     }
 
+    fn update_owner_from_auth_statuses(&mut self) {
+        let complete = self
+            .accounts
+            .accounts
+            .iter()
+            .all(|account| self.auth_status.contains_key(&account.uuid));
+        if complete {
+            self.owner = Some(self.accounts.accounts.iter().any(|account| {
+                self.auth_status
+                    .get(&account.uuid)
+                    .is_some_and(|status| status.owns_minecraft)
+            }));
+        }
+    }
+
     fn refresh_account(&mut self, uuid: String) {
         let Some(generation) = self.begin_auth_job(&uuid) else {
             return;
@@ -1825,6 +1848,14 @@ impl Launcher {
         self.begin_sign_in(None);
     }
 
+    fn start_ely_sign_in(&mut self) {
+        self.cancel_sign_in();
+        self.sign_in = Some(SignIn::start_ely());
+        self.sign_in_target = None;
+        self.sign_in_ely = true;
+        self.sign_in_state = Some(SignInState::Starting);
+    }
+
     fn re_sign_in(&mut self, uuid: &str) {
         if let Some(account) = self.accounts.find(uuid).cloned() {
             self.begin_sign_in(Some(account));
@@ -1838,6 +1869,7 @@ impl Launcher {
             None => SignIn::start(),
         });
         self.sign_in_target = target;
+        self.sign_in_ely = false;
         self.sign_in_state = Some(SignInState::Starting);
     }
 
@@ -1951,7 +1983,7 @@ fn hover_fade(
     let key = |dir: &str, at: Instant| {
         ElementId::named_usize(format!("{id}-{dir}"), (at - start).as_micros() as usize)
     };
-    let ease = || Animation::new(theme::QUICK).with_easing(ease_out_quint());
+    let ease = || motion::eased(horizon_theme::QUICK);
     if let Some((_, at)) = state.on.as_ref().filter(|(h, _)| h == id) {
         return layer()
             .with_animation(key("in", *at), ease(), paint)
@@ -2109,15 +2141,18 @@ fn button(
         Kind::Ghost => base.text_color(t.muted).hover(move |s| s.text_color(t.ink)),
     };
     // The label sits on the block's face, above its lip; pressing pushes it down.
-    let base = base.child(
-        div()
-            .relative()
-            .flex()
-            .items_center()
-            .gap(px(8.))
-            .pb(px(if kind == Kind::Ghost { 0. } else { 2. }))
-            .child(label),
-    );
+    let inner = div()
+        .relative()
+        .flex()
+        .items_center()
+        .gap(px(8.))
+        .pb(px(if kind == Kind::Ghost { 0. } else { 2. }));
+    let inner = if id == "sign-in-elyby" {
+        inner.child(crate::elyby::logo(16.))
+    } else {
+        inner
+    };
+    let base = base.child(inner.child(label));
     keyboard(track_hover(base, id), &t).active(|s| s.opacity(theme::PRESSED).top(px(1.)))
 }
 
@@ -2151,7 +2186,7 @@ fn copy_to_clipboard(cx: &mut App, item: gpui::ClipboardItem) {
 #[cfg(target_os = "linux")]
 fn sync_system_clipboard(text: String) {
     use std::io::Write;
-    use std::process::{Command, Stdio};
+    use std::process::Stdio;
     const TOOLS: [(&str, &str, &[&str]); 3] = [
         ("WAYLAND_DISPLAY", "wl-copy", &[]),
         ("DISPLAY", "xclip", &["-selection", "clipboard"]),
@@ -2166,7 +2201,7 @@ fn sync_system_clipboard(text: String) {
             if std::env::var_os(session).is_none() {
                 continue;
             }
-            let Ok(mut child) = Command::new(tool)
+            let Ok(mut child) = horizon_launcher::process::command(tool)
                 .args(args)
                 .stdin(Stdio::piped())
                 .stdout(Stdio::null())
@@ -3269,6 +3304,9 @@ impl Launcher {
                 None,
                 &t,
             )),
+            // The glass look's Overview ends with the screenshots and the patch log: Prepare is in
+            // Play's ⋯ menu, the Minecraft folder in the folder menu, signing in in the top bar.
+            None if t.glass => rows,
             None => rows
                 .child(index_row(
                     2,
@@ -4144,7 +4182,11 @@ impl Launcher {
                 .as_ref()
                 .filter(|a| a.uuid == uuid)
                 .and_then(|_| match self.sign_in_state.as_ref() {
-                    Some(SignInState::Starting) => Some("Asking Microsoft…"),
+                    Some(SignInState::Starting) => Some(if self.sign_in_ely {
+                        "Asking Ely.by…"
+                    } else {
+                        "Asking Microsoft…"
+                    }),
                     Some(SignInState::Code(_)) => Some("Waiting for browser sign-in…"),
                     Some(SignInState::Working(phase)) => Some(phase.label()),
                     _ => None,
@@ -4235,14 +4277,21 @@ impl Launcher {
     /// happening (the code to enter, a problem), and its buttons.
     fn sign_in_parts(&self, cx: &mut Context<Self>) -> (String, Div, Option<AnyElement>) {
         let t = self.theme;
-        let configured = account::client_id().is_some();
+        let configured = account::client_id().is_some() || account::ely_configured();
         let busy = matches!(
             self.sign_in_state,
             Some(SignInState::Starting | SignInState::Code(_) | SignInState::Working(_))
         );
         let detail = match &self.sign_in_state {
-            _ if !configured => div().child(tr(account::NOT_CONFIGURED)),
-            Some(SignInState::Starting) => div().child(tr("Asking Microsoft…")),
+            _ if !configured => div().child(tr("This build has no configured account provider.")),
+            Some(SignInState::Starting) => {
+                let asked = if self.sign_in_ely {
+                    tr("Asking Ely.by…")
+                } else {
+                    tr("Asking Microsoft…")
+                };
+                div().child(asked)
+            }
             Some(SignInState::Working(phase)) => div().child(tr(phase.label())),
             Some(SignInState::Code(code)) => div()
                 .flex()
@@ -4252,12 +4301,14 @@ impl Launcher {
                     "Open {link} in your browser and enter this code:",
                     &[("link", &code.verification_uri)],
                 ))
-                .child(
-                    text(theme::HEADING)
-                        .font_family(theme::MONO)
-                        .text_color(t.ink)
-                        .child(code.user_code.clone()),
-                ),
+                .when(!code.user_code.is_empty(), |d| {
+                    d.child(
+                        text(theme::HEADING)
+                            .font_family(theme::MONO)
+                            .text_color(t.ink)
+                            .child(code.user_code.clone()),
+                    )
+                }),
             Some(SignInState::Done(Ok(a))) => {
                 div().child(trf("Signed in as {name}.", &[("name", &a.name)]))
             }
@@ -4268,13 +4319,18 @@ impl Launcher {
             None => div().child(tr("Add another account.")),
         };
         let detail = if let Some(target) = &self.sign_in_target {
+            let provider: String = if self.sign_in_ely {
+                "Ely.by".into()
+            } else {
+                "Microsoft".into()
+            };
             div()
                 .flex()
                 .flex_col()
                 .gap(px(4.))
                 .child(trf(
-                    "Use the Microsoft account for {name}.",
-                    &[("name", &target.name)],
+                    "Use the {provider} account for {name}.",
+                    &[("provider", &provider), ("name", &target.name)],
                 ))
                 .child(detail)
         } else {
@@ -4297,16 +4353,18 @@ impl Launcher {
                 div()
                     .flex()
                     .gap(px(4.))
-                    .child(
-                        button("sign-in-copy", "Copy code", Kind::Secondary, &t).on_click(
-                            move |_, _, cx| {
-                                copy_to_clipboard(
-                                    cx,
-                                    gpui::ClipboardItem::new_string(user_code.clone()),
-                                )
-                            },
-                        ),
-                    )
+                    .when(!user_code.is_empty(), |d| {
+                        d.child(
+                            button("sign-in-copy", "Copy code", Kind::Secondary, &t).on_click(
+                                move |_, _, cx| {
+                                    copy_to_clipboard(
+                                        cx,
+                                        gpui::ClipboardItem::new_string(user_code.clone()),
+                                    )
+                                },
+                            ),
+                        )
+                    })
                     .child(
                         button("sign-in-open", "Open link", Kind::Secondary, &t)
                             .on_click(move |_, _, cx| cx.open_url(&uri)),
@@ -4333,22 +4391,37 @@ impl Launcher {
         } else {
             let target = self.sign_in_target.as_ref().map(|a| a.uuid.clone());
             let targeted = target.is_some();
-            // Re-signing one account names it; adding one is Microsoft's own button.
-            let sign_in = if targeted {
-                button("sign-in", "Sign in again", Kind::Secondary, &t)
+            let mut actions = div().flex().gap(px(4.));
+            if targeted {
+                actions = actions.child(
+                    button("sign-in", "Sign in again", Kind::Secondary, &t).on_click(cx.listener(
+                        move |this, _: &ClickEvent, _, cx| {
+                            if let Some(uuid) = &target {
+                                this.re_sign_in(uuid);
+                            }
+                            cx.notify();
+                        },
+                    )),
+                );
             } else {
-                microsoft::sign_in_button("sign-in", &t)
-            };
-            let mut actions = div().flex().gap(px(4.)).child(sign_in.on_click(cx.listener(
-                move |this, _: &ClickEvent, _, cx| {
-                    if let Some(uuid) = &target {
-                        this.re_sign_in(uuid);
-                    } else {
-                        this.start_sign_in();
-                    }
-                    cx.notify();
-                },
-            )));
+                if account::client_id().is_some() {
+                    actions =
+                        actions.child(microsoft::sign_in_button("sign-in-microsoft", &t).on_click(
+                            cx.listener(|this, _: &ClickEvent, _, cx| {
+                                this.start_sign_in();
+                                cx.notify();
+                            }),
+                        ));
+                }
+                actions = actions.child(
+                    button("sign-in-elyby", "Sign in with Ely.by", Kind::Secondary, &t).on_click(
+                        cx.listener(|this, _: &ClickEvent, _, cx| {
+                            this.start_ely_sign_in();
+                            cx.notify();
+                        }),
+                    ),
+                );
+            }
             if targeted {
                 actions = actions.child(
                     button("sign-in-cancel-target", "Cancel", Kind::Ghost, &t).on_click(
@@ -5023,7 +5096,7 @@ impl Render for Launcher {
             Page::Settings => self.settings_page(cx),
         };
         self.sky.free_replaced(window);
-        // The new page fades in and rises a few pixels.
+        // The new page fades in and rises a few pixels, as the website's tabs do (`hzl-pop`).
         let content = div()
             .relative()
             .w_full()
@@ -5032,8 +5105,8 @@ impl Render for Launcher {
             .child(content)
             .with_animation(
                 ElementId::named_usize("page", self.switches),
-                Animation::new(theme::ENTER).with_easing(ease_out_quint()),
-                |d, p| d.opacity(p).top(px(theme::RISE * (1. - p))),
+                motion::eased(motion::POP),
+                |d, p| d.opacity(p).top(px(motion::POP_RISE * (1. - p))),
             );
         let (reveal, held) = self.opening_phase(window);
         let ui = ease_out_cubic((reveal - 0.3) / 0.7);
@@ -5148,6 +5221,24 @@ impl Render for Launcher {
                                             .flex_1()
                                             .min_h_0()
                                             .overflow_y_scroll()
+                                            // A scrolled page is drawn from its layer, not
+                                            // rendered: the Mods page's card asks, once the
+                                            // offset has moved, whether it must follow.
+                                            .on_scroll(cx.listener(
+                                                |this, _: &gpui::ScrollEvent, window, cx| {
+                                                    if this.page != Page::Mods {
+                                                        return;
+                                                    }
+                                                    cx.on_next_frame(window, |this, _, cx| {
+                                                        if this
+                                                            .mods_sticky
+                                                            .moved(&this.content_scroll.handle)
+                                                        {
+                                                            cx.notify();
+                                                        }
+                                                    });
+                                                },
+                                            ))
                                             .child(
                                                 div()
                                                     .flex()
@@ -5173,7 +5264,8 @@ impl Render for Launcher {
                                         &t,
                                     )
                                     .flex_1()
-                                    .min_h_0(),
+                                    .min_h_0()
+                                    .when(t.glass, |d| d.mt(px(crate::glass::CONTENT_INSET))),
                             ),
                     ),
             );
@@ -5386,6 +5478,16 @@ fn main() {
     if let Some(code) = horizon_launcher::installer::run_quiet() {
         std::process::exit(code);
     }
+    // Single-instance guard (Phase 0, C2): at most one launcher process owns the data directory.
+    // Acquired before any shared state (settings, accounts, instances) is read or written, so a
+    // second instance cannot interleave its reads and writes with the first one's.
+    let _single_instance = horizon_launcher::single_instance::SingleInstance::acquire(
+        &horizon_launcher::backend::data_dir(),
+    )
+    .unwrap_or_else(|e| {
+        eprintln!("Horizon: {e}");
+        std::process::exit(2);
+    });
     perf::process_started();
     backend::exe_path();
     #[cfg(windows)]

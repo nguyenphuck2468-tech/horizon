@@ -1,0 +1,154 @@
+name: game nightly
+run-name: game nightly${{ inputs.force && ' (force)' || '' }}
+# The fork's own Nightly for Windows, the build the launcher installs as the game
+# update ([backend::REPO]). Upstream's pipeline builds every platform on self-hosted
+# runners behind the maintainer's Minecraft; this one rebuilds the Windows game from
+# this repository and takes the exporters bundle (Horizon's own compiled classes;
+# crates/horizon-prepare is unchanged from upstream, so the bundles agree) from
+# upstream's newest Nightly zip: extracted, hashed and signed with this repository's
+# key, never executed. The sources beside it (tools/, mods/, crates/horizon-prepare/)
+# come from this checkout alone (xtask's `git archive`).
+#
+#   gh workflow run "game nightly"            # from the branch that ends up published
+# Manual only: no schedule on this fork.
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Publish even if a release for today's date exists
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: game-nightly
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 75
+    defaults:
+      run:
+        shell: bash
+    env:
+      # Where cargo puts the programs.
+      BIN: target/release
+      # Linked statically, so the game runs without the Visual C++ redistributable.
+      RUSTFLAGS: -C target-feature=+crt-static
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          clean: true
+      - id: stamp
+        run: |
+          echo "date=$(date -u +%F)" >> "$GITHUB_OUTPUT"
+          echo "version=nightly-$(date -u +%F)" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "short=$(git rev-parse --short=7 HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: game-nightly-windows
+      # The exporters: upstream's newest Nightly zip carries them; extract the folder to
+      # the repository root, where xtask's `package` takes it.
+      - name: Exporters from upstream's newest Nightly
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag=$(gh api "repos/horizon-rust/horizon/releases?per_page=40" \
+            --jq '[.[] | select(.prerelease and (.assets | map(.name) | index("horizon-windows-x64.zip")))] | .[0].tag_name')
+          echo "upstream nightly: $tag"
+          mkdir -p ../upstream
+          gh release download "$tag" -R horizon-rust/horizon --pattern 'horizon-windows-x64.zip' --dir ../upstream
+          python - <<'EOF'
+          import os, zipfile
+          folder = "../upstream"
+          zip = os.path.join(folder, [n for n in os.listdir(folder) if n.endswith(".zip")][0])
+          with zipfile.ZipFile(zip) as z:
+              names = [n for n in z.namelist() if "/exporters/" in n]
+              assert names, "no exporters folder in upstream's zip"
+              for n in names:
+                  target = os.path.join("exporters", n.split("exporters/", 1)[1])
+                  if n.endswith("/"):
+                      os.makedirs(target, exist_ok=True)
+                      continue
+                  os.makedirs(os.path.dirname(target), exist_ok=True)
+                  with open(target, "wb") as f:
+                      f.write(z.read(n))
+                  print(target)
+          EOF
+          test -f exporters/manifest.json
+      - name: Build the client, horizon-ctl, horizon-prepare and horizon-server
+        env:
+          # Built in (horizon_core::release): --version, user agents, crash reports.
+          HORIZON_VERSION: ${{ steps.stamp.outputs.version }}
+          HORIZON_NIGHTLY: "${{ steps.stamp.outputs.date }} ${{ steps.stamp.outputs.short }}"
+        run: |
+          set -euo pipefail
+          cargo build --release --locked \
+            -p horizon-client -p horizon-client-lib --bin horizon-client --bin horizon-ctl \
+            -p horizon-prepare --bin horizon-prepare -p horizon-server --bin horizon-server
+          for binary in horizon-client horizon-ctl horizon-prepare horizon-server; do
+            test -f "$BIN/$binary.exe" || { echo "::error::$BIN/$binary.exe is missing"; exit 1; }
+          done
+          "$BIN/horizon-client.exe" --help | tr -d '\r' | grep -q -- '--resources'
+          for binary in horizon-prepare horizon-server; do
+            out=$("$BIN/$binary.exe" --version | tr -d '\r')
+            echo "$out"
+            [[ "$out" == "$binary $HORIZON_VERSION" ]] || { echo "::error::expected $binary $HORIZON_VERSION"; exit 1; }
+          done
+      - name: Only system libraries
+        run: |
+          set -euo pipefail
+          for binary in horizon-client horizon-ctl horizon-prepare horizon-server; do
+            python tools/check_imports.py "$BIN/$binary.exe"
+          done
+      - name: Package
+        run: |
+          set -euo pipefail
+          cargo run --locked -p xtask -- package "$BIN/horizon-client.exe" "dist/horizon-windows-x64"
+          7z a -tzip "horizon-windows-x64.zip" "dist/horizon-windows-x64" > /dev/null
+          if unzip -Z1 "horizon-windows-x64.zip" | grep -E '(^|/)(\._|__MACOSX/)'; then
+            echo "::error::junk in the zip"; exit 1
+          fi
+      - name: Sign the checksums
+        env:
+          RELEASE_SIGNING_KEY: ${{ secrets.RELEASE_SIGNING_KEY }}
+        run: |
+          set -euo pipefail
+          cp "horizon-windows-x64.zip" dist/
+          bash tools/ci/sign_release.sh nightly dist/horizon-windows-x64.zip
+      - name: The signature checks, as a launcher would
+        run: |
+          set -euo pipefail
+          cargo run --locked --quiet -p horizon-release-sign -- verify --tag nightly dist
+      - name: Publish the Nightly
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FORCE: ${{ inputs.force && 'true' || 'false' }}
+        run: |
+          set -euo pipefail
+          date=$(date -u +%F)
+          sha=$(git rev-parse HEAD)
+          short=$(git rev-parse --short=7 HEAD)
+          cat > dist/nightly-notes.md <<EOF
+          Nightly $date · $short — this fork's own game build (Windows).
+          Source: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+          EOF
+          if gh release view "nightly-$date" >/dev/null 2>&1 && [[ "$FORCE" != true ]]; then
+            echo "a release for $date already exists; pass force to replace it"
+            exit 0
+          fi
+          gh release create "nightly-$date" --prerelease --latest=false --target "$sha" \
+            --title "Nightly $date · $short" --notes-file dist/nightly-notes.md \
+            dist/horizon-windows-x64.zip dist/SHA256SUMS dist/SHA256SUMS.sig
+          # The moving tag the launcher treats as the current Nightly: rebuilt at $sha.
+          gh release delete nightly --yes --cleanup-tag 2>/dev/null || true
+          gh release create nightly --prerelease --latest=false --target "$sha" \
+            --title "Nightly $date · $short" --notes-file dist/nightly-notes.md \
+            dist/horizon-windows-x64.zip dist/SHA256SUMS dist/SHA256SUMS.sig

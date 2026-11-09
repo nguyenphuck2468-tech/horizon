@@ -50,8 +50,8 @@ fn session_tools() -> Value {
         { "name": "server_log", "description": "The most recent lines of the server's console.",
           "inputSchema": { "type": "object", "properties": { "lines": { "type": "integer", "minimum": 1, "maximum": 2000, "description": "How many lines (default 50)." } } } },
         { "name": "server_stop", "description": "Stop the server started with server cleanly (it saves the world), killing it if it does not stop within 30 seconds.", "inputSchema": none },
-        { "name": "account_list", "description": "The Microsoft accounts signed in to the launcher (names and UUIDs, never tokens), which one the game plays as (none = offline), and how a sign-in started with account_sign_in is going. CLI: horizon-launcher account list", "inputSchema": none },
-        { "name": "account_sign_in", "description": "Start signing in a Microsoft account: returns a link and a code the player enters in their browser. The sign-in finishes in the background; check it with account_list. Only when the player asks to sign in. CLI: horizon-launcher account sign-in", "inputSchema": none },
+        { "name": "account_list", "description": "The Microsoft and Ely.by accounts signed in to the launcher (names and UUIDs, never tokens), which one the game plays as (none = offline), and how a sign-in started with account_sign_in is going. CLI: horizon-launcher account list", "inputSchema": none },
+        { "name": "account_sign_in", "description": "Start signing in an account through a configured Microsoft or Ely.by provider. The sign-in finishes in the background; check it with account_list. Only when the player asks to sign in. CLI: horizon-launcher account sign-in", "inputSchema": none },
     ])
 }
 
@@ -205,7 +205,7 @@ impl Session {
                 Ok(serde_json::to_string_pretty(&json!({
                     "accounts": accounts.accounts.iter().map(|a| json!({ "name": a.name, "uuid": a.uuid, "authentication": account::session::status(account::store(), &a.uuid) })).collect::<Vec<_>>(),
                     "plays_as": accounts.selected().map(|a| a.name.clone()),
-                    "sign_in_configured": account::client_id().is_some(),
+                    "sign_in_configured": account::client_id().is_some() || account::ely_configured(),
                     // Sign-ins outlast the launcher: in the keychain, or in the secrets file
                     // where it refused them (`secrets_file`: the file holds a sign-in).
                     "keychain": account::store().persistent(),
@@ -217,11 +217,17 @@ impl Session {
                 .unwrap())
             }
             "account_sign_in" => {
-                account::client_id().ok_or(account::NOT_CONFIGURED)?;
+                if account::client_id().is_none() && !account::ely_configured() {
+                    return Err("This build has no configured account provider.".into());
+                }
                 if let Some(s) = self.sign_in.take() {
                     s.cancel();
                 }
-                let sign_in = SignIn::start();
+                let sign_in = if account::client_id().is_some() {
+                    SignIn::start()
+                } else {
+                    SignIn::start_ely()
+                };
                 let deadline = std::time::Instant::now() + Duration::from_secs(30);
                 let state = loop {
                     match sign_in.state() {
@@ -233,6 +239,10 @@ impl Session {
                 };
                 self.sign_in = Some(sign_in);
                 match state {
+                    SignInState::Code(c) if c.user_code.is_empty() => Ok(format!(
+                        "Ask the player to open {}. Then check accounts.",
+                        c.verification_uri
+                    )),
                     SignInState::Code(c) => Ok(format!(
                         "Ask the player to open {} and enter the code {}. Then check accounts.",
                         c.verification_uri, c.user_code

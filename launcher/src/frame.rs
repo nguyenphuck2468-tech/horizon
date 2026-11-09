@@ -47,7 +47,7 @@ impl Launcher {
     /// chosen), as `ColorTile` draws it.
     pub(super) fn glass_instance_icon(&mut self, i: &Instance, size: f32) -> AnyElement {
         if i.kind == InstanceKind::Default && i.icon.is_none() {
-            return ui::mark_tile(size, self.look.accent_soft).into_any_element();
+            return self.horizon_mark(size);
         }
         if let Some(picture) = self.instance_picture(i, size) {
             return instance_icons::centred(picture, size, self.scale).into_any_element();
@@ -400,10 +400,10 @@ impl Launcher {
             _ => {}
         }
 
-        // Sculk's card (not in the mockup, kept: a sponsor), where the old sidebar had it: above
-        // the links on every page but Servers, which shows the wide banner. Tall where the
-        // sidebar has the height for it besides its rows, compact otherwise.
-        if self.page != Page::Servers && !self.settings.partner_hidden {
+        // Sculk's card (not in the mockup, kept: a sponsor), where the old sidebar had it: at
+        // the sidebar's foot above the links, on every page (Servers shows the wide banner too).
+        // Tall where the sidebar has the height for it besides its rows, compact otherwise.
+        if !self.settings.partner_hidden {
             let rows = self.instances.list.len() + servers.len();
             let free = f32::from(window.viewport_size().height)
                 - 2. * MARGIN
@@ -649,6 +649,32 @@ impl Launcher {
                 &t,
             )
         });
+        // The second way in, when this build signs in through Ely.by.
+        let ely_sign_in = (!matches!(self.accounts.player(), Player::Microsoft(_))).then(|| {
+            keyboard(
+                div()
+                    .id("topbar-sign-in-elyby")
+                    .flex()
+                    .items_center()
+                    .gap(px(10.))
+                    .h(px(44.))
+                    .px(px(16.))
+                    .rounded(px(radius::ROW))
+                    .bg(white(0.08))
+                    .hover(|s| s.bg(white(0.11)))
+                    .cursor_pointer()
+                    .child(elyby::logo(16.))
+                    .child(
+                        ui::text(14., FontWeight::MEDIUM, ink::FULL)
+                            .child(tr("Sign in with Ely.by")),
+                    )
+                    .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                        this.start_ely_sign_in();
+                        cx.notify();
+                    })),
+                &t,
+            )
+        });
         let settings = ui::icon_button(
             "nav-Settings",
             "sliders-horizontal",
@@ -706,6 +732,7 @@ impl Launcher {
                     .children(build_log)
                     .child(account)
                     .children(sign_in)
+                    .children(ely_sign_in)
                     .child(settings),
             )
     }

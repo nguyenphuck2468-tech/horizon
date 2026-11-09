@@ -194,7 +194,9 @@ impl Launcher {
                 };
                 let mut line = published(&release.date, &release.time);
                 let right = self.glass_release_action(&release, cx);
+                // `gap-2.5`: the bottom margin `column` counts each row's gap in.
                 self.glass_version_card(&release.tag, title, &mut line, i == 0, on_disk, right)
+                    .mb(px(10.))
             },
         );
         page.child(list)
@@ -459,5 +461,44 @@ impl Launcher {
             }
             d
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_release_day_reads_as_the_mockup_writes_it() {
+        assert_eq!(published("2026-11-01", ""), "Nov 1");
+        // The months' short names.
+        for (mm, month) in [
+            ("01", "Jan"),
+            ("02", "Feb"),
+            ("03", "Mar"),
+            ("04", "Apr"),
+            ("05", "May"),
+            ("06", "Jun"),
+            ("07", "Jul"),
+            ("08", "Aug"),
+            ("09", "Sep"),
+            ("10", "Oct"),
+            ("11", "Nov"),
+            ("12", "Dec"),
+        ] {
+            assert_eq!(
+                published(&format!("2026-{mm}-12"), ""),
+                format!("{month} 12")
+            );
+        }
+        // The day's leading zero goes.
+        assert_eq!(published("2026-01-01", ""), "Jan 1");
+        // A date in another shape passes through untouched.
+        assert_eq!(published("soon", ""), "soon");
+    }
+
+    #[test]
+    fn a_release_day_carries_its_utc_time_when_it_has_one() {
+        assert_eq!(published("2026-03-09", "14:30"), "Mar 9, 14:30 UTC");
     }
 }

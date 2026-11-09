@@ -79,6 +79,12 @@ pub fn danger() -> Hsla {
     })
 }
 
+/// The theme's danger red at 12 %, the mockup's `bg-red-500/10`-like fill: a Delete row, a
+/// refused field and a second, destructive click's button all sit on it.
+pub fn danger_fill() -> Hsla {
+    rgba(horizon_theme::glass::DANGER_HOVER << 8 | 0x1f).into()
+}
+
 /// Builds `f`'s rows as the mockup's `SettingRow`s, for a Settings card: `index_row` and
 /// `section_title` ask [`flat`].
 pub fn flat_rows<R>(f: impl FnOnce() -> R) -> R {
@@ -460,11 +466,7 @@ pub fn menu_row(
     } else {
         (white(ink::FULL), white(ink::NOTE))
     };
-    let hover_color = if danger {
-        rgba(horizon_theme::glass::DANGER_HOVER << 8 | 0x1f).into()
-    } else {
-        white(0.07)
-    };
+    let hover_color = if danger { danger_fill() } else { white(0.07) };
     let d = div()
         .id(id.clone())
         .relative()
@@ -489,9 +491,12 @@ pub fn menu_row(
     keyboard(track_hover(d, id), t)
 }
 
-/// A popover (`POPOVER`): a float plate round at 16 with 6 px around its rows.
+/// A popover (`POPOVER`): the cards' glass (the mockup's darker `hzl-float` read as a different
+/// material beside them), round at 16 with 6 px around its rows, a shadow setting it above the
+/// card under it.
 pub fn popover(width: f32) -> Div {
-    crate::glass::float(radius::POPOVER)
+    crate::glass::plate(radius::POPOVER)
+        .shadow_lg()
         .w(px(width))
         .p(px(6.))
         .flex()
@@ -561,40 +566,6 @@ pub fn solid(
             .child(label.into()),
         t,
     )
-}
-
-/// Horizon's mark on its dark tile (`MarkTile`): the mark 64 % of the tile, round at 26 %; the
-/// stems white, their reflection white at 40 %, the horizon in the accent's soft shade.
-pub fn mark_tile(size: f32, accent_soft: u32) -> Div {
-    let inner = size * 0.64;
-    let u = inner / 16.;
-    let bar = |x: f32, y: f32, w: f32, h: f32, c: Hsla| {
-        div()
-            .absolute()
-            .left(px(x * u))
-            .top(px(y * u))
-            .w(px(w * u))
-            .h(px(h * u))
-            .bg(c)
-    };
-    div()
-        .flex()
-        .flex_none()
-        .items_center()
-        .justify_center()
-        .size(px(size))
-        .rounded(px((size * 0.26).round()))
-        .bg(color(0x0c0818))
-        .child(
-            div()
-                .relative()
-                .size(px(inner))
-                .child(bar(4., 3., 2., 4., gpui::white()))
-                .child(bar(10., 3., 2., 4., gpui::white()))
-                .child(bar(4., 8., 2., 4., gpui::white().opacity(0.4)))
-                .child(bar(10., 8., 2., 4., gpui::white().opacity(0.4)))
-                .child(bar(1., 7., 14., 1., color(accent_soft))),
-        )
 }
 
 /// A big square button with one icon (`BIG_ICON`): 56 px, white at 8 %, 13 % under the pointer;
@@ -671,6 +642,39 @@ pub fn menu_item(
     if locked {
         return d.opacity(0.4);
     }
+    keyboard(track_hover(d, id), t)
+}
+
+/// A dropdown's choice: its name on one line, 36 tall, the accent's tick on the one `picked`.
+pub fn pick_row(
+    id: impl Into<SharedString>,
+    label: impl Into<SharedString>,
+    picked: bool,
+    t: &Theme,
+) -> Stateful<Div> {
+    let id = id.into();
+    let d = div()
+        .id(id.clone())
+        .relative()
+        .flex()
+        .items_center()
+        .justify_between()
+        .gap(px(12.))
+        .h(px(36.))
+        .w_full()
+        .px(px(12.))
+        .rounded(px(radius::CONTROL))
+        .cursor_pointer()
+        .child(hover_fade(&id, layer(radius::CONTROL), |d, a| {
+            d.bg(white(0.07 * a))
+        }))
+        .child(
+            text(14., FontWeight::NORMAL, ink::FULL)
+                .relative()
+                .truncate()
+                .child(label.into()),
+        )
+        .children(picked.then(|| icon("tick-02", 17., color(look().accent_soft)).relative()));
     keyboard(track_hover(d, id), t)
 }
 
@@ -816,7 +820,7 @@ pub fn link(id: impl Into<SharedString>, label: impl Into<SharedString>) -> Stat
 /// 12 % while what it holds is refused.
 pub fn field(focused: bool, invalid: bool) -> Div {
     let bg: Hsla = if invalid {
-        rgba(horizon_theme::glass::DANGER_HOVER << 8 | 0x1f).into()
+        danger_fill()
     } else {
         white(if focused {
             fill::FIELD_FOCUS
@@ -846,16 +850,17 @@ pub fn toggle(
     on_accent: u32,
     t: &Theme,
 ) -> Stateful<Div> {
+    let id = id.into();
     let knob = div()
         .absolute()
         .top(px(4.))
-        .left(px(if on { 20. } else { 4. }))
         .size(px(16.))
         .rounded_full()
         .bg(if on { color(on_accent) } else { white(0.7) });
+    let knob = crate::motion::knob(&id, on, knob, 4., 16.);
     keyboard(
         div()
-            .id(id.into())
+            .id(id)
             .relative()
             .flex_none()
             .w(px(40.))
@@ -907,7 +912,13 @@ pub fn button(id: SharedString, label: SharedString, kind: Kind, t: &Theme) -> S
             .text_color(white(ink::BODY))
             .hover(|s| s.bg(white(0.06)).text_color(white(ink::FULL))),
     };
-    keyboard(track_hover(d.child(label), id), t)
+    let d = if id == "sign-in-elyby" {
+        let d = d.child(crate::elyby::logo(16.));
+        d.child(label)
+    } else {
+        d.child(label)
+    };
+    keyboard(track_hover(d, id), t)
 }
 
 /// A segmented control in the glass look (the server dialog's difficulty): white at 4 % round
@@ -965,7 +976,7 @@ pub fn page_head(title: impl Into<SharedString>, note: impl Into<SharedString>) 
     div()
         .flex()
         .flex_col()
-        .pt(px(40.))
+        .pt(px(40. - crate::glass::CONTENT_INSET))
         .mb(px(28.))
         .child(
             div()
@@ -999,4 +1010,43 @@ pub fn card_note(label: impl Into<SharedString>) -> Div {
     text(13., FontWeight::NORMAL, ink::QUIET)
         .line_height(px(19.5))
         .child(label.into())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_light_appearance_swaps_ink_for_paper() {
+        set_light(false);
+        assert_eq!(paper(), gpui::white());
+        set_light(true);
+        assert_eq!(paper(), color(INK));
+        assert_eq!(color(INK), gpui::rgb(0x100a1f).into());
+        set_light(false);
+    }
+
+    #[test]
+    fn the_danger_fill_is_the_theme_red_at_twelve_percent() {
+        set_light(false);
+        let fill = danger_fill();
+        let expected: Hsla = rgba(horizon_theme::glass::DANGER_HOVER << 8 | 0x1f).into();
+        assert_eq!(fill, expected);
+        // The same red, at 0x1f of 255 (about 12 %).
+        assert!((fill.a - f32::from(0x1f_u8) / 255.0).abs() < 1e-3);
+        // The light appearance does not swap it: a destructive fill stays red on paper.
+        set_light(true);
+        assert_eq!(danger_fill(), fill);
+        set_light(false);
+    }
+
+    #[test]
+    fn tone_colours_stay_the_token_ledgers_in_both_appearances() {
+        // In dark the helpers pass the crate's glass tokens through untouched.
+        set_light(false);
+        assert_eq!(live(), color(horizon_theme::glass::LIVE));
+        assert_eq!(warn(), color(horizon_theme::glass::WARN));
+        assert_eq!(danger(), color(horizon_theme::glass::DANGER));
+        set_light(false);
+    }
 }

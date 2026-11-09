@@ -498,6 +498,36 @@ fn a_version_file_that_is_not_the_pinned_one_is_refused() {
 }
 
 #[test]
+fn pinecone_mc_is_discovered_and_its_instance_root_is_used() {
+    let s = Scratch::new("pineconemc");
+    let root = s.0.join("ElyPrismLauncher");
+    let jar = "libraries/com/mojang/minecraft/26.3/minecraft-26.3-client.jar";
+    let launcher = s.launcher("ElyPrismLauncher", "", jar);
+    s.write(
+        "ElyPrismLauncher/meta/net.minecraft/26.3.json",
+        br#"{"mainJar": {"name": "com.mojang:minecraft:26.3:client"}}"#,
+    );
+
+    let chosen = s.0.join("empty-minecraft-folder");
+    fs::create_dir_all(&chosen).unwrap();
+    let folders = Folders {
+        home: s.0.clone(),
+        data: s.0.clone(),
+        config: s.0.clone(),
+    };
+    let known = known_folders(Os::Windows, &folders);
+    let linked = s.0.join("linked");
+    let got = resolve_with(&chosen, &known, &linked, &Mojang::new(MANIFEST)).unwrap();
+
+    assert_eq!(got, linked);
+    assert_linked(&linked, &launcher, jar);
+    assert_eq!(
+        launcher_of(&root.join("instances/26.3/minecraft")),
+        Some("PineconeMC")
+    );
+}
+
+#[test]
 fn each_system_has_its_launcher_folders() {
     let linux = Folders {
         home: "/home/r".into(),
@@ -515,6 +545,7 @@ fn each_system_has_its_launcher_folders() {
         "the official launcher: /home/r/.minecraft",
         "Prism Launcher: /home/r/.local/share/PrismLauncher",
         "Prism Launcher: /home/r/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher",
+        "PineconeMC: /home/r/.local/share/ElyPrismLauncher",
         "MultiMC: /home/r/.local/share/multimc",
         "Modrinth App: /home/r/.local/share/ModrinthApp",
         "Modrinth App: /home/r/.var/app/com.modrinth.ModrinthApp/data/ModrinthApp",
@@ -538,6 +569,9 @@ fn each_system_has_its_launcher_folders() {
     assert!(
         got.contains(&"Prism Launcher: /Users/r/Library/Application Support/PrismLauncher".into())
     );
+    assert!(
+        got.contains(&"PineconeMC: /Users/r/Library/Application Support/ElyPrismLauncher".into())
+    );
     let windows = Folders {
         home: "C:/Users/r".into(),
         data: "C:/Users/r/AppData/Roaming".into(),
@@ -549,4 +583,5 @@ fn each_system_has_its_launcher_folders() {
         "the official launcher: C:/Users/r/AppData/Roaming/.minecraft"
     );
     assert!(got.contains(&"ATLauncher: C:/Users/r/AppData/Roaming/ATLauncher".into()));
+    assert!(got.contains(&"PineconeMC: C:/Users/r/AppData/Roaming/ElyPrismLauncher".into()));
 }

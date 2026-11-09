@@ -28,7 +28,7 @@ impl Launcher {
     fn glass_who_plays(&mut self, cx: &mut Context<Self>) -> Div {
         let t = self.theme;
         let now = self.accounts.player();
-        let (uuid, name, status) = match &now {
+        let (uuid, name) = match &now {
             Player::Microsoft(uuid) => (
                 Some(uuid.clone()),
                 self.accounts
@@ -37,19 +37,14 @@ impl Launcher {
                     .find(|a| &a.uuid == uuid)
                     .map(|a| a.name.clone())
                     .unwrap_or_default(),
-                (Tone::Live, tr("Microsoft account · online servers too")),
             ),
-            Player::Offline(name) => (
-                None,
-                name.clone(),
-                (Tone::Off, tr("Offline · single player and LAN worlds")),
-            ),
+            Player::Offline(name) => (None, name.clone()),
             Player::GameName => (
                 None,
                 self.offline_name.clone().unwrap_or_else(|| "Player".into()),
-                (Tone::Off, tr("Offline · single player and LAN worlds")),
             ),
         };
+        let status = player_status(&now);
         let head = div()
             .flex_none()
             .size(px(80.))
@@ -303,7 +298,7 @@ impl Launcher {
                         .font_family(horizon_theme::glass::FONT)
                         .text_size(px(15.))
                         .font_weight(FontWeight::SEMIBOLD)
-                        .text_color(gpui::rgb(0x100a1f))
+                        .text_color(ui::color(horizon_theme::glass::ON_LIGHT))
                         .child(microsoft::logo(18.))
                         .child(tr("Sign in with Microsoft")),
                     &t,
@@ -316,6 +311,45 @@ impl Launcher {
             )
         } else {
             action.map(|a| div().mt(px(20.)).child(a).into_any_element())
+        };
+        // The second way in: Ely.by accounts (servers that take them), right under the
+        // Microsoft button, never while a sign-in is already moving.
+        // Always offered (the built-in client ID makes it work out of the box), so a missing
+        // button is never what keeps a player from signing in.
+        let ely_button: Option<AnyElement> = if idle && self.sign_in_target.is_none() {
+            Some(
+                keyboard(
+                    div()
+                        .id("glass-sign-in-elyby")
+                        .flex()
+                        .items_center()
+                        .justify_center()
+                        .gap(px(10.))
+                        .h(px(48.))
+                        .w_full()
+                        .mt(px(8.))
+                        .rounded(px(radius::ROW))
+                        .bg(white(0.08))
+                        // On a light plate, the quiet button keeps an edge.
+                        .when(ui::light(), |d| d.border_1().border_color(white(0.15)))
+                        .cursor_pointer()
+                        .hover(|s| s.bg(white(0.12)))
+                        .font_family(horizon_theme::glass::FONT)
+                        .text_size(px(15.))
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .text_color(white(ink::FULL))
+                        .child(elyby::logo(18.))
+                        .child(tr("Sign in with Ely.by")),
+                    &t,
+                )
+                .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                    this.start_ely_sign_in();
+                    cx.notify();
+                }))
+                .into_any_element(),
+            )
+        } else {
+            None
         };
         div()
             .flex()
@@ -344,16 +378,78 @@ impl Launcher {
                     .child(note),
             )
             .children(button)
+            .children(ely_button)
             .when(configured, |d| {
                 d.child(
                     ui::text(12., FontWeight::NORMAL, 0.45)
                         .mt(px(12.))
                         .line_height(px(18.))
-                        .child(tr(
-                            "Microsoft's own page opens in your browser. Horizon never sees your \
-                             password.",
-                        )),
+                        .child(if account::ely_configured() {
+                            tr(
+                                "The sign-in page opens in your browser. Horizon never sees \
+                                 your password.",
+                            )
+                        } else {
+                            tr("Microsoft's own page opens in your browser. Horizon never \
+                                 sees your password.")
+                        }),
                 )
             })
+    }
+}
+
+/// The dot tone and the line under the player's name: live online (Microsoft or Ely.by) or
+/// offline single player/LAN. The Ely.by branch depends on the keychain and reads false in
+/// tests, so it is not pinned here.
+fn player_status(player: &Player) -> (Tone, String) {
+    match player {
+        Player::Microsoft(uuid) => {
+            if account::is_ely_account(uuid) {
+                (
+                    Tone::Live,
+                    tr("Ely.by account · servers that accept Ely.by").to_string(),
+                )
+            } else {
+                (
+                    Tone::Live,
+                    tr("Microsoft account · online servers too").to_string(),
+                )
+            }
+        }
+        Player::Offline(_) => (
+            Tone::Off,
+            tr("Offline · single player and LAN worlds").to_string(),
+        ),
+        Player::GameName => (
+            Tone::Off,
+            tr("Offline · single player and LAN worlds").to_string(),
+        ),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use account::Player;
+
+    #[test]
+    fn a_microsoft_player_is_live_for_online_servers() {
+        let (tone, line) = player_status(&Player::Microsoft("some-uuid".into()));
+        assert!(matches!(tone, Tone::Live));
+        assert!(line.contains("online servers"));
+    }
+
+    #[test]
+    fn an_offline_player_is_off_for_single_player_and_lan() {
+        let (tone, line) = player_status(&Player::Offline("Nguyen".into()));
+        assert!(matches!(tone, Tone::Off));
+        assert!(line.contains("single player"));
+    }
+
+    #[test]
+    fn a_made_up_game_name_is_off_for_single_player_and_lan() {
+        let (tone, line) = player_status(&Player::GameName);
+        assert!(matches!(tone, Tone::Off));
+        assert!(line.contains("LAN worlds"));
     }
 }
