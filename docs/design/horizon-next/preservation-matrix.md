@@ -46,3 +46,5 @@ Manual-only paths (no unit test can provide them) and the suite covering them me
 - Capturing logs and crash reports: a running game process and GPU; `game_log::tests`.
 - Claiming wardrobe cosmetics: signed-in account and live API; `wardrobe::tests`.
 - Keychain storage, installers and desktop integration: the OS; `account::tests` in-memory store.
+
+N02 records where each of these workflows lives today: `docs/design/horizon-next/workflow-map.md` maps surface to service, persistence, error state and test, and lists the gaps the compatibility facade must close.

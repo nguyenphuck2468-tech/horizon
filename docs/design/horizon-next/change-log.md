@@ -1,6 +1,12 @@
 # Horizon Next — change log
 
 ## 2026-11-09
+- N02: `docs/design/horizon-next/workflow-map.md` maps every preserved area from the current
+  surface to its application service, its files under `data_dir()`/`game_home()`, the error
+  states the player sees, and the test plus N01 workflow that pin it. It records the two data
+  roots and their overrides, a file-by-file persistence ownership table, the secrets/retry/
+  old-data/signature contracts, and the gaps N03 must close before the old shell is removed.
+  Docs-only; the fence on the N01 tip stays fmt/clippy clean, lib 569 + bin 117.
 - N01: `launcher/src/next_preservation.rs` turns the 12-area inventory into an executable
   contract. Its 24 workflows name the production entry point each new screen must keep calling;
   13 are smoke-tested against the real functions (Ely.by secrets, Nightly naming, release order,
