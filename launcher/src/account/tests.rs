@@ -3810,3 +3810,15 @@ fn accounts_atomic_save_keeps_bak_of_previous() {
     assert!(loaded.accounts.is_empty());
     let _ = std::fs::remove_dir_all(&root);
 }
+
+#[test]
+fn accounts_save_refuses_to_overwrite_corrupt_file() {
+    let root = std::env::temp_dir().join(format!("horizon-accounts-refuse-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).unwrap();
+    let path = root.join("accounts.json");
+    std::fs::write(&path, "{not valid json").unwrap();
+    let acc = Accounts::default();
+    assert!(Accounts::save_to(&acc, &path).is_err());
+    let _ = std::fs::remove_dir_all(&root);
+}

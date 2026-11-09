@@ -13,7 +13,8 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::fs;
 use std::io::Write;
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicU64, Ordering};
 
 /// Why a state file could not be loaded.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -43,6 +44,9 @@ impl std::error::Error for LoadError {}
 /// The bytes are written to a temporary file in the same directory, synced to disk, then renamed
 /// over `path`. On Windows, rename over an existing file fails, so the target is removed first
 /// (a small unavoidable window; the `.bak` limits the damage).
+///
+/// The temporary file name carries a per-process counter and a timestamp component, so concurrent
+/// writers in the same or in different processes never collide.
 pub fn atomic_write_bytes(path: &Path, bytes: &[u8]) -> Result<(), String> {
     let dir = path.parent().unwrap_or(Path::new(""));
     fs::create_dir_all(dir).map_err(|e| format!("{}: {e}", dir.display()))?;
@@ -53,16 +57,14 @@ pub fn atomic_write_bytes(path: &Path, bytes: &[u8]) -> Result<(), String> {
         let _ = fs::copy(path, &bak);
     }
 
-    let tmp = dir.join(format!(
-        ".{}.{}.tmp",
-        path.file_name().and_then(|n| n.to_str()).unwrap_or("state"),
-        std::process::id()
-    ));
+    let tmp = random_temp_name(dir, path);
 
     {
         let mut file = fs::File::create(&tmp).map_err(|e| format!("{tmp:?}: {e}"))?;
-        file.write_all(bytes).map_err(|e| format!("{tmp:?}: {e}"))?;
-        file.sync_all().map_err(|e| format!("{tmp:?}: {e}"))?;
+        if let Err(e) = file.write_all(bytes).and_then(|_| file.sync_all()) {
+            let _ = fs::remove_file(&tmp);
+            return Err(format!("{tmp:?}: {e}"));
+        }
     }
 
     // Rename temp over target.
@@ -106,6 +108,35 @@ where
 /// Load a JSON state file with no extra validation.
 pub fn load_json<T: DeserializeOwned>(path: &Path) -> Result<T, LoadError> {
     load_json_validated(path, |_| Ok(()))
+}
+
+/// Check whether the file at `path` is present and parseable as `T`.
+///
+/// Used before overwriting a state file so that a corrupt original is never silently replaced
+/// by an in-memory default.
+pub fn is_readable<T: DeserializeOwned>(path: &Path) -> bool {
+    load_json::<T>(path).is_ok()
+}
+
+/// A monotonically increasing counter for unique temporary file names inside one process.
+static TEMP_SEQ: AtomicU64 = AtomicU64::new(0);
+
+/// A unique temporary file name in `dir`, next to `path`, for atomic writes.
+///
+/// Combines the process id, a timestamp and a per-process counter, so concurrent writers in the
+/// same or in different processes do not collide.
+fn random_temp_name(dir: &Path, path: &Path) -> PathBuf {
+    let seq = TEMP_SEQ.fetch_add(1, Ordering::Relaxed);
+    let nanos = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_nanos())
+        .unwrap_or(0);
+    dir.join(format!(
+        ".{}.{}.{}.tmp",
+        path.file_name().and_then(|n| n.to_str()).unwrap_or("state"),
+        std::process::id(),
+        nanos ^ seq as u128
+    ))
 }
 
 #[cfg(test)]
@@ -207,5 +238,46 @@ mod tests {
             }),
             Err(LoadError::Corrupt(_))
         ));
+    }
+
+    #[test]
+    fn atomic_write_bytes_does_not_collide_between_concurrent_writers() {
+        let dir = scratch("concurrent");
+        let path = dir.join("state.json");
+        let handles: Vec<_> = (0..8)
+            .map(|i| {
+                let path = path.clone();
+                std::thread::spawn(move || {
+                    let bytes = format!("writer-{i}");
+                    atomic_write_bytes(&path, bytes.as_bytes()).unwrap()
+                })
+            })
+            .collect();
+        for h in handles {
+            h.join().unwrap();
+        }
+        let content = fs::read_to_string(&path).unwrap();
+        assert!(
+            content.starts_with("writer-"),
+            "unexpected content: {content}"
+        );
+    }
+
+    #[test]
+    fn is_readable_is_true_for_valid_file_and_false_for_corrupt() {
+        let dir = scratch("readable");
+        let path = dir.join("state.json");
+        assert!(!is_readable::<Thing>(&path));
+        atomic_write_json(
+            &path,
+            &Thing {
+                name: "x".into(),
+                value: 1,
+            },
+        )
+        .unwrap();
+        assert!(is_readable::<Thing>(&path));
+        fs::write(&path, "{not valid").unwrap();
+        assert!(!is_readable::<Thing>(&path));
     }
 }

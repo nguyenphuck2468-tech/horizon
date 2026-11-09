@@ -561,3 +561,16 @@ fn instances_atomic_save_keeps_bak_of_previous() {
     assert!(loaded.instances.is_empty());
     let _ = std::fs::remove_dir_all(&root);
 }
+
+#[test]
+fn instances_save_refuses_to_overwrite_corrupt_file() {
+    let root =
+        std::env::temp_dir().join(format!("horizon-instances-refuse-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).unwrap();
+    let path = root.join("instances.json");
+    std::fs::write(&path, "{not valid json").unwrap();
+    let store = Store::default();
+    assert!(Store::save(&store, &root).is_err());
+    let _ = std::fs::remove_dir_all(&root);
+}

@@ -1750,7 +1750,7 @@ impl Accounts {
             Err(crate::persistence::LoadError::Missing) => Self::default(),
             Err(crate::persistence::LoadError::Corrupt(e)) => {
                 eprintln!(
-                    "Horizon: accounts.json is corrupt ({e}); starting with no accounts. Back up                      accounts.json.bak to recover."
+                    "Horizon: accounts.json is corrupt ({e}); starting with no accounts. Back up accounts.json.bak to recover."
                 );
                 Self::default()
             }
@@ -1768,6 +1768,16 @@ impl Accounts {
         crate::persistence::load_json(path)
     }
     pub(crate) fn save_to(&self, path: &Path) -> Result<(), String> {
+        // Refuse to overwrite a corrupt or unreadable state file: silently replacing it with an
+        // in-memory default would destroy the player's data. The player restores it from the .bak
+        // file first.
+        if path.exists() && !crate::persistence::is_readable::<Self>(path) {
+            return Err(format!(
+                "{} is corrupt or unreadable; refusing to overwrite user data. Restore it from {}.bak first.",
+                path.display(),
+                path.display()
+            ));
+        }
         crate::persistence::atomic_write_json(path, &self)
     }
     pub fn selected(&self) -> Option<&Account> {

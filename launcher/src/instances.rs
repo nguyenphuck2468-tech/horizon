@@ -225,7 +225,7 @@ impl Store {
             Err(crate::persistence::LoadError::Missing) => Store::default(),
             Err(crate::persistence::LoadError::Corrupt(e)) => {
                 eprintln!(
-                    "Horizon: instances.json is corrupt ({e}); starting with no instance metadata.                      Back up instances.json.bak to recover."
+                    "Horizon: instances.json is corrupt ({e}); starting with no instance metadata. Back up instances.json.bak to recover."
                 );
                 Store::default()
             }
@@ -246,8 +246,18 @@ impl Store {
         crate::persistence::load_json(&path)
     }
     fn save(&self, data: &Path) -> Result<(), String> {
-        crate::persistence::atomic_write_json(&data.join(FILE), &self)
-            .map_err(|e| format!("{FILE}: {e}"))
+        let path = data.join(FILE);
+        // Refuse to overwrite a corrupt or unreadable state file: silently replacing it with an
+        // in-memory default would destroy the player's data. The player restores it from the .bak
+        // file first.
+        if path.exists() && !crate::persistence::is_readable::<Store>(&path) {
+            return Err(format!(
+                "{} is corrupt or unreadable; refusing to overwrite user data. Restore it from {}.bak first.",
+                path.display(),
+                path.display()
+            ));
+        }
+        crate::persistence::atomic_write_json(&path, &self).map_err(|e| format!("{FILE}: {e}"))
     }
 }
 
