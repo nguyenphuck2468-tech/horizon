@@ -6,7 +6,7 @@ Scope: `launcher/` + shared crates. PJPL = the five-step charter in docs/design/
 |---|---------------|------|------------------------|-------|----------|
 | 1 | Versions & builds | versioning, release-flow, version-ports, windows-allocators | nightly.rs, sources.rs, sources_tests.rs, build_import.rs, github.rs | sources_tests (18), github/tests (8), backend/release_loading_tests | CI checks (pending) |
 | 2 | Prepare/install/launch | launcher-preparation, launcher-commands, prepare-performance | installer.rs, launch/, backend.rs, process.rs, rust_toolchain.rs | backend (50), backend/java_tests, launch/tests (12) | codespace run: backend+launch green |
-| 3 | Accounts | microsoft-account, elyby-account, owners | account/, microsoft.rs, elyby.rs, ely.rs | account/tests (110), ely.rs (14) | codespace run: green |
+| 3 | Accounts | microsoft-account, elyby-account, owners | account/, microsoft.rs, elyby.rs, ely.rs | account/tests (110), ely.rs (18) | codespace run: green |
 | 4 | Instances | modpacks (cfg) | instances/, instances_page.rs, new_instance.rs, collection.rs, instance_icons.rs, instance_mods.rs, glass_instance.rs | instances/tests (13) | codespace run: green |
 | 5 | Mods/packs/content | mods, mod-browser, modpacks, resource-packs, shaders, native-mods, native-hooks-neoforge, native-client | mods_page/, native_mods/, browser/, github_mods/, datapacks/, packs/, loaders/, import/, export/ | native_mods (73 across files), browser/tests (13), browser/horizon/tests (11), github_mods/tests (14) | codespace run: green |
 | 6 | Worlds/screenshots | world-data | worlds/, worlds_page.rs, screenshots.rs, screenshots_page.rs | worlds/tests (7, in run) | codespace run: green |
