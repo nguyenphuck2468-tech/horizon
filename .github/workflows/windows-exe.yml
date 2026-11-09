@@ -28,6 +28,11 @@ on:
   pull_request:
     paths:
       - '.github/workflows/windows-exe.yml'
+      - 'launcher/**'
+      - 'crates/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'tools/check_imports.py'
 
 permissions:
   contents: read
