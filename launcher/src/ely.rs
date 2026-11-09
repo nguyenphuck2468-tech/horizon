@@ -12,9 +12,11 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 const AUTHORIZATION_URL: &str = "https://account.ely.by/oauth2/v1";
 const DEVICE_CODE_URL: &str = "https://account.ely.by/api/oauth2/v1/devicecode";
-const DEVICE_VERIFICATION_URL: &str = "https://account.ely.by/code";
+const DEVICE_VERIFICATION_URL: &str = "https://account.ely.by/device";
 const TOKEN_URL: &str = "https://account.ely.by/api/oauth2/v1/token";
-const INFO_URL: &str = "https://account.ely.by/api/account/v1/info";
+/// Ely.by's Mojang-shaped profile endpoint (the one ElyHorizon reads): the UUID and name the
+/// game joins with, rather than an account record that happens to carry a UUID.
+const INFO_URL: &str = "https://account.ely.by/api/mojang/services/minecraft/profile";
 const DEFAULT_PORT: u16 = 39871;
 const SCOPES: &str = "account_info offline_access minecraft_server_session";
 const DEVICE_GRANT: &str = "urn:ietf:params:oauth:grant-type:device_code";
@@ -22,6 +24,10 @@ const DEVICE_GRANT: &str = "urn:ietf:params:oauth:grant-type:device_code";
 /// Public client ID of the Horizon-registered Ely.by application.
 /// Replace this value if you register your own application.
 const DEFAULT_ELY_CLIENT_ID: &str = "horizon-launcher2";
+
+/// Said when the profile endpoint has no Minecraft profile for this account yet (a 404).
+const NO_ELY_PROFILE: &str =
+    "This Ely.by account has no Minecraft profile yet. Create one at minecraft.net, then sign in again.";
 
 #[derive(Clone, Debug)]
 pub struct Profile {
@@ -309,44 +315,61 @@ fn tokens(status: u16, body: &Value) -> Result<Tokens, String> {
 }
 
 fn profile(token: &str) -> Result<Profile, String> {
-    let response = crate::proxy::agent(
-        ureq::AgentBuilder::new()
-            .timeout(Duration::from_secs(20))
-            .user_agent(&format!("horizon-launcher/{}", crate::backend::VERSION)),
-        INFO_URL,
-    )
-    .build()
-    .get(INFO_URL)
-    .set("Authorization", &format!("Bearer {token}"))
-    .call();
-    let response = match response {
-        Ok(response) => response,
-        Err(ureq::Error::Status(_, response)) => response,
-        Err(ureq::Error::Transport(_)) => {
-            return Err("Could not reach Ely.by. Check your internet connection.".into())
+    let mut attempt = 1;
+    loop {
+        let response = crate::proxy::agent(
+            ureq::AgentBuilder::new()
+                .timeout(Duration::from_secs(20))
+                .user_agent(&format!("horizon-launcher/{}", crate::backend::VERSION)),
+            INFO_URL,
+        )
+        .build()
+        .get(INFO_URL)
+        .set("Authorization", &format!("Bearer {token}"))
+        .call();
+        let response = match response {
+            Ok(response) => response,
+            Err(ureq::Error::Status(code, _response)) if busy(code, attempt) => {
+                std::thread::sleep(retry_delay(attempt));
+                attempt += 1;
+                continue;
+            }
+            Err(ureq::Error::Status(_, response)) => response,
+            Err(ureq::Error::Transport(_)) => {
+                return Err("Could not reach Ely.by. Check your internet connection.".into())
+            }
+        };
+        let status = response.status();
+        if busy(status, attempt) {
+            std::thread::sleep(retry_delay(attempt));
+            attempt += 1;
+            continue;
         }
-    };
-    let status = response.status();
-    let body: Value =
-        serde_json::from_str(&response.into_string().unwrap_or_default()).unwrap_or(Value::Null);
-    if status != 200 {
-        return Err(error_message(
-            &body,
-            "Ely.by could not provide the account profile.",
-        ));
+        let body: Value = serde_json::from_str(&response.into_string().unwrap_or_default())
+            .unwrap_or(Value::Null);
+        if status == 404 {
+            return Err(NO_ELY_PROFILE.into());
+        }
+        if status != 200 {
+            return Err(error_message(
+                &body,
+                "Ely.by could not provide the account profile.",
+            ));
+        }
+        return parse_profile(&body);
     }
-    parse_profile(&body)
 }
 
 fn parse_profile(body: &Value) -> Result<Profile, String> {
-    let uuid = string_field(body, "uuid")
+    // The Mojang-shaped profile says `id`/`name`; the account record says `uuid`/`username`.
+    let uuid = text_field(body, &["uuid", "id"])
         .ok_or("Ely.by returned no account UUID.")?
         .replace('-', "")
         .to_lowercase();
     if uuid.len() != 32 || !uuid.bytes().all(|byte| byte.is_ascii_hexdigit()) {
         return Err("Ely.by returned an invalid account UUID.".into());
     }
-    let name = string_field(body, "username").ok_or("Ely.by returned no username.")?;
+    let name = text_field(body, &["username", "name"]).ok_or("Ely.by returned no username.")?;
     if !(3..=16).contains(&name.chars().count())
         || !name
             .chars()
@@ -481,33 +504,60 @@ fn initial_tokens(status: u16, body: &Value) -> Result<Tokens, String> {
     tokens(status, body)
 }
 
+/// How many times an Ely.by request is sent before giving up (the first ask and two retries).
+const REQUEST_ATTEMPTS: u32 = 3;
+
+/// Whether `status` is a brief outage worth asking about again and `attempt` still has a retry
+/// left. A proxy or Ely.by answers 502, 503 or 504 while it restarts; the next ask usually works.
+fn busy(status: u16, attempt: u32) -> bool {
+    matches!(status, 502..=504) && attempt < REQUEST_ATTEMPTS
+}
+
+/// The wait before retry `attempt` (1-based): 250 ms, then 500 ms, the same as the downloader.
+fn retry_delay(attempt: u32) -> Duration {
+    Duration::from_millis(250 << (attempt - 1))
+}
+
 fn post_form(url: &str, fields: &[(&str, &String)]) -> Result<(u16, Value), String> {
     let form = fields
         .iter()
         .map(|(key, value)| format!("{}={}", encode(key), encode(value)))
         .collect::<Vec<_>>()
         .join("&");
-    let response = crate::proxy::agent(
-        ureq::AgentBuilder::new()
-            .timeout(Duration::from_secs(20))
-            .user_agent(&format!("horizon-launcher/{}", crate::backend::VERSION)),
-        url,
-    )
-    .build()
-    .post(url)
-    .set("Content-Type", "application/x-www-form-urlencoded")
-    .send_string(&form);
-    let response = match response {
-        Ok(response) => response,
-        Err(ureq::Error::Status(_, response)) => response,
-        Err(ureq::Error::Transport(_)) => {
-            return Err("Could not reach Ely.by. Check your internet connection.".into())
+    let mut attempt = 1;
+    loop {
+        let response = crate::proxy::agent(
+            ureq::AgentBuilder::new()
+                .timeout(Duration::from_secs(20))
+                .user_agent(&format!("horizon-launcher/{}", crate::backend::VERSION)),
+            url,
+        )
+        .build()
+        .post(url)
+        .set("Content-Type", "application/x-www-form-urlencoded")
+        .send_string(&form);
+        let response = match response {
+            Ok(response) => response,
+            Err(ureq::Error::Status(code, _response)) if busy(code, attempt) => {
+                std::thread::sleep(retry_delay(attempt));
+                attempt += 1;
+                continue;
+            }
+            Err(ureq::Error::Status(_, response)) => response,
+            Err(ureq::Error::Transport(_)) => {
+                return Err("Could not reach Ely.by. Check your internet connection.".into())
+            }
+        };
+        let status = response.status();
+        if busy(status, attempt) {
+            std::thread::sleep(retry_delay(attempt));
+            attempt += 1;
+            continue;
         }
-    };
-    let status = response.status();
-    let body =
-        serde_json::from_str(&response.into_string().unwrap_or_default()).unwrap_or(Value::Null);
-    Ok((status, body))
+        let body = serde_json::from_str(&response.into_string().unwrap_or_default())
+            .unwrap_or(Value::Null);
+        return Ok((status, body));
+    }
 }
 
 struct CallbackRequest {
@@ -590,6 +640,11 @@ fn query_error(query: &HashMap<String, String>) -> String {
 
 fn string_field(value: &Value, key: &str) -> Option<String> {
     value.get(key).and_then(Value::as_str).map(str::to_owned)
+}
+
+/// The first of `keys` the body carries as a string, so either profile shape reads the same.
+fn text_field(value: &Value, keys: &[&str]) -> Option<String> {
+    keys.iter().find_map(|key| string_field(value, key))
 }
 
 fn error_message(value: &Value, fallback: &str) -> String {
@@ -689,6 +744,81 @@ mod tests {
     }
 
     #[test]
+    fn only_a_brief_server_outage_is_asked_again() {
+        for code in [502, 503, 504] {
+            assert!(busy(code, 1));
+            assert!(busy(code, 2));
+            assert!(!busy(code, REQUEST_ATTEMPTS));
+        }
+        for code in [400, 401, 403, 404, 408, 429, 500, 501, 505] {
+            assert!(!busy(code, 1), "{code} must not be retried");
+        }
+        assert_eq!(retry_delay(1), Duration::from_millis(250));
+        assert_eq!(retry_delay(2), Duration::from_millis(500));
+    }
+
+    /// A loopback HTTP server that answers `statuses` in order, then closes.
+    fn server(statuses: &[&'static str]) -> (u16, std::thread::JoinHandle<usize>) {
+        let listener = TcpListener::bind(("127.0.0.1", 0)).unwrap();
+        let port = listener.local_addr().unwrap().port();
+        let statuses: Vec<&'static str> = statuses.to_vec();
+        let handle = std::thread::spawn(move || {
+            let mut served = 0;
+            for status in statuses {
+                let Ok((mut stream, _)) = listener.accept() else {
+                    break;
+                };
+                let _ = read_callback(&mut stream);
+                served += 1;
+                let body = r#"{"ok":true}"#;
+                let _ = write!(
+                    stream,
+                    "HTTP/1.1 {status}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+                    body.len()
+                );
+            }
+            served
+        });
+        (port, handle)
+    }
+
+    #[test]
+    fn a_gateway_timeout_is_asked_again_and_then_succeeds() {
+        let (port, server) = server(&["504 Gateway Timeout", "503 Service Unavailable", "200 OK"]);
+        let (status, body) = post_form(&format!("http://127.0.0.1:{port}/token"), &[]).unwrap();
+        assert_eq!(status, 200);
+        assert_eq!(body["ok"], true);
+        assert_eq!(server.join().unwrap(), 3);
+    }
+
+    #[test]
+    fn a_client_error_is_not_asked_again() {
+        let (port, server) = server(&["400 Bad Request"]);
+        let (status, _) = post_form(&format!("http://127.0.0.1:{port}/token"), &[]).unwrap();
+        assert_eq!(status, 400);
+        // The listener is gone after the one answer: a retry would be a transport error.
+        assert_eq!(server.join().unwrap(), 1);
+    }
+
+    #[test]
+    fn the_endpoints_are_the_ones_ely_horizon_uses() {
+        assert_eq!(
+            DEVICE_CODE_URL,
+            "https://account.ely.by/api/oauth2/v1/devicecode"
+        );
+        assert_eq!(TOKEN_URL, "https://account.ely.by/api/oauth2/v1/token");
+        assert_eq!(
+            INFO_URL,
+            "https://account.ely.by/api/mojang/services/minecraft/profile"
+        );
+        assert_eq!(
+            SCOPES,
+            "account_info offline_access minecraft_server_session"
+        );
+        assert!(!DEFAULT_ELY_CLIENT_ID.trim().is_empty());
+    }
+
+    #[test]
     fn initial_authorization_requires_a_refresh_token() {
         let body = serde_json::json!({"access_token": "access-only"});
         assert_eq!(
@@ -705,6 +835,15 @@ mod tests {
             "username": "Valid_Player"
         });
         let parsed = parse_profile(&valid).unwrap();
+        assert_eq!(parsed.uuid, "11111111111111111111111111111111");
+        assert_eq!(parsed.name, "Valid_Player");
+
+        // Ely.by's Mojang-shaped profile says id/name; the same player comes out.
+        let mojang = serde_json::json!({
+            "id": "11111111111111111111111111111111",
+            "name": "Valid_Player"
+        });
+        let parsed = parse_profile(&mojang).unwrap();
         assert_eq!(parsed.uuid, "11111111111111111111111111111111");
         assert_eq!(parsed.name, "Valid_Player");
 

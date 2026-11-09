@@ -467,7 +467,7 @@ pub(super) fn danger_button(id: SharedString, label: SharedString) -> Stateful<D
         .px(px(12.))
         .rounded(px(radius::CONTROL))
         .cursor_pointer()
-        .hover(|s| s.bg(gpui::rgba(horizon_theme::glass::DANGER_HOVER << 8 | 0x1f)))
+        .hover(|s| s.bg(ui::danger_fill()))
         .child(
             ui::text(13., FontWeight::MEDIUM, ink::FULL)
                 .text_color(ui::danger())

@@ -650,9 +650,7 @@ impl Launcher {
             )
         });
         // The second way in, when this build signs in through Ely.by.
-        let ely_sign_in = (!matches!(self.accounts.player(), Player::Microsoft(_))
-            && account::ely_configured())
-        .then(|| {
+        let ely_sign_in = (!matches!(self.accounts.player(), Player::Microsoft(_))).then(|| {
             keyboard(
                 div()
                     .id("topbar-sign-in-elyby")

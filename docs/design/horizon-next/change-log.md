@@ -1,5 +1,39 @@
 # Horizon Next — change log
 
+## 2026-11-09
+
+- feat(ely): the Ely.by button is always offered (Settings → Account, the top bar, the classic
+  account card), and its device-code, token, refresh and profile requests ask again after a
+  transient 502/503/504 (250 ms, then 500 ms) instead of ending the sign-in.
+- The profile read follows ElyHorizon's model: the Mojang-shaped
+  `.../api/mojang/services/minecraft/profile` with the Bearer token, `id`/`name` or
+  `uuid`/`username`, and a 404 that says a Minecraft profile is needed.
+- The only published release, `launcher@0.2.1`, predates the glass Ely.by commit by an hour;
+  a build from any phase branch has the button.
+- Fence: fmt/clippy clean; lib 561 + bin 113 green. Evidence: `ely-sign-in.md`.
+- refactor(glass): one tested `danger_fill()` helper replaces the three copies of the 12 % red
+  (delete-row hover, refused field, second destructive click), and pins its alpha and hue.
+
+## 2026-11-08
+
+- `334fbf746` fix(game): read the game, its builds and the mixin registry from
+  `horizon-rust/horizon`; the launcher's own releases stay on the fork (`LAUNCHER_REPO`).
+- `b10dca70a` fix(net): retry 502/503/504 twice (250 ms, 500 ms) before failing a download,
+  with a loopback test that serves 503, 504 then 200.
+- `15e42bd10` fix(nightly): require `SHA256SUMS.v2.sig` signed for the Nightly's own version
+  (`nightly-<date>-<commit>`); the channel signature is refused. Same rule in `horizon-server`.
+- Same three commits cherry-picked to `horizon-next/phase-2-main-experience` (`0f1c2daf4`,
+  `64e4a097f`, `29d6591a4`) and `horizon-next/phase-3-content-experience` (`d50f5705e`,
+  `d67677e1a`, `a7d3d7bbd`).
+- `cb3f7fd19` refactor(palette): match mod queries in any case and unit-test the extracted
+  filter (partial title, nothing matching, list order).
+- test(server): the Nightly pick test now serves `SHA256SUMS.v2.sig`, and covers an older
+  build under tonight's title, a pre-v2 Nightly, and a title that names no build.
+- Fence on every tip: fmt/clippy clean; lib tests green (551 phase 1, 557 phase 2, 554 phase 3;
+  the environment-dependent binary-replacement test skipped and failing identically at
+  baseline).
+- Evidence and file map: `download-fixes.md`.
+
 ## 2026-11-07
 
 - Phase 0 close-out docs added (p0-summary, preservation-matrix, roadmap). `ccec427`
@@ -51,3 +85,5 @@
 - `b4412c2de` is the 13th independent commit on the branch; every commit carries its own fence run.
 - `afd8e54d9` refactor(home): extract the packs count note and unit-test it (1 pack / N packs).
 - `068105e03` refactor(home): extract the mods count note and unit-test it (1 mod / N mods).
+- Phase 1 merged into `launcher` @ `5106b8902` via PR #2 (CI run 157 success: launcher + verify).
+- Horizon vẫn phải là Horizon — 100% existing features preserved, all commits independent.

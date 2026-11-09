@@ -9,10 +9,9 @@ use std::process::{Child, ChildStdin, Command, Stdio};
 use std::sync::mpsc::Sender;
 use std::sync::{Arc, Mutex};
 
-/// The Horizon game's releases, the mixin registry and links.json: this repository
-/// publishes them ([`game-nightly.yml`]), so the game and the launcher both update
-/// from the fork.
-pub const REPO: &str = "nguyenphuck2468-tech/horizon";
+/// The Horizon game's releases, the mixin registry and links.json: the upstream repository
+/// publishes them, so the game and the launcher both update from it.
+pub const REPO: &str = "horizon-rust/horizon";
 /// The launcher's own releases, published by this repo: the launcher self-updates from them
 /// ([`launcher_releases_in`]) while the game stays on [`REPO`].
 pub const LAUNCHER_REPO: &str = "nguyenphuck2468-tech/horizon";
@@ -171,7 +170,21 @@ pub fn get_bytes(url: &str) -> Result<Vec<u8>, String> {
     Ok(body)
 }
 
-pub(crate) fn get(url: &str) -> Result<ureq::Response, String> {
+/// Statuses worth asking again for: a proxy or GitHub itself is briefly unavailable.
+fn transient_status(code: u16) -> bool {
+    matches!(code, 502..=504)
+}
+
+/// How many times `get` asks before giving up (the first ask and two retries).
+const GET_ATTEMPTS: u32 = 3;
+
+/// The wait before ask `attempt` (1-based): 250 ms, then 500 ms.
+fn retry_delay(attempt: u32) -> std::time::Duration {
+    std::time::Duration::from_millis(250 << (attempt - 1))
+}
+
+/// One ask, without retrying.
+fn get_once(url: &str) -> Result<ureq::Response, Box<ureq::Error>> {
     let mut request = agent(url).get(url);
     // CI runners share addresses and hit GitHub's anonymous rate limit; they pass their own token.
     if let Some(token) = std::env::var("HORIZON_GITHUB_TOKEN")
@@ -182,16 +195,39 @@ pub(crate) fn get(url: &str) -> Result<ureq::Response, String> {
             request = request.set("Authorization", &format!("Bearer {token}"));
         }
     }
-    request.call().map_err(|e| match e {
-        ureq::Error::Status(code, r)
-            if url.starts_with("https://api.github.com/")
-                && crate::github::rate_limited(code, |h| r.header(h).map(str::to_owned)) =>
-        {
-            "GitHub's rate limit was reached. Try again in a few minutes.".into()
+    request.call().map_err(Box::new)
+}
+
+/// `url`'s answer, asking again while a proxy or GitHub answers 502, 503 or 504 (a deploy or a
+/// proxy's brief outage), rather than failing a download on a status that usually clears at once.
+pub(crate) fn get(url: &str) -> Result<ureq::Response, String> {
+    let mut attempt = 1;
+    loop {
+        match get_once(url) {
+            Ok(response) => return Ok(response),
+            Err(e) => {
+                let e = *e;
+                let retry = matches!(&e, ureq::Error::Status(code, _) if transient_status(*code))
+                    && attempt < GET_ATTEMPTS;
+                if !retry {
+                    return Err(match e {
+                        ureq::Error::Status(code, r)
+                            if url.starts_with("https://api.github.com/")
+                                && crate::github::rate_limited(code, |h| {
+                                    r.header(h).map(str::to_owned)
+                                }) =>
+                        {
+                            "GitHub's rate limit was reached. Try again in a few minutes.".into()
+                        }
+                        ureq::Error::Status(code, _) => format!("{url} answered {code}"),
+                        ureq::Error::Transport(t) => format!("No connection: {t}"),
+                    });
+                }
+            }
         }
-        ureq::Error::Status(code, _) => format!("{url} answered {code}"),
-        ureq::Error::Transport(t) => format!("No connection: {t}"),
-    })
+        std::thread::sleep(retry_delay(attempt));
+        attempt += 1;
+    }
 }
 
 /// A Horizon game tag: `v` then a digit (`v2026.10.13`). Launcher tags never match.
@@ -807,9 +843,10 @@ fn unpack(archive: &Path, url: &str, to: &Path) -> Result<(), String> {
 pub fn install(release: &Release, progress: impl Fn(f32)) -> Result<(), String> {
     let tag = release.tag.as_str();
     let sha256 = match &release.nightly {
-        // Signed for the Nightly channel, served under its own GitHub tag.
-        Some(published) => crate::signed::nightly_digest(
-            published,
+        // Signed for its own version (SHA256SUMS.v2.sig), served under its own GitHub tag.
+        Some(tag) => crate::signed::nightly_digest(
+            tag,
+            &release.tag,
             ASSET.unwrap_or_default(),
             &horizon_release_sign::trusted_keys(),
             fetch_small,
@@ -3548,6 +3585,41 @@ mod tests {
     use super::*;
     use std::cmp::Ordering::*;
     use std::ffi::OsStr;
+
+    /// A proxy or GitHub briefly answering 502/503/504 is asked again, and the later answer used.
+    #[test]
+    fn a_transient_status_is_asked_again() {
+        use std::io::{Read, Write};
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let server = std::thread::spawn(move || {
+            for status in ["503", "504", "200"] {
+                let (mut stream, _) = listener.accept().unwrap();
+                let mut request = [0u8; 1024];
+                let _ = stream.read(&mut request);
+                let (length, body) = if status == "200" { (2, "ok") } else { (0, "") };
+                write!(
+                    stream,
+                    "HTTP/1.1 {status} X\r\nContent-Length: {length}\r\nConnection: close\r\n\r\n{body}"
+                )
+                .unwrap();
+            }
+        });
+        assert_eq!(get_bytes(&format!("http://{address}/file")).unwrap(), b"ok");
+        server.join().unwrap();
+    }
+
+    #[test]
+    fn only_a_briefly_unavailable_status_is_asked_again() {
+        for code in [502, 503, 504] {
+            assert!(transient_status(code), "{code}");
+        }
+        for code in [200, 301, 400, 403, 404, 429, 500, 501, 505] {
+            assert!(!transient_status(code), "{code}");
+        }
+        assert_eq!(retry_delay(1).as_millis(), 250);
+        assert_eq!(retry_delay(2).as_millis(), 500);
+    }
 
     #[test]
     #[cfg(windows)]
