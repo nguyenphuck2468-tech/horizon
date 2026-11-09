@@ -30,6 +30,7 @@ mod mac_update;
 pub mod minecraft_versions;
 pub mod modpacks;
 pub mod mojang;
+pub mod next_navigation;
 pub mod native_mods;
 pub mod native_status;
 pub mod nightly;
