@@ -308,7 +308,7 @@ fn refresh_ms(ep: &Endpoints, client_id: &str, refresh: &str) -> Result<MsTokens
 const ELY_ACCESS_PREFIX: &str = "elyby:";
 const ELY_REFRESH_PREFIX: &str = "elyby-refresh:";
 
-fn is_ely(secrets: &Secrets) -> bool {
+pub(crate) fn is_ely(secrets: &Secrets) -> bool {
     secrets.minecraft_token.starts_with(ELY_ACCESS_PREFIX)
 }
 
@@ -579,13 +579,13 @@ pub struct Secrets {
 }
 impl Secrets {
     /// Whether the account may play through Horizon: what the owner gate asks.
-    fn plays(&self) -> bool {
+    pub(crate) fn plays(&self) -> bool {
         // Accounts saved by the first Ely.by builds had `owns: true` and no `plays`.
         self.plays.unwrap_or(self.owns)
     }
     /// Whether the Minecraft services confirmed the account owns the game. Never true for
     /// Ely.by, which has no such answer.
-    fn owns_minecraft(&self) -> bool {
+    pub(crate) fn owns_minecraft(&self) -> bool {
         self.owns && !is_ely(self)
     }
 }
@@ -1720,7 +1720,7 @@ const OFFLINE_NEEDS_OWNER: &str =
     "Offline names need a Microsoft account that owns Minecraft: Java Edition in the launcher.";
 
 /// The secrets an account keeps in `store`, if it still has them there.
-fn secrets_in(store: &dyn SecretStore, uuid: &str) -> Option<Secrets> {
+pub(crate) fn secrets_in(store: &dyn SecretStore, uuid: &str) -> Option<Secrets> {
     store
         .get(uuid)
         .ok()

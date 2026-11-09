@@ -1,6 +1,35 @@
 # Horizon Next — change log
 
 ## 2026-11-09
+- N03: `launcher/src/next_facade.rs` adds the shell-facing compatibility facade. It names
+  use cases for accounts (safe card, finished sign-in, refresh, sign-out, owner check,
+  play-as), release/Nightly tags, launch memory and env, instance facts, pack kinds, server
+  names and tailnet sharing, client IDs, and native-mod state, and delegates to the existing
+  services without changing behaviour. A new shell persists a sign-in through
+  `SignIn::add_to`, so it never reads or writes `Secrets`; `AccountCard` carries provider and
+  `account::session::Status` only. 12 contract tests pin the delegation and the secret
+  boundary. Fence: fmt/clippy clean; lib 581 + bin 117. Server start/stop, download progress
+  and atomic-write fixes remain open for later phases.
+- N02: `docs/design/horizon-next/workflow-map.md` maps every preserved area from the current
+  surface to its application service, its files under `data_dir()`/`game_home()`, the error
+  states the player sees, and the test plus N01 workflow that pin it. It records the two data
+  roots and their overrides, a file-by-file persistence ownership table, the secrets/retry/
+  old-data/signature contracts, and the gaps N03 must close before the old shell is removed.
+  Docs-only; the fence on the N01 tip stays fmt/clippy clean, lib 569 + bin 117.
+- N01: `launcher/src/next_preservation.rs` turns the 12-area inventory into an executable
+  contract. Its 24 workflows name the production entry point each new screen must keep calling;
+  13 are smoke-tested against the real functions (Ely.by secrets, Nightly naming, release order,
+  prepare state, instance metadata, pack kinds, world backup, official server offer,
+  server/Tailscale rules, launch memory/env, native-mod state, offline skins, config precedence)
+  and 11 manual-only paths name the suite covering them. `every_preserved_area_has_a_workflow`
+  fails if an area loses coverage. Fence: fmt/clippy clean; lib 569 + bin 117 green.
+- N00: `horizon-next/rebrand-foundation` rebased from `5106b8902` onto `launcher`
+  `cadddef84d` (the three phase PRs are merged there). The rebase applied without conflicts and
+  kept the Ely.by, config, backend, signed and release-sign work intact.
+- The PR #6 `launcher` job failed at its first step, `cargo fmt --check`: rustfmt reordered the
+  `next_navigation` module declaration and expanded the `RouteMetadata` literals.
+  `style(navigation)` formats both files without changing a route, ID or test; fence on the
+  rebased branch: fmt/clippy clean, lib 565 + bin 117 green.
 
 - feat(ely): the Ely.by button is always offered (Settings → Account, the top bar, the classic
   account card), and its device-code, token, refresh and profile requests ask again after a
