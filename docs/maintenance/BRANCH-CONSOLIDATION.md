@@ -12,8 +12,8 @@ human review (PR #1 and `horizon-next/glass-experience`); no branch was deleted 
 | Horizon Next base branch | `launcher` |
 | `launcher` before | `cadddef84d` (`merge: Horizon Next phase 3 (content experience) into launcher`) |
 | `launcher` after | `da11574439` (`Merge pull request #6 from nguyenphuck2468-tech/horizon-next/rebrand-foundation`) |
-| Branches before (origin) | 15, excluding `upstream/*` |
-| Branches after (origin) | 7, excluding `upstream/*` |
+| Branches before (origin) | 14, excluding `upstream/*` |
+| Branches after (origin) | 6 permanent, excluding `upstream/*` (plus the temporary `maintenance/branch-consolidation` while PR #7 is open) |
 | Local working tree | clean (`git status --short` empty) |
 | Stashes | none |
 
