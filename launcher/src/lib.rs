@@ -38,6 +38,7 @@ pub mod next_preservation;
 pub mod nightly;
 pub mod other_launchers;
 pub mod packs;
+pub mod persistence;
 pub mod process;
 pub mod proxy;
 pub mod rust_toolchain;

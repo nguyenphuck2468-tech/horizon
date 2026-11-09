@@ -3780,3 +3780,33 @@ fn an_accounts_look_returns_the_offline_name_skin_or_default() {
     assert!(!default.skin);
     assert!(!default.cape);
 }
+
+#[test]
+fn accounts_load_validated_rejects_corrupt_json() {
+    let root = std::env::temp_dir().join(format!("horizon-accounts-test-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).unwrap();
+    let path = root.join("accounts.json");
+    std::fs::write(&path, "{not valid json").unwrap();
+    assert!(matches!(
+        Accounts::load_validated(&path),
+        Err(crate::persistence::LoadError::Corrupt(_))
+    ));
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+#[test]
+fn accounts_atomic_save_keeps_bak_of_previous() {
+    let root = std::env::temp_dir().join(format!("horizon-accounts-save-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).unwrap();
+    let path = root.join("accounts.json");
+    std::fs::write(&path, r#"{"accounts":[],"selected":null}"#).unwrap();
+    let acc = Accounts::default();
+    Accounts::save_to(&acc, &path).unwrap();
+    assert!(path.with_extension("bak").exists());
+    assert!(path.exists());
+    let loaded = Accounts::load_from(&path);
+    assert!(loaded.accounts.is_empty());
+    let _ = std::fs::remove_dir_all(&root);
+}

@@ -1745,17 +1745,30 @@ impl Accounts {
         self.save_to(&Self::path())
     }
     pub(crate) fn load_from(path: &Path) -> Self {
-        std::fs::read_to_string(path)
-            .ok()
-            .and_then(|t| serde_json::from_str(&t).ok())
-            .unwrap_or_default()
+        match crate::persistence::load_json(path) {
+            Ok(accounts) => accounts,
+            Err(crate::persistence::LoadError::Missing) => Self::default(),
+            Err(crate::persistence::LoadError::Corrupt(e)) => {
+                eprintln!(
+                    "Horizon: accounts.json is corrupt ({e}); starting with no accounts. Back up                      accounts.json.bak to recover."
+                );
+                Self::default()
+            }
+            Err(crate::persistence::LoadError::Io(e)) => {
+                eprintln!("Horizon: cannot read accounts.json ({e}); starting with no accounts.");
+                Self::default()
+            }
+        }
+    }
+
+    /// Load `path`, failing loudly on corruption instead of silently resetting user data.
+    /// Reserved for the next shell (N04+) and callers that want a recovery path on corruption.
+    #[allow(dead_code)]
+    pub(crate) fn load_validated(path: &Path) -> Result<Self, crate::persistence::LoadError> {
+        crate::persistence::load_json(path)
     }
     pub(crate) fn save_to(&self, path: &Path) -> Result<(), String> {
-        if let Some(dir) = path.parent() {
-            std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
-        }
-        let text = serde_json::to_string_pretty(self).map_err(|e| e.to_string())?;
-        std::fs::write(path, text + "\n").map_err(|e| e.to_string())
+        crate::persistence::atomic_write_json(path, &self)
     }
     pub fn selected(&self) -> Option<&Account> {
         let uuid = self.selected.as_ref()?;

@@ -219,15 +219,35 @@ struct Store {
 
 impl Store {
     fn load(data: &Path) -> Store {
-        fs::read_to_string(data.join(FILE))
-            .ok()
-            .and_then(|t| serde_json::from_str(&t).ok())
-            .unwrap_or_default()
+        let path = data.join(FILE);
+        match crate::persistence::load_json(&path) {
+            Ok(store) => store,
+            Err(crate::persistence::LoadError::Missing) => Store::default(),
+            Err(crate::persistence::LoadError::Corrupt(e)) => {
+                eprintln!(
+                    "Horizon: instances.json is corrupt ({e}); starting with no instance metadata.                      Back up instances.json.bak to recover."
+                );
+                Store::default()
+            }
+            Err(crate::persistence::LoadError::Io(e)) => {
+                eprintln!(
+                    "Horizon: cannot read instances.json ({e}); starting with no instance metadata."
+                );
+                Store::default()
+            }
+        }
+    }
+
+    /// Load `data/FILE`, failing loudly on corruption instead of silently resetting user data.
+    /// Reserved for the next shell (N04+) and callers that want a recovery path on corruption.
+    #[allow(dead_code)]
+    fn load_validated(data: &Path) -> Result<Store, crate::persistence::LoadError> {
+        let path = data.join(FILE);
+        crate::persistence::load_json(&path)
     }
     fn save(&self, data: &Path) -> Result<(), String> {
-        fs::create_dir_all(data).map_err(|e| format!("{}: {e}", data.display()))?;
-        let text = serde_json::to_string_pretty(self).unwrap();
-        fs::write(data.join(FILE), text).map_err(|e| format!("{FILE}: {e}"))
+        crate::persistence::atomic_write_json(&data.join(FILE), &self)
+            .map_err(|e| format!("{FILE}: {e}"))
     }
 }
 
