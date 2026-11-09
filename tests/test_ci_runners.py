@@ -69,7 +69,7 @@ class OwnRunnerTests(unittest.TestCase):
         count = 0
         for where, _, _, _, value, pools in routed():
             count += 1
-            if where in {"cancel-on-close.yml cancel", "pr-labels.yml label"}:
+            if where in {"cancel-on-close.yml cancel", "pr-labels.yml label", "overlap-note.yml note"}:
                 # These fork-facing workflows use GitHub-hosted runners by default; opt in to horizon-light.
                 self.assertIn("vars.SELF_HOSTED_CI == 'on'", value, where)
             else:
