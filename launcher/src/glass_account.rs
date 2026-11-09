@@ -314,42 +314,43 @@ impl Launcher {
         };
         // The second way in: Ely.by accounts (servers that take them), right under the
         // Microsoft button, never while a sign-in is already moving.
-        let ely_button: Option<AnyElement> =
-            if account::ely_configured() && idle && self.sign_in_target.is_none() {
-                Some(
-                    keyboard(
-                        div()
-                            .id("glass-sign-in-elyby")
-                            .flex()
-                            .items_center()
-                            .justify_center()
-                            .gap(px(10.))
-                            .h(px(48.))
-                            .w_full()
-                            .mt(px(8.))
-                            .rounded(px(radius::ROW))
-                            .bg(white(0.08))
-                            // On a light plate, the quiet button keeps an edge.
-                            .when(ui::light(), |d| d.border_1().border_color(white(0.15)))
-                            .cursor_pointer()
-                            .hover(|s| s.bg(white(0.12)))
-                            .font_family(horizon_theme::glass::FONT)
-                            .text_size(px(15.))
-                            .font_weight(FontWeight::SEMIBOLD)
-                            .text_color(white(ink::FULL))
-                            .child(elyby::logo(18.))
-                            .child(tr("Sign in with Ely.by")),
-                        &t,
-                    )
-                    .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
-                        this.start_ely_sign_in();
-                        cx.notify();
-                    }))
-                    .into_any_element(),
+        // Always offered (the built-in client ID makes it work out of the box), so a missing
+        // button is never what keeps a player from signing in.
+        let ely_button: Option<AnyElement> = if idle && self.sign_in_target.is_none() {
+            Some(
+                keyboard(
+                    div()
+                        .id("glass-sign-in-elyby")
+                        .flex()
+                        .items_center()
+                        .justify_center()
+                        .gap(px(10.))
+                        .h(px(48.))
+                        .w_full()
+                        .mt(px(8.))
+                        .rounded(px(radius::ROW))
+                        .bg(white(0.08))
+                        // On a light plate, the quiet button keeps an edge.
+                        .when(ui::light(), |d| d.border_1().border_color(white(0.15)))
+                        .cursor_pointer()
+                        .hover(|s| s.bg(white(0.12)))
+                        .font_family(horizon_theme::glass::FONT)
+                        .text_size(px(15.))
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .text_color(white(ink::FULL))
+                        .child(elyby::logo(18.))
+                        .child(tr("Sign in with Ely.by")),
+                    &t,
                 )
-            } else {
-                None
-            };
+                .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                    this.start_ely_sign_in();
+                    cx.notify();
+                }))
+                .into_any_element(),
+            )
+        } else {
+            None
+        };
         div()
             .flex()
             .flex_col()

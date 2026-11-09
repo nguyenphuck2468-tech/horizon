@@ -4413,15 +4413,14 @@ impl Launcher {
                             }),
                         ));
                 }
-                if account::ely_configured() {
-                    actions = actions.child(
-                        button("sign-in-elyby", "Sign in with Ely.by", Kind::Secondary, &t)
-                            .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
-                                this.start_ely_sign_in();
-                                cx.notify();
-                            })),
-                    );
-                }
+                actions = actions.child(
+                    button("sign-in-elyby", "Sign in with Ely.by", Kind::Secondary, &t).on_click(
+                        cx.listener(|this, _: &ClickEvent, _, cx| {
+                            this.start_ely_sign_in();
+                            cx.notify();
+                        }),
+                    ),
+                );
             }
             if targeted {
                 actions = actions.child(
