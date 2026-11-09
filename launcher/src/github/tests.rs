@@ -1,5 +1,5 @@
 use super::*;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 
 fn scratch(name: &str) -> PathBuf {
     let root = std::env::temp_dir().join(format!("horizon-github-{name}-{}", std::process::id()));
@@ -19,6 +19,61 @@ fn list(tag: &str) -> serde_json::Value {
 
 fn no_mirror(_: &str) -> Answer {
     panic!("the mirror is only asked when GitHub can't answer")
+}
+
+#[test]
+fn transient_gateway_failures_retry_then_succeed() {
+    let calls = Cell::new(0u32);
+    let waits = RefCell::new(Vec::new());
+    let answer = retry_transient_with(
+        || {
+            let attempt = calls.get() + 1;
+            calls.set(attempt);
+            if attempt < 3 {
+                Answer::Transient("https://api.github.com answered 504".into())
+            } else {
+                Answer::Fresh(list("nightly"), None)
+            }
+        },
+        |attempt| waits.borrow_mut().push(attempt),
+    );
+    assert_eq!(calls.get(), 3);
+    assert_eq!(*waits.borrow(), [1, 2]);
+    assert!(matches!(answer, Answer::Fresh(body, _) if body == list("nightly")));
+}
+
+#[test]
+fn transient_gateway_failures_stop_after_three_attempts() {
+    let calls = Cell::new(0);
+    let answer = retry_transient_with(
+        || {
+            calls.set(calls.get() + 1);
+            Answer::Transient("https://api.github.com answered 504".into())
+        },
+        |_| {},
+    );
+    assert_eq!(calls.get(), REQUEST_ATTEMPTS);
+    assert!(matches!(answer, Answer::Failed(message)
+        if message.contains("answered 504") && message.contains("after 3 attempts")));
+}
+
+#[test]
+fn non_transient_answers_are_not_retried() {
+    let calls = Cell::new(0);
+    let answer = retry_transient_with(
+        || {
+            calls.set(calls.get() + 1);
+            Answer::NotFound
+        },
+        |_| panic!("a 404 must not be retried"),
+    );
+    assert_eq!(calls.get(), 1);
+    assert!(matches!(answer, Answer::NotFound));
+    assert!(transient_status(502));
+    assert!(transient_status(503));
+    assert!(transient_status(504));
+    assert!(!transient_status(500));
+    assert!(!transient_status(404));
 }
 
 #[test]

@@ -749,19 +749,31 @@ fn installed_in(versions: &Path) -> Vec<String> {
 }
 
 /// A small release file (its checksums or their signature), whole; None when it has none.
+/// The request retries gateway failures in `get`; this also retries a body interrupted after
+/// the server accepted the request, starting a fresh response rather than using partial bytes.
 pub(crate) fn fetch_small(url: &str) -> Result<Option<Vec<u8>>, String> {
-    let response = match get(url) {
-        Ok(response) => response,
-        Err(e) if e.ends_with("answered 404") => return Ok(None),
-        Err(e) => return Err(e),
-    };
-    let mut body = Vec::new();
-    response
-        .into_reader()
-        .take(1 << 20)
-        .read_to_end(&mut body)
-        .map_err(|e| format!("Download interrupted: {e}"))?;
-    Ok(Some(body))
+    let mut last_error = String::new();
+    for attempt in 1..=GET_ATTEMPTS {
+        let response = match get(url) {
+            Ok(response) => response,
+            Err(e) if e.ends_with("answered 404") => return Ok(None),
+            // `get` has already exhausted its retries for HTTP 502–504.
+            Err(e) => return Err(e),
+        };
+        let mut body = Vec::new();
+        match response.into_reader().take(1 << 20).read_to_end(&mut body) {
+            Ok(_) => return Ok(Some(body)),
+            Err(e) => {
+                last_error = format!("Download interrupted: {e}");
+                if attempt < GET_ATTEMPTS {
+                    std::thread::sleep(retry_delay(attempt));
+                }
+            }
+        }
+    }
+    Err(format!(
+        "{url} failed after {GET_ATTEMPTS} attempts: {last_error}"
+    ))
 }
 
 /// The SHA-256 the release's signed checksums give for `asset`, or why it must not be installed.
