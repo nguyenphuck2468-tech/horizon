@@ -2,6 +2,15 @@
 
 ## 2026-11-09
 
+- feat(ely): the Ely.by button is always offered (Settings → Account, the top bar, the classic
+  account card), and its device-code, token, refresh and profile requests ask again after a
+  transient 502/503/504 (250 ms, then 500 ms) instead of ending the sign-in.
+- The profile read follows ElyHorizon's model: the Mojang-shaped
+  `.../api/mojang/services/minecraft/profile` with the Bearer token, `id`/`name` or
+  `uuid`/`username`, and a 404 that says a Minecraft profile is needed.
+- The only published release, `launcher@0.2.1`, predates the glass Ely.by commit by an hour;
+  a build from any phase branch has the button.
+- Fence: fmt/clippy clean; lib 561 + bin 113 green. Evidence: `ely-sign-in.md`.
 - refactor(glass): one tested `danger_fill()` helper replaces the three copies of the 12 % red
   (delete-row hover, refused field, second destructive click), and pins its alpha and hue.
 
