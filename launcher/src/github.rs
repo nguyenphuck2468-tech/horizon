@@ -171,10 +171,6 @@ fn mirror_base() -> String {
 
 /// GitHub itself, with the saved ETag when there is one.
 fn github(url: &str, etag: Option<&str>) -> Answer {
-    retry_transient(|| github_once(url, etag))
-}
-
-fn github_once(url: &str, etag: Option<&str>) -> Answer {
     let mut request = backend::agent(url).get(url);
     // CI runners share addresses and hit GitHub's anonymous rate limit; they pass their own token.
     if let Some(token) = std::env::var("HORIZON_GITHUB_TOKEN")
@@ -192,7 +188,7 @@ fn github_once(url: &str, etag: Option<&str>) -> Answer {
             let etag = r.header("ETag").map(str::to_owned);
             match r.into_json() {
                 Ok(body) => Answer::Fresh(body, etag),
-                Err(e) => Answer::Failed(e.to_string()),
+                Err(e) => Answer::Transient(format!("GitHub response could not be read: {e}")),
             }
         }
         Err(e) => failure(url, e),
@@ -200,14 +196,10 @@ fn github_once(url: &str, etag: Option<&str>) -> Answer {
 }
 
 fn mirror(url: &str) -> Answer {
-    retry_transient(|| mirror_once(url))
-}
-
-fn mirror_once(url: &str) -> Answer {
     match backend::agent(url).get(url).call() {
         Ok(r) => match r.into_json() {
             Ok(body) => Answer::Fresh(body, None),
-            Err(e) => Answer::Failed(e.to_string()),
+            Err(e) => Answer::Transient(format!("Mirror response could not be read: {e}")),
         },
         Err(e) => failure(url, e),
     }
