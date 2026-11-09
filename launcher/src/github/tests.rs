@@ -23,7 +23,7 @@ fn no_mirror(_: &str) -> Answer {
 
 #[test]
 fn transient_gateway_failures_retry_then_succeed() {
-    let calls = Cell::new(0);
+    let calls = Cell::new(0u32);
     let waits = RefCell::new(Vec::new());
     let answer = retry_transient_with(
         || {
