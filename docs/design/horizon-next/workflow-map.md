@@ -259,24 +259,32 @@ From N01, the contract is 24 workflows across 12 areas. This map adds the "where
 6. 502/503/504 retry, signature refusal and prepared-state checks stay in the service layer, not
    in a screen.
 
-## 8. Gaps that feed N03
+## 8. N03 facade and the gaps it leaves
 
-- **No use-case boundary yet.** Pages call services directly (`use super::*`), and some
-  orchestration lives in `glass_servers.rs` and `main.rs` rather than in a service. N03 should
-  extract or wrap those flows without changing behaviour.
-- **Errors are strings.** Almost every service returns `Result<_, String>`. The facade can keep
-  the strings and add a typed classification later; changing the text now would break the
-  player-facing contract this map records.
+`launcher/src/next_facade.rs` adds the first shell-facing boundary. It names use cases for
+accounts (safe card, finished sign-in, refresh, sign-out, owner check, play-as), release and
+Nightly tags, launch memory/env, instance facts, pack kinds, server names and tailnet sharing,
+client IDs and native-mod state. Every function delegates to the service in §5; 12 contract tests
+pin the delegation.
+
+The accounts boundary is deliberate: `AccountCard` carries identity, provider and the safe
+`account::session::Status`, while `SignIn` keeps `Secrets` private and persists through
+`add_to`. A screen can finish, refresh and sign out without seeing a token.
+
+N03 does not close these, and they stay on the list for N04/N09:
+
+- **Server start/stop and the palette** still orchestrate in `glass_servers.rs` and `main.rs`;
+  the facade does not wrap them yet.
 - **Progress and cancellation are channel-based.** Downloads, prepare and server start report
-  progress through threads. A facade that only returns a final result would lose the current UX.
-- **`accounts.json` and `instances.json` are not atomic.** N03 should adopt temp+rename, with a
-  regression test that a short write leaves the old file readable.
-- **`settings.json` rewrites drop unknown keys.** A newer launcher's setting is lost after an
-  older build saves. N03 should decide whether to preserve unknown keys.
-- **Some surface state is only in the UI.** Server start/stop state, palette navigation and
-  screenshot previews have no service entry point; N03 must wrap them before the old shell is
-  removed.
-- **Manual-only N01 paths need parity hooks.** Microsoft sign-in, self-update, real launch,
+  progress through threads. The facade exposes results and options, not the progress stream; a
+  later slice must wrap it without losing the current UX.
+- **Errors keep their current shape.** Services return `Result<_, String>` (or `NotMemory`);
+  the facade does not invent new player-facing text. Typed classification can come later.
+- **`accounts.json` and `instances.json` are still not atomic.** This is a behaviour change, so
+  N03 leaves it for a dedicated fix with a short-write regression test.
+- **`settings.json` still drops unknown keys.** Preserving them is a separate compatibility
+  decision.
+- **Manual-only N01 paths still need parity hooks.** Microsoft sign-in, self-update, real launch,
   catalogue downloads, live multiplayer, Tailscale, Java install, log capture, cosmetics and OS
   integration cannot be unit-tested; the first shell behind a flag needs a manual parity script
   for each before it becomes the default.
@@ -285,5 +293,7 @@ From N01, the contract is 24 workflows across 12 areas. This map adds the "where
 
 ## 9. Verification
 
-This is a docs-only change: `cargo fmt --check`, clippy and the library/bin tests must stay green
-on `4a7db5ec82` (fmt/clippy clean, lib 569, bin 117). The N02 change-log entry records the same.
+N03 changes Rust code and docs. On the N03 tip the fence is `cargo fmt --check` and clippy clean,
+library tests **581**, bin tests **117**. The 12 facade tests are part of the library count; the
+N01 smoke tests still call the same underlying entry points. The N03 change-log entry records the
+same.

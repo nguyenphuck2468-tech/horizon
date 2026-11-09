@@ -48,3 +48,5 @@ Manual-only paths (no unit test can provide them) and the suite covering them me
 - Keychain storage, installers and desktop integration: the OS; `account::tests` in-memory store.
 
 N02 records where each of these workflows lives today: `docs/design/horizon-next/workflow-map.md` maps surface to service, persistence, error state and test, and lists the gaps the compatibility facade must close.
+
+N03 adds `launcher/src/next_facade.rs` as the shell-facing name for these workflows: accounts (card/sign-in/refresh/sign-out/owner check/play-as), tags, launch options, instance facts, pack kinds, server sharing, client IDs and native-mod state. It delegates to the services above and keeps `Secrets` out of the shell; 12 contract tests pin it.

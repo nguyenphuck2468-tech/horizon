@@ -1,6 +1,15 @@
 # Horizon Next — change log
 
 ## 2026-11-09
+- N03: `launcher/src/next_facade.rs` adds the shell-facing compatibility facade. It names
+  use cases for accounts (safe card, finished sign-in, refresh, sign-out, owner check,
+  play-as), release/Nightly tags, launch memory and env, instance facts, pack kinds, server
+  names and tailnet sharing, client IDs, and native-mod state, and delegates to the existing
+  services without changing behaviour. A new shell persists a sign-in through
+  `SignIn::add_to`, so it never reads or writes `Secrets`; `AccountCard` carries provider and
+  `account::session::Status` only. 12 contract tests pin the delegation and the secret
+  boundary. Fence: fmt/clippy clean; lib 581 + bin 117. Server start/stop, download progress
+  and atomic-write fixes remain open for later phases.
 - N02: `docs/design/horizon-next/workflow-map.md` maps every preserved area from the current
   surface to its application service, its files under `data_dir()`/`game_home()`, the error
   states the player sees, and the test plus N01 workflow that pin it. It records the two data

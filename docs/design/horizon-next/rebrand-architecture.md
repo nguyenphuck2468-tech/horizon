@@ -141,7 +141,7 @@ Each item is a small independently reviewable commit. Reorder only when a depend
 - N00 — `docs: define next-generation launcher architecture` (this document).
 - N01 — `test: establish launcher feature preservation baseline`: convert the existing feature inventory into executable smoke/regression coverage and mark manual-only paths.
 - N02 — `docs: map current launcher workflows to application domains`: record current entry points, services, persistence, and tests.
-- N03 — `refactor: add compatibility facade for launcher use cases`: no behavior change; tests pin current contracts.
+- N03 — `refactor: add compatibility facade for launcher use cases`: no behavior change; tests pin current contracts. `launcher/src/next_facade.rs` is the first slice (accounts, tags, launch options, instances, content, servers, settings, diagnostics; 12 contract tests).
 
 ### New product shell and design
 - N04 — `feat(ui): add next-generation app shell behind feature flag`.

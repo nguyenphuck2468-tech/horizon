@@ -32,6 +32,7 @@ pub mod modpacks;
 pub mod mojang;
 pub mod native_mods;
 pub mod native_status;
+pub mod next_facade;
 pub mod next_navigation;
 pub mod next_preservation;
 pub mod nightly;
