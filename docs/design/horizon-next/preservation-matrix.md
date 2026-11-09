@@ -22,3 +22,27 @@ glass_home/glass_instance/glass_server_dialog/glass_settings/glass_shot_blur), d
 titled window resize paths. `checks` CI is green on the current tips after the 2026-11-08
 download fixes, on every phase branch (pull requests #5, #3 and #4) — the authoritative
 regression fence for phases 1+. Nightly download path: `download-fixes.md`.
+
+## N01 - executable baseline (2026-11-09)
+
+`launcher/src/next_preservation.rs` turns this table into a contract:
+
+- `WORKFLOWS` lists 24 workflows across the 12 areas, each with its production entry point.
+- `cargo test --locked --lib next_preservation` runs all 13 `Automation::Smoke` entries against
+  those entry points, so a renamed or broken workflow fails the fence before a new shell uses it.
+- `every_preserved_area_has_a_workflow` fails if a preserved area loses its coverage, and
+  `manual_workflows_say_what_a_test_needs` keeps the manual reasons honest.
+
+Manual-only paths (no unit test can provide them) and the suite covering them meanwhile:
+
+- Microsoft device-code sign-in: live Microsoft/Xbox/Minecraft services; `account::tests` fixtures.
+- Launcher self-update install: a published signed release; `signed::tests`.
+- Real game download, prepare and launch: a Minecraft install and a game window; `backend`/`launch` tests.
+- Instance create/clone/import/export: the player's data directory; `instances::tests`, import/export tests.
+- Provider catalogue downloads: live Modrinth/CurseForge/Horizon APIs; `browser/tests`, `github_mods/tests`.
+- Joining a live multiplayer server: a running server and game client; `server_list::tests`.
+- Starting a hosted server and changing the live tailnet: Tailscale CLI and admin rights; `tailscale::tests`.
+- Picking and installing a Java runtime: Mojang downloads and Java homes; `java::tests`.
+- Capturing logs and crash reports: a running game process and GPU; `game_log::tests`.
+- Claiming wardrobe cosmetics: signed-in account and live API; `wardrobe::tests`.
+- Keychain storage, installers and desktop integration: the OS; `account::tests` in-memory store.

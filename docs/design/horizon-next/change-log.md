@@ -1,6 +1,13 @@
 # Horizon Next — change log
 
 ## 2026-11-09
+- N01: `launcher/src/next_preservation.rs` turns the 12-area inventory into an executable
+  contract. Its 24 workflows name the production entry point each new screen must keep calling;
+  13 are smoke-tested against the real functions (Ely.by secrets, Nightly naming, release order,
+  prepare state, instance metadata, pack kinds, world backup, official server offer,
+  server/Tailscale rules, launch memory/env, native-mod state, offline skins, config precedence)
+  and 11 manual-only paths name the suite covering them. `every_preserved_area_has_a_workflow`
+  fails if an area loses coverage. Fence: fmt/clippy clean; lib 569 + bin 117 green.
 - N00: `horizon-next/rebrand-foundation` rebased from `5106b8902` onto `launcher`
   `cadddef84d` (the three phase PRs are merged there). The rebase applied without conflicts and
   kept the Ely.by, config, backend, signed and release-sign work intact.

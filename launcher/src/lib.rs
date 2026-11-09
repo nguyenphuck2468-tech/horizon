@@ -33,6 +33,7 @@ pub mod mojang;
 pub mod native_mods;
 pub mod native_status;
 pub mod next_navigation;
+pub mod next_preservation;
 pub mod nightly;
 pub mod other_launchers;
 pub mod packs;
