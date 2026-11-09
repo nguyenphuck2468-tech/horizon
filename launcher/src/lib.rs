@@ -47,6 +47,7 @@ pub mod servers;
 pub mod shop;
 pub mod shortcut;
 pub mod signed;
+pub mod single_instance;
 pub mod skins;
 pub mod sources;
 pub mod tailscale;
