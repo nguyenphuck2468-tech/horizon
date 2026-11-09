@@ -99,8 +99,12 @@ impl SingleInstance {
     pub fn acquire(data_dir: &Path) -> Result<Self, String> {
         // A fresh install (and a clean CI runner) may not have created the data directory yet.
         // Create it before opening launcher.lock; otherwise the first launch fails with NotFound.
-        fs::create_dir_all(data_dir)
-            .map_err(|e| format!("Could not create the launcher's data directory {}: {e}", data_dir.display()))?;
+        fs::create_dir_all(data_dir).map_err(|e| {
+            format!(
+                "Could not create the launcher's data directory {}: {e}",
+                data_dir.display()
+            )
+        })?;
         Ok(Self {
             inner: StateLock::acquire(data_dir, LAUNCHER_LOCK)?,
         })
