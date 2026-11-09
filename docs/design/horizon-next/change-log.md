@@ -1,6 +1,13 @@
 # Horizon Next — change log
 
 ## 2026-11-09
+- N00: `horizon-next/rebrand-foundation` rebased from `5106b8902` onto `launcher`
+  `cadddef84d` (the three phase PRs are merged there). The rebase applied without conflicts and
+  kept the Ely.by, config, backend, signed and release-sign work intact.
+- The PR #6 `launcher` job failed at its first step, `cargo fmt --check`: rustfmt reordered the
+  `next_navigation` module declaration and expanded the `RouteMetadata` literals.
+  `style(navigation)` formats both files without changing a route, ID or test; fence on the
+  rebased branch: fmt/clippy clean, lib 565 + bin 117 green.
 
 - feat(ely): the Ely.by button is always offered (Settings → Account, the top bar, the classic
   account card), and its device-code, token, refresh and profile requests ask again after a

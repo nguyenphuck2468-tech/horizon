@@ -2,7 +2,7 @@
 
 Status: approved product direction; implementation charter
 Date: 2026-11-09
-Base: `launcher` at `5106b8902994ae882e58c78035c75957f4cc307e`
+Base: `launcher` at `cadddef84deecd4aba33af1b2af50c694dc7f538` (Phase 1-3 merged)
 Working branch: `horizon-next/rebrand-foundation`
 
 ## 1. Product decision
@@ -175,7 +175,7 @@ Each item is a small independently reviewable commit. Reorder only when a depend
 ## 9. Git and rollout policy
 
 - This work is isolated on `horizon-next/rebrand-foundation`; `launcher` is the frozen compatibility base until the owner explicitly approves integration.
-- Do not merge PRs #3/#4/#5 or cherry-pick their changes blindly. First reconcile their actual heads, overlapping commits, review state, and security-sensitive diffs against the foundation branch.
+- The three Phase 1-3 PRs are merged into `launcher`; this branch is rebased onto that tip (`cadddef84d`) instead of remaining frozen at `5106b8902`. Rebase onto current `launcher` before each review checkpoint rather than cherry-picking individual commits, so the Ely.by, config, backend, signed and release-sign work stays intact.
 - Do not reuse the existing `horizon-next/glass-experience` branch name for the new implementation. It is an earlier design experiment and remains available for selective reference.
 - Keep every commit narrowly scoped. Push and open a draft PR at a meaningful review checkpoint, not after every trivial edit.
 - Keep the old shell available behind a rollback/diagnostic switch until the new shell passes the preservation gate on all supported platforms.
