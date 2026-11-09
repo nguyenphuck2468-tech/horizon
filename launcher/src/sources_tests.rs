@@ -569,7 +569,9 @@ fn each_system_has_its_launcher_folders() {
     assert!(
         got.contains(&"Prism Launcher: /Users/r/Library/Application Support/PrismLauncher".into())
     );
-    assert!(got.contains(&"PineconeMC: /Users/r/Library/Application Support/ElyPrismLauncher".into()));
+    assert!(
+        got.contains(&"PineconeMC: /Users/r/Library/Application Support/ElyPrismLauncher".into())
+    );
     let windows = Folders {
         home: "C:/Users/r".into(),
         data: "C:/Users/r/AppData/Roaming".into(),
