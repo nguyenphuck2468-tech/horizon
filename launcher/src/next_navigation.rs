@@ -59,26 +59,146 @@ pub struct RouteMetadata {
 /// Canonical route catalogue. Contextual shortcuts should navigate here rather than create a
 /// second, competing management surface for the same feature.
 pub const ROUTES: &[RouteMetadata] = &[
-    RouteMetadata { route: Route::Home, workspace: Workspace::Home, title_key: "nav.home", id: "home", canonical: true },
-    RouteMetadata { route: Route::InstanceLibrary, workspace: Workspace::Instances, title_key: "nav.instances", id: "instances.library", canonical: true },
-    RouteMetadata { route: Route::InstanceDetails, workspace: Workspace::Instances, title_key: "nav.instance_details", id: "instances.details", canonical: true },
-    RouteMetadata { route: Route::VersionManager, workspace: Workspace::Instances, title_key: "nav.versions", id: "instances.versions", canonical: true },
-    RouteMetadata { route: Route::AccountCenter, workspace: Workspace::Accounts, title_key: "nav.accounts", id: "accounts.center", canonical: true },
-    RouteMetadata { route: Route::AccountDetails, workspace: Workspace::Accounts, title_key: "nav.account_details", id: "accounts.details", canonical: true },
-    RouteMetadata { route: Route::ContentBrowser, workspace: Workspace::Content, title_key: "nav.content", id: "content.browser", canonical: true },
-    RouteMetadata { route: Route::InstalledContent, workspace: Workspace::Content, title_key: "nav.installed_content", id: "content.installed", canonical: true },
-    RouteMetadata { route: Route::ModpackManager, workspace: Workspace::Content, title_key: "nav.modpacks", id: "content.modpacks", canonical: true },
-    RouteMetadata { route: Route::ServerDashboard, workspace: Workspace::Servers, title_key: "nav.servers", id: "servers.dashboard", canonical: true },
-    RouteMetadata { route: Route::ServerConsole, workspace: Workspace::Servers, title_key: "nav.server_console", id: "servers.console", canonical: true },
-    RouteMetadata { route: Route::MultiplayerBrowser, workspace: Workspace::Multiplayer, title_key: "nav.multiplayer", id: "multiplayer.browser", canonical: true },
-    RouteMetadata { route: Route::WorldLibrary, workspace: Workspace::Worlds, title_key: "nav.worlds", id: "worlds.library", canonical: true },
-    RouteMetadata { route: Route::ScreenshotLibrary, workspace: Workspace::Worlds, title_key: "nav.screenshots", id: "worlds.screenshots", canonical: true },
-    RouteMetadata { route: Route::Wardrobe, workspace: Workspace::Cosmetics, title_key: "nav.wardrobe", id: "cosmetics.wardrobe", canonical: true },
-    RouteMetadata { route: Route::DiagnosticsOverview, workspace: Workspace::Diagnostics, title_key: "nav.diagnostics", id: "diagnostics.overview", canonical: true },
-    RouteMetadata { route: Route::DownloadQueue, workspace: Workspace::Diagnostics, title_key: "nav.downloads", id: "diagnostics.downloads", canonical: true },
-    RouteMetadata { route: Route::CrashReports, workspace: Workspace::Diagnostics, title_key: "nav.crash_reports", id: "diagnostics.crashes", canonical: true },
-    RouteMetadata { route: Route::GlobalSettings, workspace: Workspace::Settings, title_key: "nav.settings", id: "settings.global", canonical: true },
-    RouteMetadata { route: Route::InstanceSettings, workspace: Workspace::Settings, title_key: "nav.instance_settings", id: "settings.instance", canonical: true },
+    RouteMetadata {
+        route: Route::Home,
+        workspace: Workspace::Home,
+        title_key: "nav.home",
+        id: "home",
+        canonical: true,
+    },
+    RouteMetadata {
+        route: Route::InstanceLibrary,
+        workspace: Workspace::Instances,
+        title_key: "nav.instances",
+        id: "instances.library",
+        canonical: true,
+    },
+    RouteMetadata {
+        route: Route::InstanceDetails,
+        workspace: Workspace::Instances,
+        title_key: "nav.instance_details",
+        id: "instances.details",
+        canonical: true,
+    },
+    RouteMetadata {
+        route: Route::VersionManager,
+        workspace: Workspace::Instances,
+        title_key: "nav.versions",
+        id: "instances.versions",
+        canonical: true,
+    },
+    RouteMetadata {
+        route: Route::AccountCenter,
+        workspace: Workspace::Accounts,
+        title_key: "nav.accounts",
+        id: "accounts.center",
+        canonical: true,
+    },
+    RouteMetadata {
+        route: Route::AccountDetails,
+        workspace: Workspace::Accounts,
+        title_key: "nav.account_details",
+        id: "accounts.details",
+        canonical: true,
+    },
+    RouteMetadata {
+        route: Route::ContentBrowser,
+        workspace: Workspace::Content,
+        title_key: "nav.content",
+        id: "content.browser",
+        canonical: true,
+    },
+    RouteMetadata {
+        route: Route::InstalledContent,
+        workspace: Workspace::Content,
+        title_key: "nav.installed_content",
+        id: "content.installed",
+        canonical: true,
+    },
+    RouteMetadata {
+        route: Route::ModpackManager,
+        workspace: Workspace::Content,
+        title_key: "nav.modpacks",
+        id: "content.modpacks",
+        canonical: true,
+    },
+    RouteMetadata {
+        route: Route::ServerDashboard,
+        workspace: Workspace::Servers,
+        title_key: "nav.servers",
+        id: "servers.dashboard",
+        canonical: true,
+    },
+    RouteMetadata {
+        route: Route::ServerConsole,
+        workspace: Workspace::Servers,
+        title_key: "nav.server_console",
+        id: "servers.console",
+        canonical: true,
+    },
+    RouteMetadata {
+        route: Route::MultiplayerBrowser,
+        workspace: Workspace::Multiplayer,
+        title_key: "nav.multiplayer",
+        id: "multiplayer.browser",
+        canonical: true,
+    },
+    RouteMetadata {
+        route: Route::WorldLibrary,
+        workspace: Workspace::Worlds,
+        title_key: "nav.worlds",
+        id: "worlds.library",
+        canonical: true,
+    },
+    RouteMetadata {
+        route: Route::ScreenshotLibrary,
+        workspace: Workspace::Worlds,
+        title_key: "nav.screenshots",
+        id: "worlds.screenshots",
+        canonical: true,
+    },
+    RouteMetadata {
+        route: Route::Wardrobe,
+        workspace: Workspace::Cosmetics,
+        title_key: "nav.wardrobe",
+        id: "cosmetics.wardrobe",
+        canonical: true,
+    },
+    RouteMetadata {
+        route: Route::DiagnosticsOverview,
+        workspace: Workspace::Diagnostics,
+        title_key: "nav.diagnostics",
+        id: "diagnostics.overview",
+        canonical: true,
+    },
+    RouteMetadata {
+        route: Route::DownloadQueue,
+        workspace: Workspace::Diagnostics,
+        title_key: "nav.downloads",
+        id: "diagnostics.downloads",
+        canonical: true,
+    },
+    RouteMetadata {
+        route: Route::CrashReports,
+        workspace: Workspace::Diagnostics,
+        title_key: "nav.crash_reports",
+        id: "diagnostics.crashes",
+        canonical: true,
+    },
+    RouteMetadata {
+        route: Route::GlobalSettings,
+        workspace: Workspace::Settings,
+        title_key: "nav.settings",
+        id: "settings.global",
+        canonical: true,
+    },
+    RouteMetadata {
+        route: Route::InstanceSettings,
+        workspace: Workspace::Settings,
+        title_key: "nav.instance_settings",
+        id: "settings.instance",
+        canonical: true,
+    },
 ];
 
 /// Functional areas that must remain reachable while the shell is replaced. This list is used by
@@ -139,8 +259,16 @@ mod tests {
         let mut routes = HashSet::new();
         for entry in ROUTES {
             assert!(ids.insert(entry.id), "duplicate route ID: {}", entry.id);
-            assert!(routes.insert(entry.route), "duplicate route: {:?}", entry.route);
-            assert!(entry.canonical, "route must have one canonical destination: {}", entry.id);
+            assert!(
+                routes.insert(entry.route),
+                "duplicate route: {:?}",
+                entry.route
+            );
+            assert!(
+                entry.canonical,
+                "route must have one canonical destination: {}",
+                entry.id
+            );
             assert!(!entry.title_key.is_empty());
         }
         assert_eq!(routes.len(), 20);
@@ -161,7 +289,9 @@ mod tests {
             Workspace::Settings,
         ] {
             assert!(
-                ROUTES.iter().any(|entry| entry.workspace == workspace && entry.canonical),
+                ROUTES
+                    .iter()
+                    .any(|entry| entry.workspace == workspace && entry.canonical),
                 "workspace has no canonical route: {:?}",
                 workspace
             );
@@ -170,8 +300,14 @@ mod tests {
 
     #[test]
     fn stable_route_lookup_and_workspace_resolution_work() {
-        assert_eq!(route_by_id("accounts.center").unwrap().route, Route::AccountCenter);
-        assert_eq!(route_by_id("content.modpacks").unwrap().workspace, Workspace::Content);
+        assert_eq!(
+            route_by_id("accounts.center").unwrap().route,
+            Route::AccountCenter
+        );
+        assert_eq!(
+            route_by_id("content.modpacks").unwrap().workspace,
+            Workspace::Content
+        );
         assert!(route_by_id("not-a-route").is_none());
         assert_eq!(workspace_for(Route::DownloadQueue), Workspace::Diagnostics);
     }
