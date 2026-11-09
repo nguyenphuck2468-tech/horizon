@@ -60,7 +60,7 @@ impl StateLock {
                         ));
                     }
                     let _ = fs::remove_file(&lock_path);
-                    if attempts > 3 {
+                    if attempts > 10 {
                         return Err(format!(
                             "Could not acquire the lock {} after retries: {e}",
                             lock_path.display()
