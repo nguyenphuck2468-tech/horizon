@@ -217,6 +217,10 @@ struct Store {
     instances: BTreeMap<String, Meta>,
 }
 
+/// Serializes instance state writes inside one process; cross-process serialization is the
+/// launcher-level single-instance guard (`single_instance::SingleInstance`).
+static INSTANCES_SAVE_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
 impl Store {
     fn load(data: &Path) -> Store {
         let path = data.join(FILE);
@@ -224,10 +228,20 @@ impl Store {
             Ok(store) => store,
             Err(crate::persistence::LoadError::Missing) => Store::default(),
             Err(crate::persistence::LoadError::Corrupt(e)) => {
+                // Recovery: adopt the last valid backup when one exists and is valid; otherwise
+                // fall back to an empty store with a visible diagnostic.
+                let bak = path.with_extension("bak");
+                let recovered = match crate::persistence::load_json::<Store>(&bak) {
+                    Ok(store) => {
+                        eprintln!("Horizon: recovered instances from {}", bak.display());
+                        store
+                    }
+                    Err(_) => Store::default(),
+                };
                 eprintln!(
                     "Horizon: instances.json is corrupt ({e}); starting with no instance metadata. Back up instances.json.bak to recover."
                 );
-                Store::default()
+                recovered
             }
             Err(crate::persistence::LoadError::Io(e)) => {
                 eprintln!(
@@ -247,6 +261,11 @@ impl Store {
     }
     fn save(&self, data: &Path) -> Result<(), String> {
         let path = data.join(FILE);
+        // Serialize the corruption check + write inside this process, so a concurrent save cannot
+        // interleave between the check and the replacement.
+        let _guard = INSTANCES_SAVE_LOCK
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
         // Refuse to overwrite a corrupt or unreadable state file: silently replacing it with an
         // in-memory default would destroy the player's data. The player restores it from the .bak
         // file first.

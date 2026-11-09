@@ -11,7 +11,7 @@
 
 use serde::de::DeserializeOwned;
 use serde::Serialize;
-use std::fs;
+use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -60,17 +60,22 @@ pub fn atomic_write_bytes(path: &Path, bytes: &[u8]) -> Result<(), String> {
     let tmp = random_temp_name(dir, path);
 
     {
-        let mut file = fs::File::create(&tmp).map_err(|e| format!("{tmp:?}: {e}"))?;
+        // Exclusive creation: the temp file must not exist before we write to it, so a stale
+        // temp file can never be truncated or reused by a concurrent writer.
+        let mut file = OpenOptions::new()
+            .create_new(true)
+            .write(true)
+            .open(&tmp)
+            .map_err(|e| format!("{tmp:?}: {e}"))?;
         if let Err(e) = file.write_all(bytes).and_then(|_| file.sync_all()) {
             let _ = fs::remove_file(&tmp);
             return Err(format!("{tmp:?}: {e}"));
         }
     }
 
-    // Rename temp over target.
-    if cfg!(windows) {
-        let _ = fs::remove_file(path);
-    }
+    // Rename temp over target. `rename` atomically replaces the target on Unix and Windows
+    // (MoveFileEx with REPLACE_EXISTING), so no manual remove is needed and the replacement
+    // stays atomic.
     fs::rename(&tmp, path).map_err(|e| {
         let _ = fs::remove_file(&tmp);
         format!("{path:?}: {e}")

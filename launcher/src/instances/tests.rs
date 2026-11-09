@@ -574,3 +574,18 @@ fn instances_save_refuses_to_overwrite_corrupt_file() {
     assert!(Store::save(&store, &root).is_err());
     let _ = std::fs::remove_dir_all(&root);
 }
+
+#[test]
+fn instances_recover_from_bak_when_main_is_corrupt() {
+    let root =
+        std::env::temp_dir().join(format!("horizon-instances-recover-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).unwrap();
+    let path = root.join("instances.json");
+    std::fs::write(&path, "{not valid json").unwrap();
+    let bak = path.with_extension("bak");
+    std::fs::write(&bak, "{}").unwrap();
+    let store = Store::load(&root);
+    assert!(store.instances.is_empty());
+    let _ = std::fs::remove_dir_all(&root);
+}

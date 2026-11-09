@@ -1734,6 +1734,10 @@ pub fn valid_offline_name(name: &str) -> bool {
         && name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_')
 }
 
+/// Serializes accounts state writes inside one process; cross-process serialization is the
+/// launcher-level single-instance guard (`single_instance::SingleInstance`).
+static ACCOUNTS_SAVE_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
 impl Accounts {
     pub(crate) fn path() -> PathBuf {
         crate::backend::data_dir().join("accounts.json")
@@ -1749,10 +1753,20 @@ impl Accounts {
             Ok(accounts) => accounts,
             Err(crate::persistence::LoadError::Missing) => Self::default(),
             Err(crate::persistence::LoadError::Corrupt(e)) => {
+                // Recovery: adopt the last valid backup when one exists and is valid; otherwise
+                // fall back to an empty account set with a visible diagnostic.
+                let bak = path.with_extension("bak");
+                let recovered = match crate::persistence::load_json::<Self>(&bak) {
+                    Ok(acc) => {
+                        eprintln!("Horizon: recovered accounts from {}", bak.display());
+                        acc
+                    }
+                    Err(_) => Self::default(),
+                };
                 eprintln!(
                     "Horizon: accounts.json is corrupt ({e}); starting with no accounts. Back up accounts.json.bak to recover."
                 );
-                Self::default()
+                recovered
             }
             Err(crate::persistence::LoadError::Io(e)) => {
                 eprintln!("Horizon: cannot read accounts.json ({e}); starting with no accounts.");
@@ -1768,6 +1782,9 @@ impl Accounts {
         crate::persistence::load_json(path)
     }
     pub(crate) fn save_to(&self, path: &Path) -> Result<(), String> {
+        // Serialize the corruption check + write inside this process, so a concurrent save cannot
+        // interleave between the check and the replacement.
+        let _guard = ACCOUNTS_SAVE_LOCK.lock().unwrap_or_else(|e| e.into_inner());
         // Refuse to overwrite a corrupt or unreadable state file: silently replacing it with an
         // in-memory default would destroy the player's data. The player restores it from the .bak
         // file first.
