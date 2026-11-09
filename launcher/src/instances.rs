@@ -217,17 +217,66 @@ struct Store {
     instances: BTreeMap<String, Meta>,
 }
 
+/// Serializes instance state writes inside one process; cross-process serialization is the
+/// launcher-level single-instance guard (`single_instance::SingleInstance`).
+static INSTANCES_SAVE_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
 impl Store {
     fn load(data: &Path) -> Store {
-        fs::read_to_string(data.join(FILE))
-            .ok()
-            .and_then(|t| serde_json::from_str(&t).ok())
-            .unwrap_or_default()
+        let path = data.join(FILE);
+        match crate::persistence::load_json(&path) {
+            Ok(store) => store,
+            Err(crate::persistence::LoadError::Missing) => Store::default(),
+            Err(crate::persistence::LoadError::Corrupt(e)) => {
+                // Recovery: adopt the last valid backup when one exists and is valid; otherwise
+                // fall back to an empty store with a visible diagnostic.
+                let bak = path.with_extension("bak");
+                let recovered = match crate::persistence::load_json::<Store>(&bak) {
+                    Ok(store) => {
+                        eprintln!("Horizon: recovered instances from {}", bak.display());
+                        store
+                    }
+                    Err(_) => Store::default(),
+                };
+                eprintln!(
+                    "Horizon: instances.json is corrupt ({e}); starting with no instance metadata. Back up instances.json.bak to recover."
+                );
+                recovered
+            }
+            Err(crate::persistence::LoadError::Io(e)) => {
+                eprintln!(
+                    "Horizon: cannot read instances.json ({e}); starting with no instance metadata."
+                );
+                Store::default()
+            }
+        }
+    }
+
+    /// Load `data/FILE`, failing loudly on corruption instead of silently resetting user data.
+    /// Reserved for the next shell (N04+) and callers that want a recovery path on corruption.
+    #[allow(dead_code)]
+    fn load_validated(data: &Path) -> Result<Store, crate::persistence::LoadError> {
+        let path = data.join(FILE);
+        crate::persistence::load_json(&path)
     }
     fn save(&self, data: &Path) -> Result<(), String> {
-        fs::create_dir_all(data).map_err(|e| format!("{}: {e}", data.display()))?;
-        let text = serde_json::to_string_pretty(self).unwrap();
-        fs::write(data.join(FILE), text).map_err(|e| format!("{FILE}: {e}"))
+        let path = data.join(FILE);
+        // Serialize the corruption check + write inside this process, so a concurrent save cannot
+        // interleave between the check and the replacement.
+        let _guard = INSTANCES_SAVE_LOCK
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
+        // Refuse to overwrite a corrupt or unreadable state file: silently replacing it with an
+        // in-memory default would destroy the player's data. The player restores it from the .bak
+        // file first.
+        if path.exists() && !crate::persistence::is_readable::<Store>(&path) {
+            return Err(format!(
+                "{} is corrupt or unreadable; refusing to overwrite user data. Restore it from {}.bak first.",
+                path.display(),
+                path.display()
+            ));
+        }
+        crate::persistence::atomic_write_json(&path, &self).map_err(|e| format!("{FILE}: {e}"))
     }
 }
 

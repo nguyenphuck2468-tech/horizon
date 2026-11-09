@@ -1734,6 +1734,10 @@ pub fn valid_offline_name(name: &str) -> bool {
         && name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_')
 }
 
+/// Serializes accounts state writes inside one process; cross-process serialization is the
+/// launcher-level single-instance guard (`single_instance::SingleInstance`).
+static ACCOUNTS_SAVE_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
 impl Accounts {
     pub(crate) fn path() -> PathBuf {
         crate::backend::data_dir().join("accounts.json")
@@ -1745,17 +1749,53 @@ impl Accounts {
         self.save_to(&Self::path())
     }
     pub(crate) fn load_from(path: &Path) -> Self {
-        std::fs::read_to_string(path)
-            .ok()
-            .and_then(|t| serde_json::from_str(&t).ok())
-            .unwrap_or_default()
+        match crate::persistence::load_json(path) {
+            Ok(accounts) => accounts,
+            Err(crate::persistence::LoadError::Missing) => Self::default(),
+            Err(crate::persistence::LoadError::Corrupt(e)) => {
+                // Recovery: adopt the last valid backup when one exists and is valid; otherwise
+                // fall back to an empty account set with a visible diagnostic.
+                let bak = path.with_extension("bak");
+                let recovered = match crate::persistence::load_json::<Self>(&bak) {
+                    Ok(acc) => {
+                        eprintln!("Horizon: recovered accounts from {}", bak.display());
+                        acc
+                    }
+                    Err(_) => Self::default(),
+                };
+                eprintln!(
+                    "Horizon: accounts.json is corrupt ({e}); starting with no accounts. Back up accounts.json.bak to recover."
+                );
+                recovered
+            }
+            Err(crate::persistence::LoadError::Io(e)) => {
+                eprintln!("Horizon: cannot read accounts.json ({e}); starting with no accounts.");
+                Self::default()
+            }
+        }
+    }
+
+    /// Load `path`, failing loudly on corruption instead of silently resetting user data.
+    /// Reserved for the next shell (N04+) and callers that want a recovery path on corruption.
+    #[allow(dead_code)]
+    pub(crate) fn load_validated(path: &Path) -> Result<Self, crate::persistence::LoadError> {
+        crate::persistence::load_json(path)
     }
     pub(crate) fn save_to(&self, path: &Path) -> Result<(), String> {
-        if let Some(dir) = path.parent() {
-            std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
+        // Serialize the corruption check + write inside this process, so a concurrent save cannot
+        // interleave between the check and the replacement.
+        let _guard = ACCOUNTS_SAVE_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        // Refuse to overwrite a corrupt or unreadable state file: silently replacing it with an
+        // in-memory default would destroy the player's data. The player restores it from the .bak
+        // file first.
+        if path.exists() && !crate::persistence::is_readable::<Self>(path) {
+            return Err(format!(
+                "{} is corrupt or unreadable; refusing to overwrite user data. Restore it from {}.bak first.",
+                path.display(),
+                path.display()
+            ));
         }
-        let text = serde_json::to_string_pretty(self).map_err(|e| e.to_string())?;
-        std::fs::write(path, text + "\n").map_err(|e| e.to_string())
+        crate::persistence::atomic_write_json(path, &self)
     }
     pub fn selected(&self) -> Option<&Account> {
         let uuid = self.selected.as_ref()?;
