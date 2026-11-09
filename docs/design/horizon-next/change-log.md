@@ -1,5 +1,10 @@
 # Horizon Next — change log
 
+## 2026-11-09
+
+- refactor(glass): one tested `danger_fill()` helper replaces the three copies of the 12 % red
+  (delete-row hover, refused field, second destructive click), and pins its alpha and hue.
+
 ## 2026-11-08
 
 - `334fbf746` fix(game): read the game, its builds and the mixin registry from

@@ -79,6 +79,12 @@ pub fn danger() -> Hsla {
     })
 }
 
+/// The theme's danger red at 12 %, the mockup's `bg-red-500/10`-like fill: a Delete row, a
+/// refused field and a second, destructive click's button all sit on it.
+pub fn danger_fill() -> Hsla {
+    rgba(horizon_theme::glass::DANGER_HOVER << 8 | 0x1f).into()
+}
+
 /// Builds `f`'s rows as the mockup's `SettingRow`s, for a Settings card: `index_row` and
 /// `section_title` ask [`flat`].
 pub fn flat_rows<R>(f: impl FnOnce() -> R) -> R {
@@ -460,11 +466,7 @@ pub fn menu_row(
     } else {
         (white(ink::FULL), white(ink::NOTE))
     };
-    let hover_color = if danger {
-        rgba(horizon_theme::glass::DANGER_HOVER << 8 | 0x1f).into()
-    } else {
-        white(0.07)
-    };
+    let hover_color = if danger { danger_fill() } else { white(0.07) };
     let d = div()
         .id(id.clone())
         .relative()
@@ -818,7 +820,7 @@ pub fn link(id: impl Into<SharedString>, label: impl Into<SharedString>) -> Stat
 /// 12 % while what it holds is refused.
 pub fn field(focused: bool, invalid: bool) -> Div {
     let bg: Hsla = if invalid {
-        rgba(horizon_theme::glass::DANGER_HOVER << 8 | 0x1f).into()
+        danger_fill()
     } else {
         white(if focused {
             fill::FIELD_FOCUS
@@ -1021,6 +1023,20 @@ mod tests {
         set_light(true);
         assert_eq!(paper(), color(INK));
         assert_eq!(color(INK), gpui::rgb(0x100a1f).into());
+        set_light(false);
+    }
+
+    #[test]
+    fn the_danger_fill_is_the_theme_red_at_twelve_percent() {
+        set_light(false);
+        let fill = danger_fill();
+        let expected: Hsla = rgba(horizon_theme::glass::DANGER_HOVER << 8 | 0x1f).into();
+        assert_eq!(fill, expected);
+        // The same red, at 0x1f of 255 (about 12 %).
+        assert!((fill.a - f32::from(0x1f_u8) / 255.0).abs() < 1e-3);
+        // The light appearance does not swap it: a destructive fill stays red on paper.
+        set_light(true);
+        assert_eq!(danger_fill(), fill);
         set_light(false);
     }
 
