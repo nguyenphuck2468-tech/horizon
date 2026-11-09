@@ -761,11 +761,7 @@ pub(crate) fn fetch_small(url: &str) -> Result<Option<Vec<u8>>, String> {
             Err(e) => return Err(e),
         };
         let mut body = Vec::new();
-        match response
-            .into_reader()
-            .take(1 << 20)
-            .read_to_end(&mut body)
-        {
+        match response.into_reader().take(1 << 20).read_to_end(&mut body) {
             Ok(_) => return Ok(Some(body)),
             Err(e) => {
                 last_error = format!("Download interrupted: {e}");
