@@ -5478,6 +5478,16 @@ fn main() {
     if let Some(code) = horizon_launcher::installer::run_quiet() {
         std::process::exit(code);
     }
+    // Single-instance guard (Phase 0, C2): at most one launcher process owns the data directory.
+    // Acquired before any shared state (settings, accounts, instances) is read or written, so a
+    // second instance cannot interleave its reads and writes with the first one's.
+    let _single_instance = horizon_launcher::single_instance::SingleInstance::acquire(
+        &horizon_launcher::backend::data_dir(),
+    )
+    .unwrap_or_else(|e| {
+        eprintln!("Horizon: {e}");
+        std::process::exit(2);
+    });
     perf::process_started();
     backend::exe_path();
     #[cfg(windows)]
