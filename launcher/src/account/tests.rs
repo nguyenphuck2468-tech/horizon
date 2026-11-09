@@ -3715,3 +3715,68 @@ fn renewed_game_handoff_rechecks_the_credential_after_refresh() {
         "a revoked credential must never create a session file"
     );
 }
+
+#[test]
+fn an_offline_name_is_valid_from_3_to_16_alphanumeric_underscore_chars() {
+    assert!(valid_offline_name("abc"));
+    assert!(valid_offline_name("abcdefghijklmnop"));
+    assert!(valid_offline_name("a_b"));
+    assert!(valid_offline_name("ABC123_xyz"));
+    assert!(!valid_offline_name("ab"));
+    assert!(!valid_offline_name("abcdefghijklmnopq"));
+    assert!(!valid_offline_name("a-b"));
+    assert!(!valid_offline_name("a b"));
+    assert!(!valid_offline_name(""));
+}
+
+#[test]
+fn an_account_phase_label_reads_as_written() {
+    assert_eq!(
+        session::Phase::Queued.label(),
+        "Waiting for account access…"
+    );
+    assert_eq!(session::Phase::Keychain.label(), "Reading keychain…");
+    assert_eq!(
+        session::Phase::Microsoft.label(),
+        "Renewing Microsoft sign-in…"
+    );
+    assert_eq!(session::Phase::Xbox.label(), "Signing in to Xbox Live…");
+    assert_eq!(
+        session::Phase::Minecraft.label(),
+        "Getting Minecraft session…"
+    );
+    assert_eq!(
+        session::Phase::Ownership.label(),
+        "Checking Minecraft ownership…"
+    );
+    assert_eq!(
+        session::Phase::Profile.label(),
+        "Loading Minecraft profile…"
+    );
+    assert_eq!(session::Phase::Saving.label(), "Saving sign-in…");
+    assert_eq!(session::Phase::SigningOut.label(), "Signing out…");
+    assert_eq!(session::Phase::ElyBy.label(), "Renewing Ely.by sign-in…");
+}
+
+#[test]
+fn an_accounts_look_returns_the_offline_name_skin_or_default() {
+    let mut accounts = Accounts::default();
+    accounts.offline.push("Nguyen".into());
+    accounts.looks.insert(
+        "nguyen".into(),
+        crate::skins::Look {
+            model: crate::skins::Model::Slim,
+            skin: true,
+            cape: false,
+        },
+    );
+    let look = accounts.look("Nguyen");
+    assert_eq!(look.model, crate::skins::Model::Slim);
+    assert!(look.skin);
+    assert!(!look.cape);
+    // Unknown name falls back to the default look.
+    let default = accounts.look("Nobody");
+    assert_eq!(default.model, crate::skins::Model::Classic);
+    assert!(!default.skin);
+    assert!(!default.cape);
+}
