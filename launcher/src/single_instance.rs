@@ -97,6 +97,10 @@ impl SingleInstance {
     ///
     /// Fails with a clear message when another live launcher instance already holds the lock.
     pub fn acquire(data_dir: &Path) -> Result<Self, String> {
+        // A fresh install (and a clean CI runner) may not have created the data directory yet.
+        // Create it before opening launcher.lock; otherwise the first launch fails with NotFound.
+        fs::create_dir_all(data_dir)
+            .map_err(|e| format!("Could not create the launcher's data directory {}: {e}", data_dir.display()))?;
         Ok(Self {
             inner: StateLock::acquire(data_dir, LAUNCHER_LOCK)?,
         })
@@ -140,6 +144,20 @@ mod tests {
         let _ = fs::remove_dir_all(&root);
         fs::create_dir_all(&root).unwrap();
         root
+    }
+
+    #[test]
+    fn single_instance_creates_a_missing_data_directory() {
+        let dir = std::env::temp_dir().join(format!(
+            "horizon-single-instance-missing-{}",
+            std::process::id()
+        ));
+        let _ = fs::remove_dir_all(&dir);
+        assert!(!dir.exists());
+        let guard = SingleInstance::acquire(&dir).unwrap();
+        assert!(dir.join(LAUNCHER_LOCK).exists());
+        drop(guard);
+        let _ = fs::remove_dir_all(dir);
     }
 
     #[test]
