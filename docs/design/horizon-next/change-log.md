@@ -87,3 +87,33 @@
 - `068105e03` refactor(home): extract the mods count note and unit-test it (1 mod / N mods).
 - Phase 1 merged into `launcher` @ `5106b8902` via PR #2 (CI run 157 success: launcher + verify).
 - Horizon vẫn phải là Horizon — 100% existing features preserved, all commits independent.
+
+## Tổng kết toàn bộ Horizon Next (đã làm xong, chờ review ngày mai)
+
+### Phase 1 — Design System (merge vào launcher @ 5106b8902, PR #2)
+18 commit độc lập, audit glass_ui karşı design-system.md + horizon-theme tokens.
+Mọi module glass đã có unit test: glass_ui, glass_account, glass_home, glass_home_lists,
+glass_home_mods, glass_home_packs, glass_instance, glass_instance_java, glass_mods,
+glass_servers, glass_settings, glass_toast, glass_versions, glass_shot_blur, glass_palette,
+glass_home_tabs. Home đủ 8/8 mục charter (Play, instance chọn, account, update state,
+running state, recent activity, quick actions, notifications) — không thiếu tính năng.
+
+### Phase 2 — Main Experience (CI success, PR #3)
+4 commit, cứng hệ thống account:
+- valid_offline_name(): 3–16 alphanumeric/underscore
+- account::Phase::label(): 9 phase strings
+- Accounts::look(): offline-name skin/cape/model + default fallback
+
+### Phase 3 — Content Experience (CI success, PR #4)
+1 commit: parse_config_text() client-id parsing từ TOML sidecar.
+
+### Verification (fence = CI recipe)
+- cargo fmt --check: OK
+- cargo clippy --all-targets -- -D warnings: OK
+- cargo test --locked --lib: 552 passed / 0 failed / 4 ignored (1 skip documented)
+- cargo test --locked --bin horizon-launcher: 112 passed / 0 failed
+
+### Nguyên tắc
+"Horizon vẫn phải là Horizon" — không reimplementation, không thay đổi luồng nghiệp vụ,
+chỉ trích hàm thuần + test bảo vệ hợp đồng. launcher baseline @ 0206f28 không bị thay đổi
+lịch sử.
