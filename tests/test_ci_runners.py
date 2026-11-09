@@ -69,7 +69,11 @@ class OwnRunnerTests(unittest.TestCase):
         count = 0
         for where, _, _, _, value, pools in routed():
             count += 1
-            self.assertIn("vars.SELF_HOSTED_CI != 'off'", value, where)
+            if where in {"cancel-on-close.yml cancel", "pr-labels.yml label"}:
+                # These fork-facing workflows use GitHub-hosted runners by default; opt in to horizon-light.
+                self.assertIn("vars.SELF_HOSTED_CI == 'on'", value, where)
+            else:
+                self.assertIn("vars.SELF_HOSTED_CI != 'off'", value, where)
             self.assertTrue(value.endswith("|| 'ubuntu-latest' }}"), where)
             if "checks" in pools:
                 # The desktop paused: every checks job back to GitHub, the bots stay.
