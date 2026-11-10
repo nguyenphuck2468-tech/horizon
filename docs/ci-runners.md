@@ -40,7 +40,7 @@ for):
 
 | `SELF_HOSTED_CI` | Bots (`horizon-light`) | `checks`, `mod-registry`, `telemetry-server`, `pack load bench` (`horizon-checks`) |
 | --- | --- | --- |
-| unset (default) | ours | `verify`, `launcher`: ours for the pull requests ending in 0 or 1, GitHub's for the others and main's pushes; the rest ours |
+| unset (default) | ours, except the three fork-facing workflows below (GitHub's) | `verify`, `launcher`: ours for the pull requests ending in 0 or 1, GitHub's for the others and main's pushes; the rest ours |
 | `all` | ours | ours, every pull request |
 | `light` | ours | GitHub's: the desktop is paused |
 | `off` | GitHub's | GitHub's: everything back, in one switch |
