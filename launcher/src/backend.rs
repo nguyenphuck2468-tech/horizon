@@ -5230,7 +5230,10 @@ pub fn {f}("
             fs::create_dir_all(app.join("Contents/MacOS")).unwrap();
             fs::create_dir_all(app.join("Contents/Resources")).unwrap();
             let bin = app.join("Contents/MacOS/horizon-launcher");
-            fs::copy("/usr/bin/true", &bin).unwrap();
+            // Use a tiny executable script rather than re-signing a system Mach-O binary.
+            // This checks that the app-bundle update preserves executable permissions on both
+            // Intel and Apple Silicon runners without depending on the host system binary format.
+            fs::write(&bin, "#!/bin/sh\nexit 0\n").unwrap();
             fs::set_permissions(&bin, fs::Permissions::from_mode(0o755)).unwrap();
             fs::write(app.join("Contents/Resources/version"), version).unwrap();
             fs::write(
