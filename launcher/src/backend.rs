@@ -591,12 +591,18 @@ pub fn links() -> Links {
 }
 
 /// A portable bundle keeps its data beside the executable, not in the user's platform data folder.
-/// Windows/Linux archives put `portable` beside the binary; macOS puts it in Horizon.app/Contents/Resources.
+/// Windows/Linux archives put `portable` beside the binary; macOS puts it beside Horizon.app.
 fn portable_data_dir(executable: &Path) -> Option<PathBuf> {
     let parent = executable.parent()?;
-    if parent.file_name().is_some_and(|name| name == std::ffi::OsStr::new("MacOS")) {
+    if parent
+        .file_name()
+        .is_some_and(|name| name == std::ffi::OsStr::new("MacOS"))
+    {
         let contents = parent.parent()?;
-        if contents.file_name().is_some_and(|name| name == std::ffi::OsStr::new("Contents")) {
+        if contents
+            .file_name()
+            .is_some_and(|name| name == std::ffi::OsStr::new("Contents"))
+        {
             let app = contents.parent()?;
             let folder = app.parent()?;
             if folder.join("portable").is_file() {
@@ -5497,7 +5503,11 @@ mod portable_bundle_tests {
     #[test]
     fn portable_binary_uses_sibling_data_folder_only_with_marker() {
         let root = scratch("binary");
-        let binary = if cfg!(windows) { "horizon-launcher.exe" } else { "horizon-launcher" };
+        let binary = if cfg!(windows) {
+            "horizon-launcher.exe"
+        } else {
+            "horizon-launcher"
+        };
         let executable = root.join(binary);
         assert_eq!(portable_data_dir(&executable), None);
         fs::write(root.join("portable"), b"").unwrap();
