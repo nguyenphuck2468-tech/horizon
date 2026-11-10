@@ -450,7 +450,7 @@ fn player_status(player: &Player) -> (Tone, String) {
 
 #[cfg(test)]
 mod tests {
-    use super::stack_account_cards;
+    use super::*;
 
     #[test]
     fn account_cards_stack_at_the_launchers_minimum_width() {
@@ -460,7 +460,6 @@ mod tests {
         assert!(!stack_account_cards(1440.));
     }
 
-    use super::*;
     use account::Player;
 
     #[test]
