@@ -294,7 +294,7 @@ jobs:
             mkdir -p portable-dist
             cp "$BIN/${{ matrix.binary }}" portable-dist/
             touch portable-dist/portable
-            printf '%s\\n' 'Portable mode stores settings, accounts, versions and downloads in the Horizon-Data folder beside this launcher.' 'Keep the whole folder together when moving it.' > portable-dist/PORTABLE.txt
+            printf '%s\n' 'Portable mode stores settings, accounts, versions and downloads in the Horizon-Data folder beside this launcher.' 'Keep the whole folder together when moving it.' > portable-dist/PORTABLE.txt
             if [[ "$RUNNER_OS" == "Linux" ]]; then
               (cd portable-dist && tar czf "../out/horizon-launcher-linux-x86_64-portable.tar.gz" *)
             else
