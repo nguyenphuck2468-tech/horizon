@@ -36,6 +36,7 @@ on:
       - 'crates/horizon-telemetry/**'
       - 'crates/horizon-theme/**'
       - 'packaging/linux/**'
+      - 'packaging/macos/**'
       - 'packaging/icons/**'
       - '.github/workflows/launcher.yml'
   schedule:
