@@ -97,7 +97,7 @@ touch "$portable_app/Contents/Resources/portable"
 if [[ "$identity" == "-" ]]; then
   codesign --force --sign - "$portable_app"
 else
-  codesign --force --options runtime --timestamp ${keychain[@]+"\${keychain[@]}"} --sign "$identity" "$portable_app"
+  codesign --force --options runtime --timestamp ${keychain[@]+"${keychain[@]}"} --sign "$identity" "$portable_app"
 fi
 codesign --verify --strict --verbose=2 "$portable_app"
 if [[ -n "$notarize" ]]; then
