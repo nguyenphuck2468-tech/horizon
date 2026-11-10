@@ -594,9 +594,9 @@ pub fn links() -> Links {
 /// Windows/Linux archives put `portable` beside the binary; macOS puts it in Horizon.app/Contents/Resources.
 fn portable_data_dir(executable: &Path) -> Option<PathBuf> {
     let parent = executable.parent()?;
-    if parent.file_name().is_some_and(|name| name == "MacOS") {
+    if parent.file_name().is_some_and(|name| name == std::ffi::OsStr::new("MacOS")) {
         let contents = parent.parent()?;
-        if contents.file_name().is_some_and(|name| name == "Contents")
+        if contents.file_name().is_some_and(|name| name == std::ffi::OsStr::new("Contents"))
             && contents.join("Resources/portable").is_file()
         {
             return contents.parent()?.parent().map(|folder| folder.join("Horizon-Data"));
@@ -5488,7 +5488,8 @@ mod portable_bundle_tests {
     #[test]
     fn portable_binary_uses_sibling_data_folder_only_with_marker() {
         let root = scratch("binary");
-        let executable = root.join(if cfg!(windows) { "horizon-launcher.exe" } else { "horizon-launcher" });
+        let binary = if cfg!(windows) { "horizon-launcher.exe" } else { "horizon-launcher" };
+        let executable = root.join(binary);
         assert_eq!(portable_data_dir(&executable), None);
         fs::write(root.join("portable"), b"").unwrap();
         assert_eq!(portable_data_dir(&executable), Some(root.join("Horizon-Data")));
@@ -5500,9 +5501,10 @@ mod portable_bundle_tests {
         let root = scratch("macos");
         let executable = root.join("Horizon.app/Contents/MacOS/horizon-launcher");
         fs::create_dir_all(executable.parent().unwrap()).unwrap();
-        fs::create_dir_all(executable.parent().unwrap().parent().unwrap().join("Resources")).unwrap();
+        let contents = executable.parent().unwrap().parent().unwrap();
+        fs::create_dir_all(contents.join("Resources")).unwrap();
         fs::write(
-            executable.parent().unwrap().parent().unwrap().join("Resources/portable"),
+            contents.join("Resources/portable"),
             b"",
         )
         .unwrap();
