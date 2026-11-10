@@ -13,6 +13,13 @@ use crate::servers_page::Field;
 use account::Player;
 use horizon_theme::glass::{fill, ink, radius};
 
+/// Below this window width the Settings section list leaves too little room for two account cards.
+const ACCOUNT_STACK_AT: f32 = 1120.;
+
+fn stack_account_cards(window_width: f32) -> bool {
+    window_width < ACCOUNT_STACK_AT
+}
+
 impl Launcher {
     pub(super) fn glass_account(&mut self, cx: &mut Context<Self>) -> Div {
         let left = self.glass_who_plays(cx);
@@ -20,7 +27,7 @@ impl Launcher {
         // The Settings pane sits beside its 210 px section list. At the launcher's 960 px
         // minimum, two columns leave the identity panel too narrow beside the 400 px provider
         // card; stack the cards until the content pane has room for both.
-        let stacked = self.window_width < 1120.;
+        let stacked = stack_account_cards(self.window_width);
         div()
             .flex()
             .when(stacked, |d| d.flex_col())
@@ -443,6 +450,16 @@ fn player_status(player: &Player) -> (Tone, String) {
 
 #[cfg(test)]
 mod tests {
+    use super::stack_account_cards;
+
+    #[test]
+    fn account_cards_stack_at_the_launchers_minimum_width() {
+        assert!(stack_account_cards(960.));
+        assert!(stack_account_cards(1119.));
+        assert!(!stack_account_cards(1120.));
+        assert!(!stack_account_cards(1440.));
+    }
+
     use super::*;
     use account::Player;
 
