@@ -121,9 +121,19 @@ pub fn locate(program: &str) -> std::path::PathBuf {
 /// Starts `exe mcp` as a client would, lists its tools and returns how many answered: the
 /// Settings page's "Test the connection".
 pub fn self_test(exe: &Path) -> Result<usize, String> {
+    self_test_with_data_dir(exe, None)
+}
+
+/// Starts `exe mcp` as a client would, optionally using an isolated launcher data directory.
+/// The override is useful for subprocess tests that must not contend with the running launcher.
+pub fn self_test_with_data_dir(exe: &Path, data_dir: Option<&Path>) -> Result<usize, String> {
     use std::io::Write;
     use std::process::Stdio;
-    let mut child = crate::process::command(exe)
+    let mut command = crate::process::command(exe);
+    if let Some(data_dir) = data_dir {
+        command.env("HORIZON_LAUNCHER_HOME", data_dir);
+    }
+    let mut child = command
         .arg("mcp")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())

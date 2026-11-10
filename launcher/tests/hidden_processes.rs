@@ -71,19 +71,37 @@ fn exporters_write_to_their_log_file_without_a_console() {
     }
 }
 
+fn isolated_launcher_home(name: &str) -> std::path::PathBuf {
+    std::env::temp_dir().join(format!(
+        "horizon-hidden-processes-{name}-{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ))
+}
+
 #[test]
 fn cli_keeps_redirected_stdout_and_stderr() {
     let executable = env!("CARGO_BIN_EXE_horizon-launcher");
+    let version_home = isolated_launcher_home("cli-version");
     let version = process::command(executable)
+        .env("HORIZON_LAUNCHER_HOME", &version_home)
         .arg("--version")
         .output()
         .unwrap();
+    let _ = fs::remove_dir_all(&version_home);
     assert!(version.status.success());
     assert!(String::from_utf8_lossy(&version.stdout).starts_with("horizon-launcher "));
+
+    let invalid_home = isolated_launcher_home("cli-invalid");
     let invalid = process::command(executable)
+        .env("HORIZON_LAUNCHER_HOME", &invalid_home)
         .arg("--unknown-option")
         .output()
         .unwrap();
+    let _ = fs::remove_dir_all(&invalid_home);
     assert!(!invalid.status.success());
     assert!(String::from_utf8_lossy(&invalid.stderr).contains("--unknown-option"));
 }
@@ -91,7 +109,10 @@ fn cli_keeps_redirected_stdout_and_stderr() {
 #[test]
 fn mcp_keeps_its_stdio_transport() {
     let executable = Path::new(env!("CARGO_BIN_EXE_horizon-launcher"));
-    assert!(horizon_launcher::agents::self_test(executable).unwrap() > 0);
+    let home = isolated_launcher_home("mcp");
+    let result = horizon_launcher::agents::self_test_with_data_dir(executable, Some(&home));
+    let _ = fs::remove_dir_all(&home);
+    assert!(result.unwrap() > 0);
 }
 
 #[test]
