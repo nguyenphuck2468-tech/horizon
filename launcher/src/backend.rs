@@ -596,10 +596,12 @@ fn portable_data_dir(executable: &Path) -> Option<PathBuf> {
     let parent = executable.parent()?;
     if parent.file_name().is_some_and(|name| name == std::ffi::OsStr::new("MacOS")) {
         let contents = parent.parent()?;
-        if contents.file_name().is_some_and(|name| name == std::ffi::OsStr::new("Contents"))
-            && contents.join("Resources/portable").is_file()
-        {
-            return contents.parent()?.parent().map(|folder| folder.join("Horizon-Data"));
+        if contents.file_name().is_some_and(|name| name == std::ffi::OsStr::new("Contents")) {
+            let app = contents.parent()?;
+            let folder = app.parent()?;
+            if folder.join("portable").is_file() {
+                return Some(folder.join("Horizon-Data"));
+            }
         }
     }
     parent
@@ -5503,11 +5505,7 @@ mod portable_bundle_tests {
         fs::create_dir_all(executable.parent().unwrap()).unwrap();
         let contents = executable.parent().unwrap().parent().unwrap();
         fs::create_dir_all(contents.join("Resources")).unwrap();
-        fs::write(
-            contents.join("Resources/portable"),
-            b"",
-        )
-        .unwrap();
+        fs::write(root.join("portable"), b"").unwrap();
         assert_eq!(
             portable_data_dir(Path::new(&executable)),
             Some(root.join("Horizon-Data"))
