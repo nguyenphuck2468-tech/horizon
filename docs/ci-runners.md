@@ -45,6 +45,12 @@ for):
 | `light` | ours | GitHub's: the desktop is paused |
 | `off` | GitHub's | GitHub's: everything back, in one switch |
 
+Three fork-facing workflows are an intentional exception to the default bot routing: `pr-labels.yml`,
+`overlap-note.yml` and `cancel-on-close.yml` use `SELF_HOSTED_CI == 'on'` to opt in to `horizon-light`.
+If the variable is unset, or set to `all`, `light` or `off`, these three workflows use `ubuntu-latest`.
+This keeps a fork from requesting a self-hosted runner by default; set the value to `on` only when deliberately
+opting those workflows into the private runner pool.
+
 ```sh
 gh variable set SELF_HOSTED_CI --body light --repo horizon-rust/horizon   # or all, off
 gh variable delete SELF_HOSTED_CI --repo horizon-rust/horizon             # the default
