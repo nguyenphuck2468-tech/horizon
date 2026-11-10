@@ -173,12 +173,26 @@ mod tests {
         assert!(SingleInstance::acquire(&dir).is_ok());
     }
 
+    // Unix can distinguish a dead PID from a live process. Windows deliberately treats
+    // existing lock files as held because this implementation has no portable process probe;
+    // after a crash, the user clears that stale lock rather than risking a second launcher.
+    #[cfg(unix)]
     #[test]
     fn single_instance_reuses_stale_lock_from_dead_process() {
         let dir = scratch("stale");
         let lock = dir.join(LAUNCHER_LOCK);
         fs::write(&lock, "999999999\n").unwrap(); // a PID that does not exist
         assert!(SingleInstance::acquire(&dir).is_ok());
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn single_instance_does_not_reclaim_an_existing_lock_without_a_process_probe() {
+        let dir = scratch("stale");
+        let lock = dir.join(LAUNCHER_LOCK);
+        fs::write(&lock, "999999999\n").unwrap();
+        assert!(SingleInstance::acquire(&dir).is_err());
+        assert!(lock.exists(), "an unverified lock must not be removed");
     }
 
     #[test]
