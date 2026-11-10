@@ -5497,6 +5497,9 @@ fn main() {
     // that build their own agents (`horizon-port-pack`) are told before anything starts.
     horizon_launcher::proxy::announce(horizon_launcher::backend::Settings::load().proxy);
     if let Some(code) = cli::run() {
+        // Windows cannot probe whether a PID is still alive, so release the guard before
+        // process::exit bypasses Rust destructors and leaves a stale launcher.lock behind.
+        drop(_single_instance);
         std::process::exit(code);
     }
     gpui_platform::application()
