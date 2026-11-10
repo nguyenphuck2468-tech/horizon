@@ -2137,8 +2137,8 @@ pub fn prepare_in_process(
 }
 
 /// Where the game keeps saves and options.txt: `HORIZON_HOME`, else `horizon` in the platform's
-/// data folder (~/.local/share/horizon on Linux, as the release folders' horizon.sh uses). It is
-/// never inside a version folder, so installing, updating or removing a version keeps the saves.
+/// data folder (~/.local/share/horizon on Linux), or `Horizon-Data/horizon` in a portable bundle.
+/// It is never inside a version folder, so installing, updating or removing a version keeps the saves.
 pub fn game_home() -> PathBuf {
     if let Some(home) = std::env::var_os("HORIZON_HOME").filter(|h| !h.is_empty()) {
         return PathBuf::from(home);
