@@ -5480,7 +5480,6 @@ pub fn {f}("
     }
 }
 
-
 #[cfg(test)]
 mod portable_bundle_tests {
     use super::portable_data_dir;
@@ -5511,7 +5510,10 @@ mod portable_bundle_tests {
         let executable = root.join(binary);
         assert_eq!(portable_data_dir(&executable), None);
         fs::write(root.join("portable"), b"").unwrap();
-        assert_eq!(portable_data_dir(&executable), Some(root.join("Horizon-Data")));
+        assert_eq!(
+            portable_data_dir(&executable),
+            Some(root.join("Horizon-Data"))
+        );
         fs::remove_dir_all(root).unwrap();
     }
 
