@@ -84,4 +84,26 @@ if [[ -n "$notarize" ]]; then
   spctl --assess --verbose=2 "$app"
   spctl --assess --type open --context context:primary-signature --verbose=2 "$dmg"
 fi
-echo "Packaged $out/$zip and $dmg"
+
+# A separate opt-in portable app keeps its data beside Horizon.app after extraction. Do not put
+# the marker in the ordinary app: that same bundle is installed from the DMG and self-updated.
+portable_dir=$out/portable-app
+portable_app=$portable_dir/Horizon.app
+portable_zip=horizon-launcher-macos-$arch-portable.zip
+rm -rf "$portable_dir" "$out/$portable_zip"
+mkdir -p "$portable_dir"
+ditto "$app" "$portable_app"
+touch "$portable_app/Contents/Resources/portable"
+if [[ "$identity" == "-" ]]; then
+  codesign --force --sign - "$portable_app"
+else
+  codesign --force --options runtime --timestamp ${keychain[@]+"\${keychain[@]}"} --sign "$identity" "$portable_app"
+fi
+codesign --verify --strict --verbose=2 "$portable_app"
+if [[ -n "$notarize" ]]; then
+  "$here/notarize.sh" "$portable_app"
+  spctl --assess --verbose=2 "$portable_app"
+fi
+(cd "$portable_dir" && ditto -c -k --norsrc --noextattr --noqtn --keepParent Horizon.app "$out/$portable_zip")
+rm -rf "$portable_dir"
+echo "Packaged $out/$zip, $dmg and $out/$portable_zip"
