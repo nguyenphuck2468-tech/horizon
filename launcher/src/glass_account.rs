@@ -17,11 +17,25 @@ impl Launcher {
     pub(super) fn glass_account(&mut self, cx: &mut Context<Self>) -> Div {
         let left = self.glass_who_plays(cx);
         let right = self.glass_microsoft_card(cx);
+        // The Settings pane sits beside its 210 px section list. At the launcher's 960 px
+        // minimum, two columns leave the identity panel too narrow beside the 400 px provider
+        // card; stack the cards until the content pane has room for both.
+        let stacked = self.window_width < 1120.;
         div()
             .flex()
+            .when(stacked, |d| d.flex_col())
             .gap(px(8.))
-            .child(left.flex_1().min_w_0().p(px(24.)))
-            .child(right.flex_none().w(px(400.)))
+            .child(
+                left.min_w_0()
+                    .when(stacked, |d| d.w_full().p(px(20.)))
+                    .when(!stacked, |d| d.flex_1().p(px(24.))),
+            )
+            .child(
+                right
+                    .min_w_0()
+                    .when(stacked, |d| d.w_full())
+                    .when(!stacked, |d| d.flex_none().w(px(400.))),
+            )
     }
 
     /// The player now, the offline names and the field to add one.
