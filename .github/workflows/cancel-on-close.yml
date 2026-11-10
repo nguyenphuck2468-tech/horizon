@@ -10,7 +10,7 @@ permissions:
 jobs:
   cancel:
     # One of our small runners (horizon-light), out of GitHub's pool: no checkout, no code of the pull request
-    # (docs/ci-runners.md). SELF_HOSTED_CI=off: GitHub's runners.
+    # (docs/ci-runners.md). SELF_HOSTED_CI=on opts in to horizon-light; unset/off: GitHub's runners.
     runs-on: ${{ vars.SELF_HOSTED_CI == 'on' && fromJSON('["self-hosted", "linux", "horizon-light"]') || 'ubuntu-latest' }}
     steps:
       - name: Cancel the pull request's unfinished runs

@@ -40,10 +40,16 @@ for):
 
 | `SELF_HOSTED_CI` | Bots (`horizon-light`) | `checks`, `mod-registry`, `telemetry-server`, `pack load bench` (`horizon-checks`) |
 | --- | --- | --- |
-| unset (default) | ours | `verify`, `launcher`: ours for the pull requests ending in 0 or 1, GitHub's for the others and main's pushes; the rest ours |
-| `all` | ours | ours, every pull request |
-| `light` | ours | GitHub's: the desktop is paused |
+| unset (default) | ours, except the three fork-facing workflows below (GitHub's) | `verify`, `launcher`: ours for the pull requests ending in 0 or 1, GitHub's for the others and main's pushes; the rest ours |
+| `all` | ours, except the three fork-facing workflows below (GitHub's) | ours, every pull request |
+| `light` | ours, except the three fork-facing workflows below (GitHub's) | GitHub's: the desktop is paused |
 | `off` | GitHub's | GitHub's: everything back, in one switch |
+
+Three fork-facing workflows are an intentional exception to the default bot routing: `pr-labels.yml`,
+`overlap-note.yml` and `cancel-on-close.yml` use `SELF_HOSTED_CI == 'on'` to opt in to `horizon-light`.
+If the variable is unset, or set to `all`, `light` or `off`, these three workflows use `ubuntu-latest`.
+This keeps a fork from requesting a self-hosted runner by default; set the value to `on` only when deliberately
+opting those workflows into the private runner pool.
 
 ```sh
 gh variable set SELF_HOSTED_CI --body light --repo horizon-rust/horizon   # or all, off
