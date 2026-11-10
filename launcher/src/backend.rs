@@ -2137,6 +2137,13 @@ pub fn game_home() -> PathBuf {
     if let Some(home) = std::env::var_os("HORIZON_HOME").filter(|h| !h.is_empty()) {
         return PathBuf::from(home);
     }
+    if let Some(portable) = std::env::current_exe()
+        .ok()
+        .as_deref()
+        .and_then(portable_data_dir)
+    {
+        return portable.join("horizon");
+    }
     dirs::data_dir()
         .unwrap_or_else(std::env::temp_dir)
         .join("horizon")
