@@ -10,7 +10,7 @@ The release includes opt-in portable archives alongside the normal installer and
 | macOS Intel | `horizon-launcher-macos-x64-portable.zip` | `Horizon-Data` beside `Horizon.app` |
 
 Extract the archive to a folder you can write to and launch Horizon from there. The portable marker opts the
-launcher into storing settings, accounts, downloaded game versions, Java runtimes and other launcher data in
+launcher into storing settings, accounts, downloaded game versions, Java runtimes, worlds, screenshots, options and other game/launcher data in
 the adjacent `Horizon-Data` folder. Keep the launcher and that folder together when moving or backing it up.
 The data folder is created on first launch. The marker stays outside the replaceable executable/app bundle, so a
 portable installation keeps using its adjacent data folder after a self-update.
