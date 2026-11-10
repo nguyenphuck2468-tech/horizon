@@ -93,7 +93,7 @@ portable_zip=horizon-launcher-macos-$arch-portable.zip
 rm -rf "$portable_dir" "$out/$portable_zip"
 mkdir -p "$portable_dir"
 ditto "$app" "$portable_app"
-touch "$portable_app/Contents/Resources/portable"
+touch "$portable_dir/portable"
 if [[ "$identity" == "-" ]]; then
   codesign --force --sign - "$portable_app"
 else
@@ -104,6 +104,6 @@ if [[ -n "$notarize" ]]; then
   "$here/notarize.sh" "$portable_app"
   spctl --assess --verbose=2 "$portable_app"
 fi
-(cd "$portable_dir" && ditto -c -k --norsrc --noextattr --noqtn --keepParent Horizon.app "$out/$portable_zip")
+(cd "$portable_dir" && ditto -c -k --norsrc --noextattr --noqtn --keepParent Horizon.app "$out/$portable_zip" && zip -X "$out/$portable_zip" portable)
 rm -rf "$portable_dir"
 echo "Packaged $out/$zip, $dmg and $out/$portable_zip"
