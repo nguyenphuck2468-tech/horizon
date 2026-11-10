@@ -5505,6 +5505,7 @@ mod portable_bundle_tests {
         fs::create_dir_all(executable.parent().unwrap()).unwrap();
         let contents = executable.parent().unwrap().parent().unwrap();
         fs::create_dir_all(contents.join("Resources")).unwrap();
+        assert_eq!(portable_data_dir(&executable), None);
         fs::write(root.join("portable"), b"").unwrap();
         assert_eq!(
             portable_data_dir(Path::new(&executable)),
