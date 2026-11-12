@@ -1106,5 +1106,8 @@
   "Import existing data": "Импортиране на съществуващи данни",
   "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Само на същия компютър. Първо затворете всички процеси на играта. Може да се наложи да влезете отново, ако идентификационните данни не са налични.",
   "Close the running game and wait for preparation to finish before migrating.": "Затворете стартираната игра и изчакайте подготовката да завърши, преди да мигрирате.",
-  "Could not locate this computer's user data folder": "Папката с потребителски данни на този компютър не беше намерена."
+  "Could not locate this computer's user data folder": "Папката с потребителски данни на този компютър не беше намерена.",
+  "Copy missing files": "Копиране на липсващите файлове",
+  "Review again": "Преглед отново",
+  "Review existing data": "Преглед на съществуващите данни"
 }
