@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Accedi cun Ely.by",
   "Asking Ely.by…": "Domandi Ely.by...",
   "Use the {provider} account for {name}.": "Utilizâ il {provider} par {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "La pagjine di acedi si vierç tal navigadôr. Horizon no viôt mai la tô clâf."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "La pagjine di acedi si vierç tal navigadôr. Horizon no viôt mai la tô clâf.",
+  "Scanning or copying files in the background. Keep Horizon open.": "I files a vegnin controlâts o copiâts in sotfont. Lassâ Horizon viert.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} files dal launcher ({launcher_mb} MB), {game_files} files dal zûc ({game_mb} MB); {conflicts} files esistents a vignaran conservâts e {symlinks} colegaments simbolics a vignaran saltâts.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "A son stâts copiâts {launcher_files} files dal launcher e {game_files} files dal zûc. I files esistents no son stâts sovrascrits; {symlinks} colegaments simbolics a son stâts saltâts.",
+  "Review and copy data from this computer's previous Horizon installation": "Controle e copie i dâts de instalazion precedinte di Horizon su chest computer",
+  "Import existing data": "Impuarte i dâts esistents",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Dome sul stes computer. Siere prin dutis lis proceduris dal zûc. Al podarès coventâ tornâ a jentrâ se lis credenziâls no son disponibilis.",
+  "Close the running game and wait for preparation to finish before migrating.": "Siere il zûc in esecuzion e spiete che la preparazion e sedi finide prime di migrâ.",
+  "Could not locate this computer's user data folder": "No si rive a cjatâ la cartele dai dâts utent di chest computer.",
+  "Copy missing files": "Copie i files mancants",
+  "Review again": "Controle di gnûf",
+  "Review existing data": "Controle i dâts esistents"
 }
