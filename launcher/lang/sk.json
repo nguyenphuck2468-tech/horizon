@@ -1106,5 +1106,8 @@
   "Import existing data": "Importovať existujúce údaje",
   "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Iba na tom istom počítači. Najprv zatvorte všetky herné procesy. Ak prihlasovacie údaje nie sú dostupné, možno sa budete musieť znova prihlásiť.",
   "Close the running game and wait for preparation to finish before migrating.": "Pred migráciou zatvorte spustenú hru a počkajte na dokončenie prípravy.",
-  "Could not locate this computer's user data folder": "Nepodarilo sa nájsť priečinok používateľských údajov na tomto počítači."
+  "Could not locate this computer's user data folder": "Nepodarilo sa nájsť priečinok používateľských údajov na tomto počítači.",
+  "Copy missing files": "Kopírovať chýbajúce súbory",
+  "Review again": "Skontrolovať znova",
+  "Review existing data": "Skontrolovať existujúce údaje"
 }
