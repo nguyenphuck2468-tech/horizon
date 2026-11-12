@@ -86,7 +86,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
     let selected_version = this.selected().cloned();
     let game_running = this.client.is_some() || this.starting_client.is_some();
 
-    let navigation = div()
+    let mut navigation = div()
         .flex()
         .flex_col()
         .w(px(232.))
@@ -110,25 +110,63 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                 .text_size(px(11.))
                 .text_color(t.muted)
                 .child(tr("NEXT-GENERATION LAUNCHER")),
-        )
-        .children(ROUTES.iter().map(|entry| {
-            let route = entry.route;
-            let selected = route == active;
+        );
+
+    // ROUTES is ordered by workspace. Render one primary destination per workspace,
+    // then nest its secondary destinations below it instead of flattening 21 routes.
+    for entry in ROUTES.iter().filter(|entry| {
+        !ROUTES
+            .iter()
+            .take_while(|candidate| candidate.route != entry.route)
+            .any(|candidate| candidate.workspace == entry.workspace)
+    }) {
+        let workspace = entry.workspace;
+        let primary = entry.route;
+        let selected = primary == active;
+        navigation = navigation.child(
             div()
-                .id(SharedString::from(format!("next-route-{}", entry.id)))
-                .w_full()
-                .px(px(12.))
-                .py(px(10.))
-                .rounded(px(8.))
-                .text_size(px(13.))
-                .text_color(if selected { t.accent } else { t.ink_soft })
-                .when(selected, |element| element.bg(t.surface))
-                .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
-                    this.next_route = route;
-                    cx.notify();
-                }))
-                .child(tr(label(route)))
-        }));
+                .flex()
+                .flex_col()
+                .gap(px(3.))
+                .child(
+                    div()
+                        .id(SharedString::from(format!("next-workspace-{}", entry.id)))
+                        .w_full()
+                        .px(px(12.))
+                        .py(px(9.))
+                        .rounded(px(8.))
+                        .text_size(px(13.))
+                        .text_color(if selected { t.accent } else { t.ink })
+                        .when(selected, |element| element.bg(t.surface))
+                        .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
+                            this.next_route = primary;
+                            cx.notify();
+                        }))
+                        .child(tr(label(primary))),
+                )
+                .children(ROUTES.iter().filter(|child| {
+                    child.workspace == workspace && child.route != primary
+                }).map(|child| {
+                    let route = child.route;
+                    let selected = route == active;
+                    div()
+                        .id(SharedString::from(format!("next-route-{}", child.id)))
+                        .w_full()
+                        .pl(px(24.))
+                        .pr(px(12.))
+                        .py(px(7.))
+                        .rounded(px(7.))
+                        .text_size(px(12.))
+                        .text_color(if selected { t.accent } else { t.ink_soft })
+                        .when(selected, |element| element.bg(t.surface))
+                        .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
+                            this.next_route = route;
+                            cx.notify();
+                        }))
+                        .child(tr(label(route)))
+                })),
+        );
+    }
 
     let page = div()
         .flex()
