@@ -380,6 +380,23 @@ fn a_download_is_kept_only_when_its_checksum_matches() {
     std::fs::remove_dir_all(&dir).unwrap();
 }
 
+
+#[test]
+fn a_download_does_not_truncate_another_transfer_partial_file() {
+    let dir = scratch("partial-isolation");
+    std::fs::create_dir_all(&dir).unwrap();
+    let stale = dir.join(".pack.zip.part");
+    let sentinel = b"another transfer owns this partial file";
+    std::fs::write(&stale, sentinel).unwrap();
+
+    let body = b"a resource pack";
+    let path = download::save(&file_for(body, true), &body[..], &dir, &|_| {}).unwrap();
+
+    assert_eq!(std::fs::read(&stale).unwrap(), sentinel);
+    assert_eq!(std::fs::read(&path).unwrap(), body);
+    std::fs::remove_dir_all(&dir).unwrap();
+}
+
 #[test]
 fn downloads_refused_before_any_byte() {
     let body = b"x";
