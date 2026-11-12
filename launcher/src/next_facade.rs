@@ -254,10 +254,81 @@ pub mod content {
     use std::path::Path;
 
     pub use crate::packs::Kind as PackKind;
+    pub use crate::browser::horizon::pack::Installed as RegistryPack;
 
     /// Whether a file is a resource pack or a shader pack; a mod jar is neither.
     pub fn pack_kind(path: &Path) -> Result<PackKind, String> {
         content_engine::kind_of(path)
+    }
+
+    /// Installed Horizon registry packs, already checked and recorded by the existing service.
+    pub fn registry_packs() -> Vec<RegistryPack> {
+        crate::browser::horizon::pack::list()
+    }
+
+    /// Install a registry pack through its signed/hash-checked download pipeline.
+    pub fn install_registry_pack(
+        id: &str,
+        progress: &dyn Fn(&str, f32),
+    ) -> Result<RegistryPack, String> {
+        crate::browser::horizon::pack::install(id, progress)
+    }
+
+    /// Remove an installed registry pack through the existing service.
+    pub fn remove_registry_pack(work: &Path) -> Result<(), String> {
+        crate::browser::horizon::pack::remove(work)
+    }
+}
+
+/// Native mod discovery and build operations. Progress is emitted by the existing pipeline;
+/// callers should run these functions on a background executor and stream steps to the UI.
+pub mod native_mods {
+    use super::*;
+    use std::path::{Path, PathBuf};
+
+    pub use crate::native_mods::{Bundle, Plan, Profile, Step};
+
+    /// Inspect .hnmod or unpacked native bundles with the same parser used by the builder.
+    pub fn discover(folder: &Path) -> Result<Vec<Bundle>, String> {
+        crate::native_mods::bundles(folder)
+    }
+
+    /// Build the selected instance with the trusted native-mod pipeline.
+    pub fn build(
+        base: &str,
+        folder: &Path,
+        instance: &crate::instances::Instance,
+        allow_revision_mismatch: bool,
+        profile: Profile,
+        progress: impl Fn(Step),
+    ) -> Result<String, String> {
+        crate::native_mods::build(
+            base,
+            folder,
+            instance,
+            allow_revision_mismatch,
+            profile,
+            progress,
+        )
+    }
+
+    /// Export a standalone headless server runtime without mutating a game instance.
+    pub fn build_server(
+        base: &str,
+        folder: &Path,
+        output: &Path,
+        allow_revision_mismatch: bool,
+        profile: Profile,
+        progress: impl Fn(Step),
+    ) -> Result<PathBuf, String> {
+        crate::native_mods::build_server(
+            base,
+            folder,
+            output,
+            allow_revision_mismatch,
+            profile,
+            progress,
+        )
     }
 }
 
