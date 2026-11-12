@@ -1098,5 +1098,13 @@
   "Sign in with Ely.by": "Влезте с Ely.by",
   "Asking Ely.by…": "Питане на Ely.by...",
   "Use the {provider} account for {name}.": "Използвайте акаунта на {provider} за {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Страницата за влизане се отваря в браузъра ви. Horizon никога не вижда паролата ви."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Страницата за влизане се отваря в браузъра ви. Horizon никога не вижда паролата ви.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Файловете се сканират или копират във фонов режим. Оставете Horizon отворен.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "Файлове на стартера: {launcher_files} ({launcher_mb} MB), файлове на играта: {game_files} ({game_mb} MB); {conflicts} съществуващи файла ще бъдат запазени, а {symlinks} символни връзки ще бъдат пропуснати.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Копирани са {launcher_files} файла на стартера и {game_files} файла на играта. Съществуващите файлове не са презаписани; пропуснати са {symlinks} символни връзки.",
+  "Review and copy data from this computer's previous Horizon installation": "Преглед и копиране на данните от предишната инсталация на Horizon на този компютър",
+  "Import existing data": "Импортиране на съществуващи данни",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Само на същия компютър. Първо затворете всички процеси на играта. Може да се наложи да влезете отново, ако идентификационните данни не са налични.",
+  "Close the running game and wait for preparation to finish before migrating.": "Затворете стартираната игра и изчакайте подготовката да завърши, преди да мигрирате.",
+  "Could not locate this computer's user data folder": "Папката с потребителски данни на този компютър не беше намерена."
 }
