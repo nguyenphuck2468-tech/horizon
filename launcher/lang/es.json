@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Iniciar sesión con Ely.by",
   "Asking Ely.by…": "Consultando Ely.by…",
   "Use the {provider} account for {name}.": "Usa la {provider} de {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "La página de inicio de sesión se abre en tu navegador. Horizon nunca ve tu contraseña."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "La página de inicio de sesión se abre en tu navegador. Horizon nunca ve tu contraseña.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Los archivos se están analizando o copiando en segundo plano. Mantén Horizon abierto.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} archivos del lanzador ({launcher_mb} MB), {game_files} archivos del juego ({game_mb} MB); se conservarán {conflicts} archivos existentes y se omitirán {symlinks} enlaces simbólicos.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Se copiaron {launcher_files} archivos del lanzador y {game_files} archivos del juego. No se sobrescribieron los archivos existentes; se omitieron {symlinks} enlaces simbólicos.",
+  "Review and copy data from this computer's previous Horizon installation": "Revisa y copia los datos de la instalación anterior de Horizon en este equipo",
+  "Import existing data": "Importar datos existentes",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Solo en el mismo equipo. Cierra primero todos los procesos del juego. Puede que tengas que volver a iniciar sesión si las credenciales no están disponibles.",
+  "Close the running game and wait for preparation to finish before migrating.": "Cierra el juego en ejecución y espera a que termine la preparación antes de migrar.",
+  "Could not locate this computer's user data folder": "No se pudo encontrar la carpeta de datos de usuario de este equipo.",
+  "Copy missing files": "Copiar archivos que faltan",
+  "Review again": "Revisar de nuevo",
+  "Review existing data": "Revisar los datos existentes"
 }
