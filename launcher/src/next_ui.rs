@@ -109,6 +109,20 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
     let auth_status = this.auth_status.clone();
     let selected_version = this.selected().cloned();
     let game_running = this.client.is_some() || this.starting_client.is_some();
+    let version_releases = match &this.releases {
+        Load::Ready(releases) => releases.clone(),
+        _ => Vec::new(),
+    };
+    let versions_loading = matches!(this.releases, Load::Loading);
+    let versions_error = match &this.releases {
+        Load::Failed(error) => Some(error.clone()),
+        _ => None,
+    };
+    let installed_versions = this.installed.clone();
+    let installing_version = this.installing.clone();
+    let removing_versions = this.removing.clone();
+    let version_error = this.install_error.clone();
+    let confirm_remove = this.confirm_remove.clone();
 
     let mut navigation = div()
         .flex()
@@ -342,6 +356,195 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                             }))
                     })),
             )
+        })
+        .when(active == Route::VersionManager, |page| {
+            let mut versions = div().flex().flex_col().gap(px(10.));
+            versions = versions.child(
+                div()
+                    .flex()
+                    .items_center()
+                    .justify_between()
+                    .child(
+                        div()
+                            .text_size(px(12.))
+                            .text_color(t.muted)
+                            .child(format!("{} installed · {} available", installed_versions.len(), version_releases.len())),
+                    )
+                    .child(
+                        div()
+                            .id("next-versions-refresh")
+                            .px(px(12.))
+                            .py(px(8.))
+                            .rounded(px(8.))
+                            .bg(t.plate)
+                            .text_color(t.ink)
+                            .cursor_pointer()
+                            .child(tr("Refresh"))
+                            .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                                this.fetch_releases();
+                                cx.notify();
+                            })),
+                    ),
+            );
+            if let Some(error) = versions_error {
+                versions = versions.child(
+                    div()
+                        .p(px(14.))
+                        .rounded(px(9.))
+                        .bg(t.plate_soft)
+                        .text_color(t.danger)
+                        .child(format!("{}: {error}", tr("Couldn't load releases."))),
+                );
+            } else if versions_loading {
+                versions = versions.child(
+                    div()
+                        .p(px(18.))
+                        .text_color(t.muted)
+                        .child(tr("Loading releases…")),
+                );
+            } else if version_releases.is_empty() {
+                versions = versions.child(
+                    div()
+                        .p(px(18.))
+                        .text_color(t.muted)
+                        .child(tr("No releases yet.")),
+                );
+            }
+            versions = versions.children(version_releases.iter().map(|release| {
+                let tag = release.tag.clone();
+                let installed = installed_versions.contains(&tag);
+                let selected = this.selected() == Some(&tag);
+                let is_installing = installing_version.as_ref().is_some_and(|(current, _)| current == &tag);
+                let is_removing = removing_versions.contains(&tag);
+                let confirming = confirm_remove.as_deref() == Some(tag.as_str());
+                let release_for_install = release.clone();
+                let mut row = div()
+                    .id(SharedString::from(format!("next-version-{tag}")))
+                    .flex()
+                    .items_center()
+                    .justify_between()
+                    .gap(px(12.))
+                    .w_full()
+                    .p(px(15.))
+                    .rounded(px(10.))
+                    .bg(if selected { t.surface } else { t.plate_soft })
+                    .text_color(t.ink)
+                    .child(
+                        div()
+                            .flex()
+                            .flex_col()
+                            .flex_1()
+                            .min_w_0()
+                            .gap(px(4.))
+                            .child(release.name.clone())
+                            .child(
+                                div()
+                                    .text_size(px(11.))
+                                    .text_color(t.muted)
+                                    .child(format!("{} · {}", tag, release.date)),
+                            )
+                            .child(
+                                div()
+                                    .text_size(px(11.))
+                                    .text_color(t.muted)
+                                    .child(if selected {
+                                        tr("In use")
+                                    } else if installed {
+                                        tr("Installed")
+                                    } else {
+                                        tr("Not installed")
+                                    }),
+                            ),
+                    );
+                if is_installing {
+                    let percent = installing_version.as_ref().map(|(_, progress)| (*progress * 100.) as u32).unwrap_or(0);
+                    row = row.child(
+                        div()
+                            .text_size(px(12.))
+                            .text_color(t.accent)
+                            .child(format!("Installing · {percent}%")),
+                    );
+                } else if is_removing {
+                    row = row.child(
+                        div().text_size(px(12.)).text_color(t.muted).child(tr("Removing…")),
+                    );
+                } else if installed {
+                    let use_tag = tag.clone();
+                    let remove_tag = tag.clone();
+                    let mut actions = div().flex().items_center().gap(px(6.));
+                    if !selected && !confirming {
+                        actions = actions.child(
+                            div()
+                                .id(SharedString::from(format!("next-version-use-{tag}")))
+                                .px(px(10.))
+                                .py(px(7.))
+                                .rounded(px(7.))
+                                .bg(t.plate)
+                                .text_size(px(12.))
+                                .cursor_pointer()
+                                .child(tr("Use"))
+                                .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
+                                    this.settings.selected = Some(use_tag.clone());
+                                    this.save_settings();
+                                    cx.notify();
+                                })),
+                        );
+                    }
+                    actions = actions.child(
+                        div()
+                            .id(SharedString::from(format!("next-version-remove-{tag}")))
+                            .px(px(10.))
+                            .py(px(7.))
+                            .rounded(px(7.))
+                            .bg(t.plate)
+                            .text_size(px(12.))
+                            .text_color(if confirming { t.danger } else { t.ink_soft })
+                            .cursor_pointer()
+                            .child(tr(if confirming { "Remove for good" } else { "Remove" }))
+                            .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
+                                if this.confirm_remove.as_deref() == Some(remove_tag.as_str()) {
+                                    this.remove(&remove_tag);
+                                } else {
+                                    this.confirm_remove = Some(remove_tag.clone());
+                                }
+                                cx.notify();
+                            })),
+                    );
+                    row = row.child(actions);
+                } else if release.asset.is_some() {
+                    row = row.child(
+                        div()
+                            .id(SharedString::from(format!("next-version-install-{tag}")))
+                            .px(px(12.))
+                            .py(px(8.))
+                            .rounded(px(7.))
+                            .bg(t.accent)
+                            .text_color(t.page)
+                            .cursor_pointer()
+                            .child(tr("Install"))
+                            .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
+                                this.install(&release_for_install);
+                                cx.notify();
+                            })),
+                    );
+                } else {
+                    row = row.child(
+                        div().text_size(px(11.)).text_color(t.muted).child(tr("No build for this platform")),
+                    );
+                }
+                row
+            }));
+            if let Some((tag, error)) = version_error {
+                versions = versions.child(
+                    div()
+                        .p(px(12.))
+                        .rounded(px(8.))
+                        .text_color(t.danger)
+                        .bg(t.plate_soft)
+                        .child(format!("{tag}: {error}")),
+                );
+            }
+            page.child(versions)
         })
         .when(active == Route::AccountCenter, |page| {
             page.child(
