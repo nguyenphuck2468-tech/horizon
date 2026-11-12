@@ -94,7 +94,7 @@
   "For example nice -n 5": "例如 nice -n 5",
   "Overview": "概览",
   "The launcher stays open while you play.": "游戏时启动器保持打开。",
-  "Jars: {summary}.": "Jars：{summary}。",
+  "Jars: {summary}.": "JAR 文件：{summary}。",
   "Client": "客户端",
   "Address on this network": "当前局域网地址",
   "Tailscale is installed but not running. Open it and switch it on.": "Tailscale 已安装但未运行。请打开并启用它。",
