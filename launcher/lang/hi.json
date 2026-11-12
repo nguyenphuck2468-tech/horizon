@@ -1106,5 +1106,8 @@
   "Import existing data": "मौजूदा डेटा आयात करें",
   "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "केवल इसी कंप्यूटर पर। पहले गेम की सभी प्रक्रियाएँ बंद करें। यदि क्रेडेंशियल उपलब्ध नहीं हैं, तो आपको फिर से साइन इन करना पड़ सकता है।",
   "Close the running game and wait for preparation to finish before migrating.": "माइग्रेशन से पहले चल रहे गेम को बंद करें और तैयारी पूरी होने तक प्रतीक्षा करें।",
-  "Could not locate this computer's user data folder": "इस कंप्यूटर का उपयोगकर्ता डेटा फ़ोल्डर नहीं मिला।"
+  "Could not locate this computer's user data folder": "इस कंप्यूटर का उपयोगकर्ता डेटा फ़ोल्डर नहीं मिला।",
+  "Copy missing files": "गुम फ़ाइलें कॉपी करें",
+  "Review again": "फिर से समीक्षा करें",
+  "Review existing data": "मौजूदा डेटा की समीक्षा करें"
 }
