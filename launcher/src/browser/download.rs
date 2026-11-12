@@ -2,9 +2,12 @@
 use super::{safe_name, FileRef};
 use sha1::Sha1;
 use sha2::{Digest, Sha256, Sha512};
-use std::fs;
+use std::fs::{self, OpenOptions};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicU64, Ordering};
+
+static PART_FILE_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
 /// Hosts a file may come from: Modrinth's and CurseForge's file servers, and the release assets
 /// of Horizon's registry (and, see [`github_release_asset`], of the repository a registry entry
@@ -119,8 +122,22 @@ impl Hasher {
     }
 }
 
+/// Creates a collision-resistant partial file for one transfer. A fixed `.<name>.part` path
+/// lets concurrent downloads (or a stale partial from a previous process) truncate each other.
+fn create_part_file(folder: &Path, name: &str) -> Result<(PathBuf, fs::File), String> {
+    loop {
+        let sequence = PART_FILE_SEQUENCE.fetch_add(1, Ordering::Relaxed);
+        let part = folder.join(format!(".{name}.{}.{}.part", std::process::id(), sequence));
+        match OpenOptions::new().write(true).create_new(true).open(&part) {
+            Ok(file) => return Ok((part, file)),
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => continue,
+            Err(error) => return Err(format!("{}: {error}", part.display())),
+        }
+    }
+}
+
 /// Copies `reader` into `<folder>/<file.name>`, hashing on the way, and keeps it only when the
-/// size and checksum match: until then it is `.<name>.part`, removed on any failure.
+/// size and checksum match. Its unique partial file is removed on any failure.
 /// `progress` gets the fraction done.
 pub fn save(
     file: &FileRef,
@@ -147,9 +164,8 @@ pub(super) fn save_from_anywhere(
     let (algo, want) = file.checksum().expect("refuse checks for one");
     fs::create_dir_all(folder).map_err(|e| format!("{}: {e}", folder.display()))?;
     let target = folder.join(&file.name);
-    let part = folder.join(format!(".{}.part", file.name));
+    let (part, mut out) = create_part_file(folder, &file.name)?;
     let result = (|| {
-        let mut out = fs::File::create(&part).map_err(|e| format!("{}: {e}", part.display()))?;
         let mut hasher = Hasher::for_file(file);
         let (mut done, mut buf) = (0u64, vec![0u8; 1 << 16]);
         loop {
