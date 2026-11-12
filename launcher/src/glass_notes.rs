@@ -1,6 +1,6 @@
 //! The Patch notes page in the glass look: the mockup's `NotesView`, each release on its own
-//! glass card (its name, the day it came out, its notes as a list). Not in the mockup, kept in
-//! without promotional cards: the release history is the focus.
+//! glass card (its name, the day it came out, its notes as a list). Promotional cards are
+//! intentionally absent so the release history stays the focus.
 
 use super::*;
 use crate::glass_ui::{self as ui};
@@ -15,8 +15,7 @@ impl Launcher {
             .child(ui::page_head(
                 tr("Patch notes"),
                 tr("What changed in each release, newest first."),
-            ))
-        ;
+            ));
         let releases = match &self.releases {
             Load::Loading => return page.child(centered(tr("Loading patch notes…"), &t)),
             Load::Failed(e) => {
