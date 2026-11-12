@@ -144,27 +144,30 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                         }))
                         .child(tr(label(primary))),
                 )
-                .children(ROUTES.iter().filter(|child| {
-                    child.workspace == workspace && child.route != primary
-                }).map(|child| {
-                    let route = child.route;
-                    let selected = route == active;
-                    div()
-                        .id(SharedString::from(format!("next-route-{}", child.id)))
-                        .w_full()
-                        .pl(px(24.))
-                        .pr(px(12.))
-                        .py(px(7.))
-                        .rounded(px(7.))
-                        .text_size(px(12.))
-                        .text_color(if selected { t.accent } else { t.ink_soft })
-                        .when(selected, |element| element.bg(t.surface))
-                        .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
-                            this.next_route = route;
-                            cx.notify();
-                        }))
-                        .child(tr(label(route)))
-                })),
+                .children(
+                    ROUTES
+                        .iter()
+                        .filter(|child| child.workspace == workspace && child.route != primary)
+                        .map(|child| {
+                            let route = child.route;
+                            let selected = route == active;
+                            div()
+                                .id(SharedString::from(format!("next-route-{}", child.id)))
+                                .w_full()
+                                .pl(px(24.))
+                                .pr(px(12.))
+                                .py(px(7.))
+                                .rounded(px(7.))
+                                .text_size(px(12.))
+                                .text_color(if selected { t.accent } else { t.ink_soft })
+                                .when(selected, |element| element.bg(t.surface))
+                                .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
+                                    this.next_route = route;
+                                    cx.notify();
+                                }))
+                                .child(tr(label(route)))
+                        }),
+                ),
         );
     }
 
