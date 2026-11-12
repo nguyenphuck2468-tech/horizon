@@ -1106,5 +1106,8 @@
   "Import existing data": "Uvezi postojeće podatke",
   "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Samo na istom računalu. Najprije zatvorite sve procese igre. Možda ćete se morati ponovno prijaviti ako vjerodajnice nisu dostupne.",
   "Close the running game and wait for preparation to finish before migrating.": "Zatvorite pokrenutu igru i pričekajte da priprema završi prije prijenosa.",
-  "Could not locate this computer's user data folder": "Nije moguće pronaći mapu korisničkih podataka na ovom računalu."
+  "Could not locate this computer's user data folder": "Nije moguće pronaći mapu korisničkih podataka na ovom računalu.",
+  "Copy missing files": "Kopiraj datoteke koje nedostaju",
+  "Review again": "Pregledaj ponovno",
+  "Review existing data": "Pregledaj postojeće podatke"
 }
