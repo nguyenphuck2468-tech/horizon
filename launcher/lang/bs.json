@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Prijavite se pomoću Ely.by",
   "Asking Ely.by…": "Pitam Ely.by…",
   "Use the {provider} account for {name}.": "Koristite {provider} nalog za {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Stranica za prijavu se otvara u vašem pretraživaču. Horizon nikada ne vidi vašu lozinku."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Stranica za prijavu se otvara u vašem pretraživaču. Horizon nikada ne vidi vašu lozinku.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Datoteke se skeniraju ili kopiraju u pozadini. Ostavite Horizon otvoren.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "Datoteke pokretača: {launcher_files} ({launcher_mb} MB), datoteke igre: {game_files} ({game_mb} MB); {conflicts} postojećih datoteka bit će sačuvano, a {symlinks} simboličkih veza preskočeno.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Kopirano je {launcher_files} datoteka pokretača i {game_files} datoteka igre. Postojeće datoteke nisu prepisane; {symlinks} simboličkih veza je preskočeno.",
+  "Review and copy data from this computer's previous Horizon installation": "Pregledajte i kopirajte podatke iz prethodne instalacije Horizona na ovom računaru",
+  "Import existing data": "Uvezi postojeće podatke",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Samo na istom računaru. Prvo zatvorite sve procese igre. Možda ćete se morati ponovo prijaviti ako podaci za prijavu nisu dostupni.",
+  "Close the running game and wait for preparation to finish before migrating.": "Zatvorite pokrenutu igru i sačekajte da priprema završi prije migracije.",
+  "Could not locate this computer's user data folder": "Nije moguće pronaći mapu korisničkih podataka na ovom računaru.",
+  "Copy missing files": "Kopiraj nedostajuće datoteke",
+  "Review again": "Pregledaj ponovo",
+  "Review existing data": "Pregledaj postojeće podatke"
 }

@@ -236,13 +236,15 @@ fn test_endpoints() -> Endpoints {
 }
 
 #[test]
-fn fallback_file_key_requires_a_nonempty_machine_identity() {
+fn fallback_file_key_is_stable_on_one_machine_and_bound_to_its_identity() {
     assert!(key_for_machine_id(None).is_none());
     assert!(key_for_machine_id(Some(b" \n")).is_none());
 
-    let first = key_for_machine_id(Some(b"machine-one")).unwrap();
-    let second = key_for_machine_id(Some(b"machine-two")).unwrap();
-    assert_ne!(first.as_slice(), second.as_slice());
+    let same_machine = key_for_machine_id(Some(b"machine-one")).unwrap();
+    let same_machine_again = key_for_machine_id(Some(b"machine-one")).unwrap();
+    let another_machine = key_for_machine_id(Some(b"machine-two")).unwrap();
+    assert_eq!(same_machine.as_slice(), same_machine_again.as_slice());
+    assert_ne!(same_machine.as_slice(), another_machine.as_slice());
 }
 
 #[test]

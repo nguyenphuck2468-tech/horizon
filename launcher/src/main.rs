@@ -272,6 +272,10 @@ struct Launcher {
     /// The top bar's Build log panel (`native_log_page.rs`).
     native_log: native_log_page::NativeLog,
     confirm_remove: Option<String>,
+    /// Portable migration is always previewed before the player can copy any files.
+    migration_preview: Option<Result<horizon_launcher::migration::Preview, String>>,
+    migration_done: Option<Result<horizon_launcher::migration::ResultSummary, String>>,
+    migration_busy: bool,
     picker_open: bool,
     /// Settings' any-colour swatch shows the hue strip (the glass look).
     accent_strip: bool,
@@ -593,6 +597,9 @@ impl Launcher {
             native_mismatch: None,
             native_log: Default::default(),
             confirm_remove: None,
+            migration_preview: None,
+            migration_done: None,
+            migration_busy: false,
             picker_open: false,
             accent_strip: false,
             look_sliders: Default::default(),
@@ -1318,6 +1325,21 @@ impl Launcher {
                         Err(e) => SelfUpdate::Failed(e),
                     };
                 }
+                Msg::MigrationPreview(result) => {
+                    self.migration_busy = false;
+                    self.migration_preview = Some(result);
+                }
+                Msg::MigrationDone(result) => {
+                    self.migration_busy = false;
+                    if result.is_ok() {
+                        self.accounts = Accounts::load();
+                        self.auth_checked = None;
+                        self.load_auth_statuses(false);
+                        self.load_profile_heads();
+                    }
+                    self.migration_done = Some(result);
+                    self.migration_preview = None;
+                }
                 Msg::PackLine(line) => {
                     self.pack_log.push_back(line);
                     if self.pack_log.len() > LOG_LINES {
@@ -1552,6 +1574,61 @@ impl Launcher {
             let result = backend::remove_version(&tag);
             let _ = tx.send(Msg::Removed(tag, result));
         });
+    }
+
+    /// Scans the old per-user folders without blocking the UI or changing any files.
+    fn preview_portable_migration(&mut self) {
+        if self.migration_busy || !backend::is_portable_install() {
+            return;
+        }
+        if self.preparing || self.client.is_some() {
+            self.migration_preview = Some(Err(tr(
+                "Close the running game and wait for preparation to finish before migrating.",
+            )
+            .to_string()));
+            self.migration_done = None;
+            return;
+        }
+        self.migration_busy = true;
+        self.migration_preview = None;
+        self.migration_done = None;
+        let tx = self.tx.clone();
+        let destination = backend::data_dir();
+        std::thread::spawn(move || {
+            let result = horizon_launcher::migration::Migration::from_user_data(&destination)
+                .ok_or_else(|| tr("Could not locate this computer's user data folder").to_string())
+                .and_then(|migration| migration.preview());
+            let _ = tx.send(Msg::MigrationPreview(result));
+        });
+    }
+
+    /// Copies missing files only, after the player has reviewed the preview.
+    fn execute_portable_migration(&mut self) {
+        if self.migration_busy
+            || !backend::is_portable_install()
+            || self.preparing
+            || self.client.is_some()
+        {
+            return;
+        }
+        self.migration_busy = true;
+        self.migration_done = None;
+        let tx = self.tx.clone();
+        let destination = backend::data_dir();
+        std::thread::spawn(move || {
+            let result = horizon_launcher::migration::Migration::from_user_data(&destination)
+                .ok_or_else(|| tr("Could not locate this computer's user data folder").to_string())
+                .and_then(|migration| migration.execute());
+            let _ = tx.send(Msg::MigrationDone(result));
+        });
+    }
+
+    fn cancel_portable_migration(&mut self) {
+        if self.migration_busy {
+            return;
+        }
+        self.migration_preview = None;
+        self.migration_done = None;
     }
 
     /// Asks for a game program (or a zip holding one) and installs it as its own version on a

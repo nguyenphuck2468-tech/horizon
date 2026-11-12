@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "E ʻeʻe me Ely.by",
   "Asking Ely.by…": "Ke nīnau nei Ely.by…",
   "Use the {provider} account for {name}.": "E hoʻohana i ka {provider} no {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Wehe ʻia ka ʻaoʻao ʻeʻe ʻana ma kāu polokalamu kele pūnaewele. ʻAʻole ʻike ʻo Horizon i kāu ʻōlelo huna."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Wehe ʻia ka ʻaoʻao ʻeʻe ʻana ma kāu polokalamu kele pūnaewele. ʻAʻole ʻike ʻo Horizon i kāu ʻōlelo huna.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Ke nānā ʻia a kope ʻia paha nā faila ma hope. E waiho hāmama iā Horizon.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "Nā faila launcher {launcher_files} ({launcher_mb} MB), nā faila pāʻani {game_files} ({game_mb} MB); e mālama ʻia nā faila {conflicts} i loaʻa a e kāpae ʻia nā loulou hōʻailona {symlinks}.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Ua kope ʻia nā faila launcher {launcher_files} a me nā faila pāʻani {game_files}. ʻAʻole i pani ʻia nā faila i loaʻa; ua kāpae ʻia nā loulou hōʻailona {symlinks}.",
+  "Review and copy data from this computer's previous Horizon installation": "E nānā a kope i nā ʻikepili mai ka hoʻouka Horizon kahiko ma kēia kamepiula",
+  "Import existing data": "Hoʻokomo i nā ʻikepili i loaʻa",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Ma kēia kamepiula hoʻokahi wale nō. E pani mua i nā kaʻina pāʻani a pau. Pono paha ʻoe e komo hou inā ʻaʻole loaʻa nā hōʻoia komo.",
+  "Close the running game and wait for preparation to finish before migrating.": "E pani i ka pāʻani e holo nei a kali a pau ka hoʻomākaukau ʻana ma mua o ka neʻe ʻana.",
+  "Could not locate this computer's user data folder": "ʻAʻole hiki ke loaʻa ka waihona ʻikepili mea hoʻohana o kēia kamepiula.",
+  "Copy missing files": "Kope i nā faila i nele",
+  "Review again": "Nānā hou",
+  "Review existing data": "Nānā i nā ʻikepili i loaʻa"
 }

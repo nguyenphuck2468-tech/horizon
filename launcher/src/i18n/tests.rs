@@ -107,11 +107,20 @@ fn the_scan_finds_multiline_calls_without_reading_comments_or_quoted_code() {
     assert!(!all.contains("block comment"));
 }
 
-fn holes(s: &str) -> BTreeSet<&str> {
-    s.split('{')
+fn holes(s: &str) -> Vec<&str> {
+    let mut holes: Vec<_> = s
+        .split('{')
         .skip(1)
         .filter_map(|part| part.split_once('}').map(|(name, _)| name))
-        .collect()
+        .collect();
+    holes.sort_unstable();
+    holes
+}
+
+#[test]
+fn placeholder_validation_preserves_duplicate_occurrences() {
+    assert_eq!(holes("Hello {name}, welcome {name}"), vec!["name", "name"]);
+    assert_ne!(holes("Hello {name}, welcome {name}"), holes("Hello {name}"));
 }
 
 #[test]

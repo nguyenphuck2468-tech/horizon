@@ -616,6 +616,22 @@ fn portable_data_dir(executable: &Path) -> Option<PathBuf> {
         .then(|| parent.join("Horizon-Data"))
 }
 
+/// Whether this process is running from a portable bundle with its adjacent marker file.
+pub fn is_portable_install() -> bool {
+    // Explicit path overrides make the effective data tree user-defined; do not guess that
+    // the adjacent portable folder is the active destination in that case.
+    if std::env::var_os("HORIZON_LAUNCHER_HOME").is_some()
+        || std::env::var_os("HORIZON_HOME").is_some()
+    {
+        return false;
+    }
+    std::env::current_exe()
+        .ok()
+        .as_deref()
+        .and_then(portable_data_dir)
+        .is_some()
+}
+
 /// The launcher's data folder; `HORIZON_LAUNCHER_HOME` overrides it (for tests and scripts).
 /// A portable archive opts in with a marker file, so ordinary installs and self-updates keep
 /// using the platform's normal per-user data folder.
@@ -3276,6 +3292,10 @@ pub enum Msg {
     Updates(Result<Box<Updates>, String>),
     LauncherProgress(f32),
     LauncherUpdated(Result<(), String>),
+    /// A preview of the files an explicit portable migration would copy.
+    MigrationPreview(Result<crate::migration::Preview, String>),
+    /// The result of copying missing files into a portable data folder.
+    MigrationDone(Result<crate::migration::ResultSummary, String>),
     /// `reuse_prepared_everywhere` prepared these versions.
     Reused(Vec<(String, String)>),
     /// None when secrets are kept in the OS keychain, else what to say: they last only until

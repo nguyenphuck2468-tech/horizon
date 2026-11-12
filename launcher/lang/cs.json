@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Přihlaste se pomocí Ely.by",
   "Asking Ely.by…": "Dotaz na Ely.by…",
   "Use the {provider} account for {name}.": "Použijte účet {provider}pro {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Přihlašovací stránka se otevře ve vašem prohlížeči. Horizon vaše heslo nikdy nevidí."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Přihlašovací stránka se otevře ve vašem prohlížeči. Horizon vaše heslo nikdy nevidí.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Soubory se na pozadí kontrolují nebo kopírují. Nechte Horizon otevřený.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "Soubory launcheru: {launcher_files} ({launcher_mb} MB), herní soubory: {game_files} ({game_mb} MB); {conflicts} existujících souborů zůstane zachováno a {symlinks} symbolických odkazů bude přeskočeno.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Bylo zkopírováno {launcher_files} souborů launcheru a {game_files} herních souborů. Existující soubory nebyly přepsány; {symlinks} symbolických odkazů bylo přeskočeno.",
+  "Review and copy data from this computer's previous Horizon installation": "Zkontrolovat a zkopírovat data z předchozí instalace Horizon na tomto počítači",
+  "Import existing data": "Importovat existující data",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Pouze na stejném počítači. Nejprve ukončete všechny herní procesy. Pokud přihlašovací údaje nejsou dostupné, možná se budete muset přihlásit znovu.",
+  "Close the running game and wait for preparation to finish before migrating.": "Před migrací zavřete spuštěnou hru a počkejte na dokončení přípravy.",
+  "Could not locate this computer's user data folder": "Nelze najít složku uživatelských dat tohoto počítače.",
+  "Copy missing files": "Kopírovat chybějící soubory",
+  "Review again": "Zkontrolovat znovu",
+  "Review existing data": "Zkontrolovat existující data"
 }

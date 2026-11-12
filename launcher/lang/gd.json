@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Log a-steach le Ely.by",
   "Asking Ely.by…": "A’ faighneachd Ely.by…",
   "Use the {provider} account for {name}.": "Cleachd an {provider} airson {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Tha an duilleag clàraidh a-steach a' fosgladh sa bhrobhsair agad. Horizon chan fhaic thu am facal-faire agad gu bràth."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Tha an duilleag clàraidh a-steach a' fosgladh sa bhrobhsair agad. Horizon chan fhaic thu am facal-faire agad gu bràth.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Tha na faidhlichean gan an sganadh no an lethbhreacadh sa chùlaibh. Cùm Horizon fosgailte.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} faidhlichean launcher ({launcher_mb} MB), {game_files} faidhlichean geama ({game_mb} MB); glèidhidh sinn {conflicts} faidhle a tha ann agus leumaidh sinn thairis air {symlinks} ceangal samhlachail.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Chaidh {launcher_files} faidhle launcher agus {game_files} faidhle geama a lethbhreacadh. Cha deach faidhlichean a tha ann a sgrìobhadh thairis; chaidh {symlinks} ceangal samhlachail a leum.",
+  "Review and copy data from this computer's previous Horizon installation": "Dèan lèirmheas agus lethbhreac de dhàta bhon t-seann stàladh Horizon air a' choimpiutair seo",
+  "Import existing data": "Cuir a-steach dàta a tha ann",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Air an aon choimpiutair a-mhàin. Dùin gach pròiseas geama an toiseach. Dh'fhaoidte gum feum thu clàradh a-steach a-rithist mura bheil na teisteanasan rim faighinn.",
+  "Close the running game and wait for preparation to finish before migrating.": "Dùin an geama a tha a' ruith agus feith gus am bi an t-ullachadh deiseil mus gluais thu.",
+  "Could not locate this computer's user data folder": "Cha deach am pasgan dàta cleachdaiche air a' choimpiutair seo a lorg.",
+  "Copy missing files": "Dèan lethbhreac de na faidhlichean a tha a dhìth",
+  "Review again": "Dèan lèirmheas a-rithist",
+  "Review existing data": "Dèan lèirmheas air an dàta a tha ann"
 }

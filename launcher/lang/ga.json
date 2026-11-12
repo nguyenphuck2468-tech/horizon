@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Sínigh isteach le Ely.by",
   "Asking Ely.by…": "Ag fiafraí Ely.by…",
   "Use the {provider} account for {name}.": "Úsáid an {provider} le haghaidh {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Osclaíonn an leathanach síniú isteach i do bhrabhsálaí. Ní fheiceann Horizon do phasfhocal riamh."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Osclaíonn an leathanach síniú isteach i do bhrabhsálaí. Ní fheiceann Horizon do phasfhocal riamh.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Tá comhaid á scanadh nó á gcóipeáil sa chúlra. Coinnigh Horizon ar oscailt.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} comhad lainseálaí ({launcher_mb} MB), {game_files} comhad cluiche ({game_mb} MB); coimeádfar {conflicts} comhad atá ann cheana agus scipeálfar {symlinks} nasc siombalach.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Cóipeáladh {launcher_files} comhad lainseálaí agus {game_files} comhad cluiche. Níor forscríobhadh comhaid atá ann cheana; scipeáladh {symlinks} nasc siombalach.",
+  "Review and copy data from this computer's previous Horizon installation": "Athbhreithnigh agus cóipeáil sonraí ón sean-suiteáil Horizon ar an ríomhaire seo",
+  "Import existing data": "Iompórtáil sonraí atá ann cheana",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Ar an ríomhaire céanna amháin. Dún gach próiseas cluiche ar dtús. Seans go mbeidh ort síniú isteach arís mura bhfuil na dintiúir ar fáil.",
+  "Close the running game and wait for preparation to finish before migrating.": "Dún an cluiche atá ar siúl agus fan go mbeidh an t-ullmhúchán críochnaithe sula n-imíonn tú.",
+  "Could not locate this computer's user data folder": "Níorbh fhéidir fillteán sonraí úsáideora an ríomhaire seo a aimsiú.",
+  "Copy missing files": "Cóipeáil comhaid atá ar iarraidh",
+  "Review again": "Athbhreithnigh arís",
+  "Review existing data": "Athbhreithnigh sonraí atá ann cheana"
 }

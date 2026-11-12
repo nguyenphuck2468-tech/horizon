@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Inicieu la sessió amb Ely.by",
   "Asking Ely.by…": "Preguntant Ely.by...",
   "Use the {provider} account for {name}.": "Utilitzeu el {provider} per a {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "La pàgina d'inici de sessió s'obre al navegador. Horizon no veu mai la teva contrasenya."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "La pàgina d'inici de sessió s'obre al navegador. Horizon no veu mai la teva contrasenya.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Els fitxers s'estan analitzant o copiant en segon pla. Mantén Horizon obert.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} fitxers del llançador ({launcher_mb} MB), {game_files} fitxers del joc ({game_mb} MB); es conservaran {conflicts} fitxers existents i s'ometran {symlinks} enllaços simbòlics.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "S'han copiat {launcher_files} fitxers del llançador i {game_files} fitxers del joc. No s'han sobreescrit els fitxers existents; s'han omès {symlinks} enllaços simbòlics.",
+  "Review and copy data from this computer's previous Horizon installation": "Revisa i copia les dades de la instal·lació anterior de Horizon en aquest ordinador",
+  "Import existing data": "Importa les dades existents",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Només al mateix ordinador. Tanca primer tots els processos del joc. Pot ser que hagis d'iniciar sessió de nou si les credencials no estan disponibles.",
+  "Close the running game and wait for preparation to finish before migrating.": "Tanca el joc en execució i espera que acabi la preparació abans de migrar.",
+  "Could not locate this computer's user data folder": "No s'ha pogut trobar la carpeta de dades d'usuari d'aquest ordinador.",
+  "Copy missing files": "Copia els fitxers que falten",
+  "Review again": "Torna-ho a revisar",
+  "Review existing data": "Revisa les dades existents"
 }
