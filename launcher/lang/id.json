@@ -1106,5 +1106,8 @@
   "Import existing data": "Impor data yang sudah ada",
   "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Hanya untuk komputer yang sama. Tutup semua proses game terlebih dahulu. Anda mungkin perlu masuk kembali jika kredensial tidak tersedia.",
   "Close the running game and wait for preparation to finish before migrating.": "Tutup game yang sedang berjalan dan tunggu persiapan selesai sebelum memindahkan data.",
-  "Could not locate this computer's user data folder": "Folder data pengguna di komputer ini tidak dapat ditemukan."
+  "Could not locate this computer's user data folder": "Folder data pengguna di komputer ini tidak dapat ditemukan.",
+  "Copy missing files": "Salin file yang belum ada",
+  "Review again": "Tinjau lagi",
+  "Review existing data": "Tinjau data yang sudah ada"
 }
