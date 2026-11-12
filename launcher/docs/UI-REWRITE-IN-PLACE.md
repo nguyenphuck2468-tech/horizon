@@ -12,7 +12,8 @@ Keep the existing Rust backend/services for:
 - Minecraft/Horizon version discovery, game build/download, installation, preparation and launch.
 - Instance creation, selection, editing, import/export, game directories and Java discovery.
 - Microsoft, Ely.by and offline accounts, including secure secret storage and ownership rules.
-- .homd package discovery/download, validation, installation, update and removal.
+- .homd package discovery/download, validation, installation, update and removal (explicit product requirement).
+- .hmod registry content packs already supported by Horizon, preserving their signed/hash-checked install path.
 - .hnmod discovery/download, validation, dependency resolution, installation and removal.
 - Native mod build pipeline, toolchain/dependency checks, build logs, artifact validation and packaging.
 - Modrinth/other content sources, modpacks, resource packs, shaders and datapacks.
@@ -33,7 +34,7 @@ The UI calls typed application services/facades. It must not read account secret
 Build a new native GPUI application shell with:
 - Home: selected instance, account, version/loader, Java/readiness, activity and one primary Play action.
 - Library: instances, versions and profiles.
-- Content: .homd packages, .hnmod mods, modpacks, resource packs and shaders.
+- Content: .homd packages, existing .hmod registry packs, .hnmod native mods, modpacks, resource packs and shaders.
 - Mod development: build configuration, dependency checks, build progress, logs and artifacts.
 - Accounts: provider-aware account management and sign-in.
 - Servers, worlds, cosmetics and diagnostics.
@@ -46,7 +47,7 @@ Use a coherent design system: compact typography, consistent spacing, accessible
 1. Map each retained workflow to its current backend entry point and add parity coverage.
 2. Create the replacement UI module and app shell inside launcher/; keep it separate from the old screen modules during development.
 3. Implement Home, instance library, accounts and launch end-to-end.
-4. Implement .homd and .hnmod management and native mod building end-to-end.
+4. Implement .homd package management, existing .hmod registry-pack management, .hnmod management and native mod building end-to-end.
 5. Migrate remaining retained workflows, with parity tests for each.
 6. Switch the app entry point to the new frontend and remove the old UI modules only after feature parity and Windows/Linux/macOS smoke tests pass.
 
@@ -65,7 +66,7 @@ The old frontend may be used as a temporary reference during migration, but the 
 
 - The old UI is no longer the app default and is removed after migration.
 - All retained workflows above are reachable in the new UI.
-- .homd and .hnmod downloads/installations use the existing validated pipelines.
+- .homd packages have a documented, validated import/install pipeline; existing .hmod registry packs and .hnmod native mods continue using their current verified pipelines.
 - Native mod building exposes its real build stages, logs and verified artifacts.
 - No account, instance, world, mod or settings data is lost or relocated.
 - All existing security and backend tests pass; UI parity tests cover migrated workflows.
