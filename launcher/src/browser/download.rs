@@ -127,7 +127,10 @@ impl Hasher {
 fn create_part_file(folder: &Path) -> Result<(PathBuf, fs::File), String> {
     loop {
         let sequence = PART_FILE_SEQUENCE.fetch_add(1, Ordering::Relaxed);
-        let part = folder.join(format!(".horizon-download-{}-{sequence}.part", std::process::id()));
+        let part = folder.join(format!(
+            ".horizon-download-{}-{sequence}.part",
+            std::process::id()
+        ));
         match OpenOptions::new().write(true).create_new(true).open(&part) {
             Ok(file) => return Ok((part, file)),
             Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => continue,
