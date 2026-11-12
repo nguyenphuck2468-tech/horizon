@@ -12,6 +12,18 @@ fn preview_enabled(value: Option<&str>) -> bool {
     value == Some("1")
 }
 
+/// Keep the new shell usable on compact laptop and split-screen windows.
+/// Values are deliberately conservative to leave room for the actual page content.
+fn layout_metrics(window_width: f32) -> (f32, f32, f32) {
+    if window_width < 720. {
+        (148., 14., 22.)
+    } else if window_width < 1080. {
+        (184., 22., 26.)
+    } else {
+        (232., 34., 30.)
+    }
+}
+
 /// Whether the replacement shell is requested for local development and screenshot tests.
 /// Require an explicit value so unrelated inherited environment variables cannot switch UIs.
 pub(super) fn wanted() -> bool {
@@ -73,6 +85,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
     use horizon_launcher::next_navigation::{Route, ROUTES};
 
     let t = this.theme;
+    let (sidebar_width, page_padding, page_title_size) = layout_metrics(this.window_width);
     let active = this.next_route;
     let instance_name = this
         .selected_instance()
@@ -89,7 +102,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
     let mut navigation = div()
         .flex()
         .flex_col()
-        .w(px(232.))
+        .w(px(sidebar_width))
         .h_full()
         .p(px(18.))
         .gap(px(8.))
@@ -177,7 +190,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
         .flex_1()
         .min_w_0()
         .h_full()
-        .p(px(34.))
+        .p(px(page_padding))
         .gap(px(22.))
         .child(
             div()
@@ -192,7 +205,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                         .child(
                             div()
                                 .font_family(theme::DISPLAY_FONT)
-                                .text_size(px(30.))
+                                .text_size(px(page_title_size))
                                 .text_color(t.ink)
                                 .child(tr(label(active))),
                         )
@@ -416,7 +429,14 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
 
 #[cfg(test)]
 mod tests {
-    use super::preview_enabled;
+    use super::{layout_metrics, preview_enabled};
+
+    #[test]
+    fn shell_layout_scales_for_compact_and_standard_windows() {
+        assert_eq!(layout_metrics(600.), (148., 14., 22.));
+        assert_eq!(layout_metrics(900.), (184., 22., 26.));
+        assert_eq!(layout_metrics(1200.), (232., 34., 30.));
+    }
 
     #[test]
     fn preview_requires_explicit_opt_in() {
