@@ -18,8 +18,6 @@ pub(super) fn wanted() -> bool {
     preview_enabled(std::env::var("HORIZON_LAUNCHER_NEXT_UI").ok().as_deref())
 }
 
-
-
 fn label(route: horizon_launcher::next_navigation::Route) -> &'static str {
     use horizon_launcher::next_navigation::Route::*;
     match route {
