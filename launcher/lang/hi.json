@@ -1098,5 +1098,13 @@
   "Sign in with Ely.by": "Ely.by के साथ साइन इन करें",
   "Asking Ely.by…": "Ely.by से पूछा जा रहा है…",
   "Use the {provider} account for {name}.": "{name} के लिए {provider} खाते का उपयोग करें।",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "साइन इन पेज आपके ब्राउज़र में खुलता है। Horizon आपका पासवर्ड कभी नहीं देखता।"
+  "The sign-in page opens in your browser. Horizon never sees your password.": "साइन इन पेज आपके ब्राउज़र में खुलता है। Horizon आपका पासवर्ड कभी नहीं देखता।",
+  "Scanning or copying files in the background. Keep Horizon open.": "फ़ाइलें बैकग्राउंड में स्कैन या कॉपी हो रही हैं। Horizon खुला रखें।",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "लॉन्चर की {launcher_files} फ़ाइलें ({launcher_mb} MB), गेम की {game_files} फ़ाइलें ({game_mb} MB); {conflicts} मौजूदा फ़ाइलें रखी जाएँगी और {symlinks} सिम्बॉलिक लिंक छोड़े जाएँगे।",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "लॉन्चर की {launcher_files} और गेम की {game_files} फ़ाइलें कॉपी की गईं। मौजूदा फ़ाइलों को ओवरराइट नहीं किया गया; {symlinks} सिम्बॉलिक लिंक छोड़े गए।",
+  "Review and copy data from this computer's previous Horizon installation": "इस कंप्यूटर पर पुराने Horizon इंस्टॉलेशन का डेटा देखें और कॉपी करें",
+  "Import existing data": "मौजूदा डेटा आयात करें",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "केवल इसी कंप्यूटर पर। पहले गेम की सभी प्रक्रियाएँ बंद करें। यदि क्रेडेंशियल उपलब्ध नहीं हैं, तो आपको फिर से साइन इन करना पड़ सकता है।",
+  "Close the running game and wait for preparation to finish before migrating.": "माइग्रेशन से पहले चल रहे गेम को बंद करें और तैयारी पूरी होने तक प्रतीक्षा करें।",
+  "Could not locate this computer's user data folder": "इस कंप्यूटर का उपयोगकर्ता डेटा फ़ोल्डर नहीं मिला।"
 }
