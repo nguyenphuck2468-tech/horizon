@@ -348,28 +348,30 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                     .flex_col()
                     .gap(px(8.))
                     .children(accounts.iter().map(|account| {
+                        let uuid = account.uuid.clone();
                         let state = auth_status
-                            .get(&account.uuid)
+                            .get(&uuid)
                             .map(|status| format!("{:?}", status.state))
                             .unwrap_or_else(|| "Checking".into());
-                        let selected = selected_account.as_deref() == Some(account.uuid.as_str());
+                        let selected = selected_account.as_deref() == Some(uuid.as_str());
                         div()
-                            .id(SharedString::from(format!("next-account-{}", account.uuid)))
+                            .id(SharedString::from(format!("next-account-{uuid}")))
                             .flex()
                             .flex_col()
                             .gap(px(5.))
                             .w_full()
                             .p(px(16.))
                             .rounded(px(10.))
-                            .bg(t.surface)
+                            .bg(if selected { t.surface } else { t.plate_soft })
                             .text_color(t.ink)
+                            .cursor_pointer()
                             .child(
                                 div()
                                     .flex()
                                     .items_center()
                                     .justify_between()
                                     .child(account.name.clone())
-                                    .child(if selected { "Selected" } else { "" }),
+                                    .child(if selected { tr("Selected") } else { tr("Select account") }),
                             )
                             .child(
                                 div()
@@ -377,6 +379,11 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                                     .text_color(t.muted)
                                     .child(format!("{}: {state}", tr("Session"))),
                             )
+                            .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
+                                this.play_as(horizon_launcher::account::Player::Microsoft(uuid.clone()));
+                                this.next_route = Route::AccountCenter;
+                                cx.notify();
+                            }))
                     })),
             )
         })
