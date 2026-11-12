@@ -66,20 +66,24 @@ fn workspace_is_active(
         .any(|entry| entry.workspace == workspace && entry.route == active)
 }
 
-fn select_route(this: &mut Launcher, route: horizon_launcher::next_navigation::Route) {
+fn content_kind(
+    route: horizon_launcher::next_navigation::Route,
+) -> Option<horizon_launcher::browser::Kind> {
     use horizon_launcher::next_navigation::Route;
 
-    // Reuse the mature legacy content workflows until their individual GPUI panels are migrated.
-    // Keep the package kinds distinct: .hmod registry mods, .hnmod native mods, and .hpack modpacks
-    // are handled by the existing Mods/Modpacks services rather than a parallel implementation.
     match route {
         Route::ContentBrowser | Route::InstalledContent | Route::ModWorkshop => {
-            this.mods_set_kind(horizon_launcher::browser::Kind::Mod);
+            Some(horizon_launcher::browser::Kind::Mod)
         }
-        Route::ModpackManager => {
-            this.mods_set_kind(horizon_launcher::browser::Kind::Modpack);
-        }
-        _ => {}
+        Route::ModpackManager => Some(horizon_launcher::browser::Kind::Modpack),
+        _ => None,
+    }
+}
+
+fn select_route(this: &mut Launcher, route: horizon_launcher::next_navigation::Route) {
+    // Keep the established content services authoritative while the new visual panels are built.
+    if let Some(kind) = content_kind(route) {
+        this.mods_set_kind(kind);
     }
     this.next_route = route;
 }
@@ -738,6 +742,29 @@ mod tests {
             Workspace::Content,
             Route::ServerConsole
         ));
+    }
+
+    #[test]
+    fn content_routes_select_the_correct_existing_package_workflow() {
+        use horizon_launcher::next_navigation::Route;
+
+        assert_eq!(
+            super::content_kind(Route::ContentBrowser),
+            Some(horizon_launcher::browser::Kind::Mod)
+        );
+        assert_eq!(
+            super::content_kind(Route::InstalledContent),
+            Some(horizon_launcher::browser::Kind::Mod)
+        );
+        assert_eq!(
+            super::content_kind(Route::ModWorkshop),
+            Some(horizon_launcher::browser::Kind::Mod)
+        );
+        assert_eq!(
+            super::content_kind(Route::ModpackManager),
+            Some(horizon_launcher::browser::Kind::Modpack)
+        );
+        assert_eq!(super::content_kind(Route::ServerDashboard), None);
     }
 
     #[test]
