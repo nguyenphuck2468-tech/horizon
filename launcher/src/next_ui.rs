@@ -111,7 +111,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                 .pb(px(12.))
                 .text_size(px(11.))
                 .text_color(t.muted)
-                .child("NEXT-GENERATION LAUNCHER"),
+                .child(tr("NEXT-GENERATION LAUNCHER")),
         )
         .children(ROUTES.iter().map(|entry| {
             let route = entry.route;
@@ -129,7 +129,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                     this.next_route = route;
                     cx.notify();
                 }))
-                .child(label(route))
+                .child(tr(label(route)))
         }));
 
     let page = div()
@@ -155,13 +155,13 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                                 .font_family(theme::DISPLAY_FONT)
                                 .text_size(px(30.))
                                 .text_color(t.ink)
-                                .child(label(active)),
+                                .child(tr(label(active))),
                         )
                         .child(
                             div()
                                 .text_size(px(13.))
                                 .text_color(t.muted)
-                                .child(description(active)),
+                                .child(tr(description(active))),
                         ),
                 )
                 .child(
@@ -172,7 +172,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                         .bg(t.plate)
                         .text_color(t.ink_soft)
                         .text_size(px(12.))
-                        .child("Preview · feature migration in progress"),
+                        .child(tr("Preview · feature migration in progress")),
                 ),
         )
         .when(active == Route::Home, |page| {
@@ -188,7 +188,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                         div()
                             .text_size(px(12.))
                             .text_color(t.muted)
-                            .child("SELECTED INSTANCE"),
+                            .child(tr("SELECTED INSTANCE")),
                     )
                     .child(
                         div()
@@ -220,7 +220,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                             .bg(t.accent)
                             .text_color(t.page)
                             .cursor_pointer()
-                            .child(if game_running { "Game starting / running" } else { "Play" })
+                            .child(tr(if game_running { "Game starting / running" } else { "Play" }))
                             .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
                                 this.play();
                                 cx.notify();
@@ -230,7 +230,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                         div()
                             .text_size(px(12.))
                             .text_color(t.muted)
-                            .child("Play delegates to Horizon's existing owner, session, preparation and launch checks."),
+                            .child(tr("Play delegates to Horizon's existing owner, session, preparation and launch checks.")),
                     ),
             )
         })
@@ -264,10 +264,10 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                                         div()
                                             .text_size(px(11.))
                                             .text_color(t.muted)
-                                            .child(format!("{} · {} seconds played", instance.id, instance.played.as_secs())),
+                                            .child(format!("{} · {} {}", instance.id, instance.played.as_secs(), tr("seconds played"))),
                                     ),
                             )
-                            .child(if selected { "Selected" } else { "Select" })
+                            .child(tr(if selected { "Selected" } else { "Select" }))
                             .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
                                 if let Some(chosen) = this.instances.list.iter().find(|item| item.id == id).cloned() {
                                     this.select_instance(&chosen);
@@ -312,7 +312,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                                 div()
                                     .text_size(px(12.))
                                     .text_color(t.muted)
-                                    .child(format!("Session: {state}")),
+                                    .child(format!("{}: {state}", tr("Session"))),
                             )
                     })),
             )
@@ -330,13 +330,13 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                         div()
                             .text_size(px(18.))
                             .text_color(t.ink)
-                            .child("Native mod build workspace"),
+                            .child(tr("Native mod build workspace")),
                     )
                     .child(
                         div()
                             .text_size(px(13.))
                             .text_color(t.ink_soft)
-                            .child("The existing native build pipeline is now exposed through the typed next_facade boundary. The next screen step wires bundle discovery, profile selection, cancellable background execution and build logs."),
+                            .child(tr("The existing native build pipeline is now exposed through the typed next_facade boundary. The next screen step wires bundle discovery, profile selection, cancellable background execution and build logs.")),
                     ),
             )
         })
@@ -353,13 +353,13 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                         div()
                             .text_size(px(16.))
                             .text_color(t.ink)
-                            .child("This workspace is being migrated."),
+                            .child(tr("This workspace is being migrated.")),
                     )
                     .child(
                         div()
                             .text_size(px(13.))
                             .text_color(t.muted)
-                            .child("The legacy workflow remains available during migration; this preview does not pretend that this panel is functional yet."),
+                            .child(tr("The legacy workflow remains available during migration; this preview does not pretend that this panel is functional yet.")),
                     ),
             )
         });
