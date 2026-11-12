@@ -8,7 +8,6 @@
 use super::*;
 use gpui::{div, prelude::*, px, ClickEvent, SharedString};
 
-/// Whether the replacement shell is requested for local development and screenshot tests.
 fn preview_enabled(value: Option<&str>) -> bool {
     value == Some("1")
 }
@@ -265,7 +264,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                                         div()
                                             .text_size(px(11.))
                                             .text_color(t.muted)
-                                            .child(format!("{} · {} seconds played", instance.id, instance.meta.played_secs)),
+                                            .child(format!("{} · {} seconds played", instance.id, instance.played.as_secs())),
                                     ),
                             )
                             .child(if selected { "Selected" } else { "Select" })
