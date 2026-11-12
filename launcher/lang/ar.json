@@ -1106,5 +1106,8 @@
   "Import existing data": "استيراد البيانات الموجودة",
   "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "على الكمبيوتر نفسه فقط. أغلق جميع عمليات اللعبة أولًا. قد تحتاج إلى تسجيل الدخول مجددًا إذا لم تكن بيانات الاعتماد متاحة.",
   "Close the running game and wait for preparation to finish before migrating.": "أغلق اللعبة قيد التشغيل وانتظر اكتمال التجهيز قبل نقل البيانات.",
-  "Could not locate this computer's user data folder": "تعذر العثور على مجلد بيانات المستخدم على هذا الكمبيوتر."
+  "Could not locate this computer's user data folder": "تعذر العثور على مجلد بيانات المستخدم على هذا الكمبيوتر.",
+  "Copy missing files": "نسخ الملفات المفقودة",
+  "Review again": "مراجعة مرة أخرى",
+  "Review existing data": "مراجعة البيانات الموجودة"
 }
