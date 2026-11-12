@@ -1098,5 +1098,13 @@
   "Sign in with Ely.by": "Войти через Ely.by",
   "Asking Ely.by…": "Запрос к Ely.by…",
   "Use the {provider} account for {name}.": "Используйте учётную запись {provider} для {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Страница входа открывается в вашем браузере. Horizon никогда не видит ваш пароль."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Страница входа открывается в вашем браузере. Horizon никогда не видит ваш пароль.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Файлы проверяются или копируются в фоновом режиме. Не закрывайте Horizon.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "Файлов лаунчера: {launcher_files} ({launcher_mb} МБ), игровых файлов: {game_files} ({game_mb} МБ); существующие файлы ({conflicts}) будут сохранены, символические ссылки ({symlinks}) пропущены.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Скопировано файлов лаунчера: {launcher_files}, игровых файлов: {game_files}. Существующие файлы не перезаписаны; символические ссылки ({symlinks}) пропущены.",
+  "Review and copy data from this computer's previous Horizon installation": "Проверить и скопировать данные из прежней установки Horizon на этом компьютере",
+  "Import existing data": "Импортировать существующие данные",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Только для этого же компьютера. Сначала закройте все игровые процессы. Если учётные данные недоступны, может потребоваться войти снова.",
+  "Close the running game and wait for preparation to finish before migrating.": "Перед переносом закройте запущенную игру и дождитесь завершения подготовки.",
+  "Could not locate this computer's user data folder": "Не удалось найти папку пользовательских данных на этом компьютере."
 }
