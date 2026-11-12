@@ -19,18 +19,7 @@ pub(super) fn wanted() -> bool {
     preview_enabled(std::env::var("HORIZON_LAUNCHER_NEXT_UI").ok().as_deref())
 }
 
-#[cfg(test)]
-mod tests {
-    use super::preview_enabled;
 
-    #[test]
-    fn preview_requires_explicit_opt_in() {
-        assert!(preview_enabled(Some("1")));
-        for value in [None, Some(""), Some("0"), Some("true"), Some("yes")] {
-            assert!(!preview_enabled(value));
-        }
-    }
-}
 
 fn label(route: horizon_launcher::next_navigation::Route) -> &'static str {
     use horizon_launcher::next_navigation::Route::*;
@@ -264,4 +253,17 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
         .font_family(theme::FONT)
         .child(navigation)
         .child(page)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::preview_enabled;
+
+    #[test]
+    fn preview_requires_explicit_opt_in() {
+        assert!(preview_enabled(Some("1")));
+        for value in [None, Some(""), Some("0"), Some("true"), Some("yes")] {
+            assert!(!preview_enabled(value));
+        }
+    }
 }
