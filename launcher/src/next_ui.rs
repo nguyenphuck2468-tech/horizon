@@ -57,6 +57,15 @@ fn label(route: horizon_launcher::next_navigation::Route) -> &'static str {
     }
 }
 
+fn workspace_is_active(
+    workspace: horizon_launcher::next_navigation::Workspace,
+    active: horizon_launcher::next_navigation::Route,
+) -> bool {
+    horizon_launcher::next_navigation::ROUTES
+        .iter()
+        .any(|entry| entry.workspace == workspace && entry.route == active)
+}
+
 fn description(route: horizon_launcher::next_navigation::Route) -> &'static str {
     use horizon_launcher::next_navigation::Route::*;
     match route {
@@ -135,7 +144,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
     }) {
         let workspace = entry.workspace;
         let primary = entry.route;
-        let selected = primary == active;
+        let selected = workspace_is_active(workspace, active);
         navigation = navigation.child(
             div()
                 .flex()
@@ -436,6 +445,15 @@ mod tests {
         assert_eq!(layout_metrics(600.), (148., 14., 22.));
         assert_eq!(layout_metrics(900.), (184., 22., 26.));
         assert_eq!(layout_metrics(1200.), (232., 34., 30.));
+    }
+
+    #[test]
+    fn workspace_parent_stays_highlighted_for_secondary_routes() {
+        use horizon_launcher::next_navigation::{Route, Workspace};
+
+        assert!(super::workspace_is_active(Workspace::Content, Route::InstalledContent));
+        assert!(super::workspace_is_active(Workspace::ModDevelopment, Route::ModWorkshop));
+        assert!(!super::workspace_is_active(Workspace::Content, Route::ServerConsole));
     }
 
     #[test]
