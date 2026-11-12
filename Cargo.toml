@@ -20,6 +20,8 @@ members = [
     "crates/horizon-chat-filter",
     # The Model Context Protocol, shared by horizon-ctl, horizon-server and the launcher.
     "crates/horizon-mcp",
+    # Stable backend API consumed by the standalone desktop launcher repository.
+    "crates/horizon-launcher-core",
     "crates/horizon-server",
     "crates/horizon-bots",
     "crates/horizon-assets",
