@@ -283,7 +283,6 @@ pub mod content {
 /// Native mod discovery and build operations. Progress is emitted by the existing pipeline;
 /// callers should run these functions on a background executor and stream steps to the UI.
 pub mod native_mods {
-    use super::*;
     use std::path::{Path, PathBuf};
 
     pub use crate::native_mods::{Bundle, Plan, Profile, Step};
