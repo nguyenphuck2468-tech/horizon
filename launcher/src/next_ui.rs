@@ -451,9 +451,18 @@ mod tests {
     fn workspace_parent_stays_highlighted_for_secondary_routes() {
         use horizon_launcher::next_navigation::{Route, Workspace};
 
-        assert!(super::workspace_is_active(Workspace::Content, Route::InstalledContent));
-        assert!(super::workspace_is_active(Workspace::ModDevelopment, Route::ModWorkshop));
-        assert!(!super::workspace_is_active(Workspace::Content, Route::ServerConsole));
+        assert!(super::workspace_is_active(
+            Workspace::Content,
+            Route::InstalledContent
+        ));
+        assert!(super::workspace_is_active(
+            Workspace::ModDevelopment,
+            Route::ModWorkshop
+        ));
+        assert!(!super::workspace_is_active(
+            Workspace::Content,
+            Route::ServerConsole
+        ));
     }
 
     #[test]
