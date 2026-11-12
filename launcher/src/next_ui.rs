@@ -81,6 +81,13 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
         .selected_instance()
         .map(|instance| instance.name.clone())
         .unwrap_or_else(|| "No instance selected".into());
+    let selected_id = this.selected_instance().map(|instance| instance.id.clone());
+    let instances = this.instances.list.clone();
+    let accounts = this.accounts.accounts.clone();
+    let selected_account = this.accounts.selected.clone();
+    let auth_status = this.auth_status.clone();
+    let selected_version = this.selected().cloned();
+    let game_running = this.client.is_some() || this.starting_client.is_some();
 
     let navigation = div()
         .flex()
@@ -195,8 +202,120 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                         div()
                             .text_size(px(13.))
                             .text_color(t.ink_soft)
-                            .child("The new Home workflow will connect instance readiness, account status, Java and Play."),
+                            .child(format!(
+                                "Version: {} · Installed builds: {}",
+                                selected_version.as_deref().unwrap_or("No build selected"),
+                                this.installed.len()
+                            )),
+                    )
+                    .child(
+                        div()
+                            .id("next-home-play")
+                            .flex()
+                            .items_center()
+                            .justify_center()
+                            .w(px(180.))
+                            .px(px(18.))
+                            .py(px(12.))
+                            .rounded(px(9.))
+                            .bg(t.accent)
+                            .text_color(t.page)
+                            .cursor_pointer()
+                            .child(if game_running { "Game starting / running" } else { "Play" })
+                            .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                                this.play();
+                                cx.notify();
+                            })),
+                    )
+                    .child(
+                        div()
+                            .text_size(px(12.))
+                            .text_color(t.muted)
+                            .child("Play delegates to Horizon's existing owner, session, preparation and launch checks."),
                     ),
+            )
+        })
+        .when(active == Route::InstanceLibrary, |page| {
+            page.child(
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(8.))
+                    .children(instances.iter().map(|instance| {
+                        let id = instance.id.clone();
+                        let selected = selected_id.as_deref() == Some(id.as_str());
+                        div()
+                            .id(SharedString::from(format!("next-instance-{id}")))
+                            .flex()
+                            .items_center()
+                            .justify_between()
+                            .w_full()
+                            .p(px(16.))
+                            .rounded(px(10.))
+                            .bg(if selected { t.surface } else { t.plate_soft })
+                            .text_color(t.ink)
+                            .cursor_pointer()
+                            .child(
+                                div()
+                                    .flex()
+                                    .flex_col()
+                                    .gap(px(4.))
+                                    .child(instance.name.clone())
+                                    .child(
+                                        div()
+                                            .text_size(px(11.))
+                                            .text_color(t.muted)
+                                            .child(format!("{} · {} seconds played", instance.id, instance.meta.played_secs)),
+                                    ),
+                            )
+                            .child(if selected { "Selected" } else { "Select" })
+                            .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
+                                if let Some(chosen) = this.instances.list.iter().find(|item| item.id == id).cloned() {
+                                    this.select_instance(&chosen);
+                                    this.next_route = Route::Home;
+                                }
+                                cx.notify();
+                            }))
+                    })),
+            )
+        })
+        .when(active == Route::AccountCenter, |page| {
+            page.child(
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(8.))
+                    .children(accounts.iter().map(|account| {
+                        let state = auth_status
+                            .get(&account.uuid)
+                            .map(|status| format!("{:?}", status.state))
+                            .unwrap_or_else(|| "Checking".into());
+                        let selected = selected_account.as_deref() == Some(account.uuid.as_str());
+                        div()
+                            .id(SharedString::from(format!("next-account-{}", account.uuid)))
+                            .flex()
+                            .flex_col()
+                            .gap(px(5.))
+                            .w_full()
+                            .p(px(16.))
+                            .rounded(px(10.))
+                            .bg(t.surface)
+                            .text_color(t.ink)
+                            .child(
+                                div()
+                                    .flex()
+                                    .items_center()
+                                    .justify_between()
+                                    .child(account.name.clone())
+                                    .child(if selected { "Selected" } else { "" }),
+                            )
+                            .child(
+                                div()
+                                    .text_size(px(12.))
+                                    .text_color(t.muted)
+                                    .child(format!("Session: {state}")),
+                            )
+                    })),
             )
         })
         .when(active == Route::ModWorkshop, |page| {
