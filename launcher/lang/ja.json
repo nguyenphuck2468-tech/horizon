@@ -1098,5 +1098,13 @@
   "Sign in with Ely.by": "Ely.byでサインイン",
   "Asking Ely.by…": "Ely.byに問い合わせ中…",
   "Use the {provider} account for {name}.": "{name} の{provider}を使用します。",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "サインインページがブラウザで開きます。Horizon がパスワードを見ることはありません。"
+  "The sign-in page opens in your browser. Horizon never sees your password.": "サインインページがブラウザで開きます。Horizon がパスワードを見ることはありません。",
+  "Scanning or copying files in the background. Keep Horizon open.": "ファイルをバックグラウンドで確認またはコピーしています。Horizonを開いたままにしてください。",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "ランチャーのファイル {launcher_files} 個（{launcher_mb} MB）、ゲームのファイル {game_files} 個（{game_mb} MB）。既存のファイル {conflicts} 個は保持し、シンボリックリンク {symlinks} 個はスキップします。",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "ランチャーのファイルを {launcher_files} 個、ゲームのファイルを {game_files} 個コピーしました。既存のファイルは上書きしていません。シンボリックリンク {symlinks} 個はスキップしました。",
+  "Review and copy data from this computer's previous Horizon installation": "このコンピューターにある以前のHorizonインストールからデータを確認してコピー",
+  "Import existing data": "既存のデータをインポート",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "同じコンピューターでのみ使用できます。最初にすべてのゲームプロセスを終了してください。認証情報を利用できない場合は、再度サインインが必要になることがあります。",
+  "Close the running game and wait for preparation to finish before migrating.": "データを移行する前に、実行中のゲームを終了し、準備が完了するまでお待ちください。",
+  "Could not locate this computer's user data folder": "このコンピューターのユーザーデータフォルダーが見つかりませんでした。"
 }
