@@ -1098,5 +1098,13 @@
   "Sign in with Ely.by": "Zaloguj się przez Ely.by",
   "Asking Ely.by…": "Łączenie Ely.by…",
   "Use the {provider} account for {name}.": "Użyj konta {provider} gracza {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Strona logowania otwiera się w przeglądarce. Horizon nigdy nie widzi twojego hasła."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Strona logowania otwiera się w przeglądarce. Horizon nigdy nie widzi twojego hasła.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Pliki są skanowane lub kopiowane w tle. Pozostaw Horizon otwarty.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "Pliki launchera: {launcher_files} ({launcher_mb} MB), pliki gry: {game_files} ({game_mb} MB); {conflicts} istniejących plików zostanie zachowanych, a {symlinks} dowiązań symbolicznych pominiętych.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Skopiowano {launcher_files} plików launchera i {game_files} plików gry. Istniejące pliki nie zostały nadpisane; pominięto {symlinks} dowiązań symbolicznych.",
+  "Review and copy data from this computer's previous Horizon installation": "Przejrzyj i skopiuj dane z poprzedniej instalacji Horizon na tym komputerze",
+  "Import existing data": "Importuj istniejące dane",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Tylko na tym samym komputerze. Najpierw zamknij wszystkie procesy gry. Jeśli dane logowania są niedostępne, może być konieczne ponowne zalogowanie.",
+  "Close the running game and wait for preparation to finish before migrating.": "Zamknij uruchomioną grę i poczekaj na zakończenie przygotowania przed migracją.",
+  "Could not locate this computer's user data folder": "Nie można znaleźć folderu danych użytkownika na tym komputerze."
 }
