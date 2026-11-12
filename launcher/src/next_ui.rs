@@ -104,6 +104,8 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
     let instances = this.instances.list.clone();
     let accounts = this.accounts.accounts.clone();
     let selected_account = this.accounts.selected.clone();
+    let offline_names = this.accounts.offline.clone();
+    let offline_selected = this.accounts.offline_selected.clone();
     let auth_status = this.auth_status.clone();
     let selected_version = this.selected().cloned();
     let game_running = this.client.is_some() || this.starting_client.is_some();
@@ -384,7 +386,45 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                                 this.next_route = Route::AccountCenter;
                                 cx.notify();
                             }))
-                    })),
+                    }))
+                    .children(offline_names.iter().map(|offline_name| {
+                        let name = offline_name.clone();
+                        let selected = offline_selected.as_deref() == Some(name.as_str());
+                        div()
+                            .id(SharedString::from(format!("next-offline-account-{name}")))
+                            .flex()
+                            .items_center()
+                            .justify_between()
+                            .w_full()
+                            .p(px(16.))
+                            .rounded(px(10.))
+                            .bg(if selected { t.surface } else { t.plate_soft })
+                            .text_color(t.ink)
+                            .cursor_pointer()
+                            .child(name.clone())
+                            .child(tr(if selected { "Selected · Offline" } else { "Select offline name" }))
+                            .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
+                                this.play_as(horizon_launcher::account::Player::Offline(name.clone()));
+                                this.next_route = Route::AccountCenter;
+                                cx.notify();
+                            }))
+                    }))
+                    .child(
+                        div()
+                            .id("next-game-generated-name")
+                            .w_full()
+                            .p(px(16.))
+                            .rounded(px(10.))
+                            .bg(if selected_account.is_none() && offline_selected.is_none() { t.surface } else { t.plate_soft })
+                            .text_color(t.ink)
+                            .cursor_pointer()
+                            .child(tr("Use generated game name"))
+                            .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                                this.play_as(horizon_launcher::account::Player::GameName);
+                                this.next_route = Route::AccountCenter;
+                                cx.notify();
+                            })),
+                    ),
             )
         })
         .when(active == Route::ModWorkshop, |page| {
