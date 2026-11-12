@@ -1106,5 +1106,8 @@
   "Import existing data": "Mevcut verileri içe aktar",
   "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Yalnızca aynı bilgisayarda. Önce tüm oyun işlemlerini kapatın. Kimlik bilgilerine erişilemiyorsa yeniden oturum açmanız gerekebilir.",
   "Close the running game and wait for preparation to finish before migrating.": "Taşımadan önce çalışan oyunu kapatın ve hazırlığın tamamlanmasını bekleyin.",
-  "Could not locate this computer's user data folder": "Bu bilgisayarın kullanıcı verileri klasörü bulunamadı."
+  "Could not locate this computer's user data folder": "Bu bilgisayarın kullanıcı verileri klasörü bulunamadı.",
+  "Copy missing files": "Eksik dosyaları kopyala",
+  "Review again": "Yeniden gözden geçir",
+  "Review existing data": "Mevcut verileri gözden geçir"
 }
