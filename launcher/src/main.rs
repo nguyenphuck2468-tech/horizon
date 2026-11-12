@@ -1582,10 +1582,10 @@ impl Launcher {
             return;
         }
         if self.preparing || self.client.is_some() {
-            self.migration_preview = Some(Err(
-                tr("Close the running game and wait for preparation to finish before migrating.")
-                    .to_string(),
-            ));
+            self.migration_preview = Some(Err(tr(
+                "Close the running game and wait for preparation to finish before migrating.",
+            )
+            .to_string()));
             self.migration_done = None;
             return;
         }
