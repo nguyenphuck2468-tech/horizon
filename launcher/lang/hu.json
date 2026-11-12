@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Jelentkezzen be Ely.by-val",
   "Asking Ely.by…": "Az Ely.by megkérdezése…",
   "Use the {provider} account for {name}.": "Használja a {provider} a következőhöz: {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "A bejelentkezési oldal nyílik meg a böngészőjében. A Horizon soha nem látja a jelszavát."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "A bejelentkezési oldal nyílik meg a böngészőjében. A Horizon soha nem látja a jelszavát.",
+  "Scanning or copying files in the background. Keep Horizon open.": "A fájlok ellenőrzése vagy másolása a háttérben folyik. Hagyd nyitva a Horizont.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} indítófájl ({launcher_mb} MB), {game_files} játékfájl ({game_mb} MB); {conflicts} meglévő fájl megmarad, {symlinks} szimbolikus hivatkozás kimarad.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "{launcher_files} indítófájl és {game_files} játékfájl másolása megtörtént. A meglévő fájlok nem lettek felülírva; {symlinks} szimbolikus hivatkozás kimaradt.",
+  "Review and copy data from this computer's previous Horizon installation": "A számítógép korábbi Horizon-telepítésének adatainak áttekintése és másolása",
+  "Import existing data": "Meglévő adatok importálása",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Csak ugyanazon a számítógépen. Először zárj be minden játékfolyamatot. Ha a hitelesítő adatok nem érhetők el, újra be kell jelentkezned.",
+  "Close the running game and wait for preparation to finish before migrating.": "A költöztetés előtt zárd be a futó játékot, és várd meg az előkészítés végét.",
+  "Could not locate this computer's user data folder": "Nem található a számítógép felhasználói adatainak mappája.",
+  "Copy missing files": "Hiányzó fájlok másolása",
+  "Review again": "Újraellenőrzés",
+  "Review existing data": "Meglévő adatok áttekintése"
 }
