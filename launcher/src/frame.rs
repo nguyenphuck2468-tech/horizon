@@ -19,7 +19,11 @@ pub const MARGIN: f32 = 14.;
 
 /// Keep the instance workspace useful without letting it dominate compact desktop windows.
 pub(super) fn responsive_sidebar_width(window_width: f32) -> f32 {
-    if window_width < 1120. { 216. } else { SIDEBAR }
+    if window_width < 1120. {
+        216.
+    } else {
+        SIDEBAR
+    }
 }
 
 /// The ⋮ menu of a sidebar row while open: whose, and whether Delete… was pressed once.
