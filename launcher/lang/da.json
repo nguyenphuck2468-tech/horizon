@@ -1098,5 +1098,13 @@
   "Sign in with Ely.by": "Log ind med Ely.by",
   "Asking Ely.by…": "Spørger Ely.by...",
   "Use the {provider} account for {name}.": "Brug {provider} til {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Logonsiden åbner i din browser. Horizon ser aldrig din adgangskode."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Logonsiden åbner i din browser. Horizon ser aldrig din adgangskode.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Filerne scannes eller kopieres i baggrunden. Hold Horizon åben.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} launcherfiler ({launcher_mb} MB), {game_files} spilfiler ({game_mb} MB); {conflicts} eksisterende filer bevares, og {symlinks} symbolske links springes over.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Kopierede {launcher_files} launcherfiler og {game_files} spilfiler. Eksisterende filer blev ikke overskrevet; {symlinks} symbolske links blev sprunget over.",
+  "Review and copy data from this computer's previous Horizon installation": "Gennemse og kopiér data fra denne computers tidligere Horizon-installation",
+  "Import existing data": "Importér eksisterende data",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Kun på samme computer. Luk alle spilprocesser først. Du skal muligvis logge ind igen, hvis legitimationsoplysningerne ikke er tilgængelige.",
+  "Close the running game and wait for preparation to finish before migrating.": "Luk det kørende spil, og vent på, at forberedelsen er færdig, før du flytter data.",
+  "Could not locate this computer's user data folder": "Kunne ikke finde denne computers brugerdatamappe."
 }
