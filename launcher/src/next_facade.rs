@@ -576,6 +576,17 @@ mod tests {
     }
 
     #[test]
+    fn native_build_profiles_are_explicit_and_stable() {
+        use crate::native_mods::Profile;
+        assert_eq!(Profile::parse("performance"), Some(Profile::Performance));
+        assert_eq!(Profile::parse("fast"), Some(Profile::Performance));
+        assert_eq!(Profile::parse("dev"), Some(Profile::Dev));
+        assert_eq!(Profile::parse("release"), Some(Profile::Release));
+        assert_eq!(Profile::parse("unknown"), None);
+        assert_eq!(Profile::ALL, [Profile::Performance, Profile::Dev, Profile::Release]);
+    }
+
+    #[test]
     fn a_pack_file_keeps_its_kind() {
         let root = std::env::temp_dir().join(format!("horizon-facade-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&root);
