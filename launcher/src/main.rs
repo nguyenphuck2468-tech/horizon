@@ -4825,8 +4825,7 @@ impl Launcher {
                 "Patch notes",
                 "What changed in each release, newest first.",
                 &t,
-            ))
-            ;
+            ));
         let releases = match &self.releases {
             Load::Loading => return page.child(centered(tr("Loading patch notes…"), &t)),
             Load::Failed(e) => {
