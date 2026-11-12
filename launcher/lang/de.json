@@ -1098,5 +1098,13 @@
   "Sign in with Ely.by": "Mit Ely.by anmelden",
   "Asking Ely.by…": "Frage Ely.by…",
   "Use the {provider} account for {name}.": "Verwende das {provider} von {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Die Anmeldeseite öffnet sich in deinem Browser. Horizon sieht dein Passwort nie."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Die Anmeldeseite öffnet sich in deinem Browser. Horizon sieht dein Passwort nie.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Dateien werden im Hintergrund geprüft oder kopiert. Lassen Sie Horizon geöffnet.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} Launcher-Dateien ({launcher_mb} MB), {game_files} Spieldateien ({game_mb} MB); {conflicts} vorhandene Dateien bleiben erhalten und {symlinks} symbolische Links werden übersprungen.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "{launcher_files} Launcher-Dateien und {game_files} Spieldateien wurden kopiert. Vorhandene Dateien wurden nicht überschrieben; {symlinks} symbolische Links wurden übersprungen.",
+  "Review and copy data from this computer's previous Horizon installation": "Daten aus der bisherigen Horizon-Installation auf diesem Computer prüfen und kopieren",
+  "Import existing data": "Vorhandene Daten importieren",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Nur auf demselben Computer. Schließen Sie zuerst alle Spielprozesse. Möglicherweise müssen Sie sich erneut anmelden, wenn die Anmeldedaten nicht verfügbar sind.",
+  "Close the running game and wait for preparation to finish before migrating.": "Schließen Sie das laufende Spiel und warten Sie, bis die Vorbereitung abgeschlossen ist, bevor Sie Daten übertragen.",
+  "Could not locate this computer's user data folder": "Der Benutzer-Datenordner auf diesem Computer konnte nicht gefunden werden."
 }
