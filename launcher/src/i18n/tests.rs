@@ -141,19 +141,19 @@ fn every_language_has_every_string_the_code_asks_for() {
     for (_, table) in &tables {
         asked.extend(table.keys().cloned());
     }
+    let mut language_failures = Vec::new();
     for (language, table) in &tables {
         let missing: Vec<_> = asked.iter().filter(|s| !table.contains_key(*s)).collect();
-        assert!(
-            missing.is_empty(),
-            "lang/{}.json lacks {missing:#?}",
-            language.code()
-        );
+        if !missing.is_empty() {
+            language_failures.push(format!("lang/{}.json lacks {missing:#?}", language.code()));
+        }
         let unused: Vec<_> = table.keys().filter(|s| !all.contains(*s)).collect();
-        assert!(
-            unused.is_empty(),
-            "lang/{}.json has strings the code no longer has: {unused:#?}",
-            language.code()
-        );
+        if !unused.is_empty() {
+            language_failures.push(format!(
+                "lang/{}.json has strings the code no longer has: {unused:#?}",
+                language.code()
+            ));
+        }
         for (en, said) in table {
             assert_eq!(holes(en), holes(said), "{}: {en:?}", language.code());
             assert!(
@@ -163,6 +163,11 @@ fn every_language_has_every_string_the_code_asks_for() {
             );
         }
     }
+    assert!(
+        language_failures.is_empty(),
+        "Localization table audit found issues:\n{}",
+        language_failures.join("\n")
+    );
 }
 
 #[test]
