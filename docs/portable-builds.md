@@ -13,7 +13,8 @@ Extract the archive to a folder you can write to and launch Horizon from there. 
 launcher into storing settings, accounts, downloaded game versions, Java runtimes, worlds, screenshots, options and other game/launcher data in
 the adjacent `Horizon-Data` folder. Keep the launcher and that folder together when moving or backing it up.
 The data folder is created on first launch. The marker stays outside the replaceable executable/app bundle, so a
-portable installation keeps using its adjacent data folder after a self-update.
+portable installation keeps using its adjacent data folder after a self-update. The Settings → About migration assistant
+copies only missing files, reports conflicts, and never overwrites existing destination files.
 
 The ordinary Windows ZIP, Linux self-update tarball and macOS app ZIP do not contain the portable marker:
 they keep using the normal per-user data location and remain compatible with the launcher's self-updater.
