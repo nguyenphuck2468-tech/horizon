@@ -1098,5 +1098,13 @@
   "Sign in with Ely.by": "Iniciar sessão com a Ely.by",
   "Asking Ely.by…": "A perguntar Ely.by…",
   "Use the {provider} account for {name}.": "Usar a {provider} de {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "A página de início de sessão abre no teu navegador. O Horizon nunca vê a tua palavra-passe."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "A página de início de sessão abre no teu navegador. O Horizon nunca vê a tua palavra-passe.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Os ficheiros estão a ser analisados ou copiados em segundo plano. Mantenha o Horizon aberto.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} ficheiros do iniciador ({launcher_mb} MB), {game_files} ficheiros do jogo ({game_mb} MB); os {conflicts} ficheiros existentes serão mantidos e as {symlinks} ligações simbólicas serão ignoradas.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Foram copiados {launcher_files} ficheiros do iniciador e {game_files} ficheiros do jogo. Os ficheiros existentes não foram substituídos; foram ignoradas {symlinks} ligações simbólicas.",
+  "Review and copy data from this computer's previous Horizon installation": "Rever e copiar os dados da instalação anterior do Horizon neste computador",
+  "Import existing data": "Importar dados existentes",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Apenas no mesmo computador. Feche primeiro todos os processos do jogo. Poderá ter de iniciar sessão novamente se as credenciais não estiverem disponíveis.",
+  "Close the running game and wait for preparation to finish before migrating.": "Feche o jogo em execução e aguarde que a preparação termine antes de migrar.",
+  "Could not locate this computer's user data folder": "Não foi possível localizar a pasta de dados do utilizador neste computador."
 }
