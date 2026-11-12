@@ -113,7 +113,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
         Load::Ready(releases) => releases.clone(),
         _ => Vec::new(),
     };
-    let versions_loading = matches!(this.releases, Load::Loading);
+    let versions_loading = matches!(&this.releases, Load::Loading);
     let versions_error = match &this.releases {
         Load::Failed(error) => Some(error.clone()),
         _ => None,
@@ -511,6 +511,13 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                             })),
                     );
                     row = row.child(actions);
+                } else if installing_version.is_some() {
+                    row = row.child(
+                        div()
+                            .text_size(px(11.))
+                            .text_color(t.muted)
+                            .child(tr("Another install is running")),
+                    );
                 } else if release.asset.is_some() {
                     row = row.child(
                         div()
