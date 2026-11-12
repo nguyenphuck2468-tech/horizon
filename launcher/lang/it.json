@@ -1106,5 +1106,8 @@
   "Import existing data": "Importa i dati esistenti",
   "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Solo sullo stesso computer. Chiudi prima tutti i processi di gioco. Potrebbe essere necessario accedere di nuovo se le credenziali non sono disponibili.",
   "Close the running game and wait for preparation to finish before migrating.": "Chiudi il gioco in esecuzione e attendi il completamento della preparazione prima di migrare.",
-  "Could not locate this computer's user data folder": "Impossibile trovare la cartella dei dati utente su questo computer."
+  "Could not locate this computer's user data folder": "Impossibile trovare la cartella dei dati utente su questo computer.",
+  "Copy missing files": "Copia i file mancanti",
+  "Review again": "Rivedi di nuovo",
+  "Review existing data": "Controlla i dati esistenti"
 }
