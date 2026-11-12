@@ -1098,5 +1098,13 @@
   "Sign in with Ely.by": "Masuk dengan Ely.by",
   "Asking Ely.by…": "Menanyakan Ely.by…",
   "Use the {provider} account for {name}.": "Gunakan {provider} untuk {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Halaman masuk terbuka di browser-mu. Horizon tidak pernah melihat kata sandimu."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Halaman masuk terbuka di browser-mu. Horizon tidak pernah melihat kata sandimu.",
+  "Scanning or copying files in the background. Keep Horizon open.": "File sedang dipindai atau disalin di latar belakang. Biarkan Horizon tetap terbuka.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} file peluncur ({launcher_mb} MB), {game_files} file game ({game_mb} MB); {conflicts} file yang sudah ada akan dipertahankan dan {symlinks} tautan simbolis akan dilewati.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "{launcher_files} file peluncur dan {game_files} file game telah disalin. File yang sudah ada tidak ditimpa; {symlinks} tautan simbolis dilewati.",
+  "Review and copy data from this computer's previous Horizon installation": "Tinjau dan salin data dari instalasi Horizon sebelumnya di komputer ini",
+  "Import existing data": "Impor data yang sudah ada",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Hanya untuk komputer yang sama. Tutup semua proses game terlebih dahulu. Anda mungkin perlu masuk kembali jika kredensial tidak tersedia.",
+  "Close the running game and wait for preparation to finish before migrating.": "Tutup game yang sedang berjalan dan tunggu persiapan selesai sebelum memindahkan data.",
+  "Could not locate this computer's user data folder": "Folder data pengguna di komputer ini tidak dapat ditemukan."
 }
