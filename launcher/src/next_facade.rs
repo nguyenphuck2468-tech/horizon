@@ -277,7 +277,9 @@ pub mod content {
             .ok_or_else(|| "Horizon registry is unavailable.".to_owned())?;
         let project = crate::browser::Source::project(&*source, id)?;
         if crate::browser::horizon::is_native_mod(id) {
-            return Err("This project is a native mod; open it in the Native Mods workspace.".into());
+            return Err(
+                "This project is a native mod; open it in the Native Mods workspace.".into(),
+            );
         }
         Ok(project)
     }
