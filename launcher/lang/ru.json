@@ -1106,5 +1106,8 @@
   "Import existing data": "Импортировать существующие данные",
   "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Только для этого же компьютера. Сначала закройте все игровые процессы. Если учётные данные недоступны, может потребоваться войти снова.",
   "Close the running game and wait for preparation to finish before migrating.": "Перед переносом закройте запущенную игру и дождитесь завершения подготовки.",
-  "Could not locate this computer's user data folder": "Не удалось найти папку пользовательских данных на этом компьютере."
+  "Could not locate this computer's user data folder": "Не удалось найти папку пользовательских данных на этом компьютере.",
+  "Copy missing files": "Скопировать отсутствующие файлы",
+  "Review again": "Проверить ещё раз",
+  "Review existing data": "Проверить существующие данные"
 }
