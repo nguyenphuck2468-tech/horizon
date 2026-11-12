@@ -17,6 +17,11 @@ use std::rc::Rc;
 pub const SIDEBAR: f32 = 248.;
 pub const MARGIN: f32 = 14.;
 
+/// Keep the instance workspace useful without letting it dominate compact desktop windows.
+pub(super) fn responsive_sidebar_width(window_width: f32) -> f32 {
+    if window_width < 1120. { 216. } else { SIDEBAR }
+}
+
 /// The ⋮ menu of a sidebar row while open: whose, and whether Delete… was pressed once.
 #[derive(Clone, Default)]
 pub struct RowMenu {
@@ -263,7 +268,7 @@ impl Launcher {
         let t = self.theme;
         let soft = self.look.accent_soft;
         // Give the content more room on compact desktop windows without hiding instance controls.
-        let sidebar_width = if self.window_width < 1120. { 216. } else { SIDEBAR };
+        let sidebar_width = responsive_sidebar_width(self.window_width);
         self.load_packs();
         let add = ui::icon_button(
             "add-instance",
@@ -967,5 +972,18 @@ impl Launcher {
                 .with_priority(1)
                 .into_any_element(),
         )
+    }
+}
+
+#[cfg(test)]
+mod layout_tests {
+    use super::{responsive_sidebar_width, SIDEBAR};
+
+    #[test]
+    fn sidebar_reclaims_space_only_below_the_compact_window_breakpoint() {
+        assert_eq!(responsive_sidebar_width(900.), 216.);
+        assert_eq!(responsive_sidebar_width(1119.), 216.);
+        assert_eq!(responsive_sidebar_width(1120.), SIDEBAR);
+        assert_eq!(responsive_sidebar_width(1600.), SIDEBAR);
     }
 }
