@@ -1098,5 +1098,13 @@
   "Sign in with Ely.by": "Увійти через Ely.by",
   "Asking Ely.by…": "Запит до Ely.by…",
   "Use the {provider} account for {name}.": "Використайте обліковий запис {provider} для {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Сторінка входу відкривається у вашому браузері. Horizon ніколи не бачить ваш пароль."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Сторінка входу відкривається у вашому браузері. Horizon ніколи не бачить ваш пароль.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Файли перевіряються або копіюються у фоновому режимі. Не закривайте Horizon.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "Файлів лаунчера: {launcher_files} ({launcher_mb} МБ), файлів гри: {game_files} ({game_mb} МБ); наявні файли ({conflicts}) буде збережено, символічні посилання ({symlinks}) пропущено.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Скопійовано файлів лаунчера: {launcher_files}, файлів гри: {game_files}. Наявні файли не перезаписано; символічні посилання ({symlinks}) пропущено.",
+  "Review and copy data from this computer's previous Horizon installation": "Переглянути й скопіювати дані з попереднього встановлення Horizon на цьому комп’ютері",
+  "Import existing data": "Імпортувати наявні дані",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Лише на цьому самому комп’ютері. Спочатку закрийте всі ігрові процеси. Якщо облікові дані недоступні, може знадобитися повторний вхід.",
+  "Close the running game and wait for preparation to finish before migrating.": "Перед перенесенням закрийте запущену гру та дочекайтеся завершення підготовки.",
+  "Could not locate this computer's user data folder": "Не вдалося знайти теку даних користувача на цьому комп’ютері."
 }
