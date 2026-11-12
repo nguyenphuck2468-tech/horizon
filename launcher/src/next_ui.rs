@@ -16,11 +16,7 @@ fn preview_enabled(value: Option<&str>) -> bool {
 /// Whether the replacement shell is requested for local development and screenshot tests.
 /// Require an explicit value so unrelated inherited environment variables cannot switch UIs.
 pub(super) fn wanted() -> bool {
-    preview_enabled(
-        std::env::var("HORIZON_LAUNCHER_NEXT_UI")
-            .ok()
-            .as_deref(),
-    )
+    preview_enabled(std::env::var("HORIZON_LAUNCHER_NEXT_UI").ok().as_deref())
 }
 
 #[cfg(test)]
