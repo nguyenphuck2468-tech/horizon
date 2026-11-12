@@ -112,6 +112,13 @@ fn the_scan_finds_multiline_calls_without_reading_comments_or_quoted_code() {
 // review is complete. Keep this allowlist narrow so established launcher strings remain
 // required in every shipped language.
 const PREVIEW_ENGLISH_FALLBACKS: &[&str] = &[
+    "Another install is running",
+    "Couldn't load releases.",
+    "Ely.by",
+    "Not installed",
+    "Provider unavailable",
+    "Select account",
+    "Use generated game name",
     "Account details",
     "Accounts",
     "Browse worlds and captured game moments.",
