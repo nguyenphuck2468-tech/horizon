@@ -107,6 +107,48 @@ fn the_scan_finds_multiline_calls_without_reading_comments_or_quoted_code() {
     assert!(!all.contains("block comment"));
 }
 
+// The replacement UI is still a development preview. Vietnamese has reviewed copy;
+ // other locales intentionally use the runtime's English fallback until human translation
+ // review is complete. Keep this allowlist narrow so established launcher strings remain
+ // required in every shipped language.
+const PREVIEW_ENGLISH_FALLBACKS: &[&str] = &[
+    "Account details",
+    "Accounts",
+    "Browse worlds and captured game moments.",
+    "Configure appearance, language, paths, Java and performance.",
+    "Content",
+    "Cosmetics",
+    "Diagnostics",
+    "Discover and manage validated Horizon content and mod packages.",
+    "Game starting / running",
+    "Inspect downloads, logs, failures and recovery information.",
+    "Inspect native mods, resolve compatibility and run builds with live progress and logs.",
+    "Installed builds",
+    "Installed content",
+    "Instance details",
+    "Instance settings",
+    "Manage Microsoft, Ely.by and offline identities without exposing credentials to the UI.",
+    "Manage game profiles, versions, Java and per-instance configuration.",
+    "Manage servers, multiplayer sessions and network diagnostics.",
+    "Manage skins and supported cosmetics.",
+    "Mod Workshop",
+    "NEXT-GENERATION LAUNCHER",
+    "Native mod build workspace",
+    "No build selected",
+    "Play delegates to Horizon's existing owner, session, preparation and launch checks.",
+    "Preview · feature migration in progress",
+    "SELECTED INSTANCE",
+    "Select",
+    "Selected",
+    "Server console",
+    "Session",
+    "The existing native build pipeline is now exposed through the typed next_facade boundary. The next screen step wires bundle discovery, profile selection, cancellable background execution and build logs.",
+    "The legacy workflow remains available during migration; this preview does not pretend that this panel is functional yet.",
+    "This workspace is being migrated.",
+    "Your game, instances and next action in one clear place.",
+    "seconds played",
+];
+
 fn holes(s: &str) -> BTreeSet<&str> {
     s.split('{')
         .skip(1)
@@ -133,12 +175,29 @@ fn every_language_has_every_string_the_code_asks_for() {
         asked.extend(table.keys().cloned());
     }
     for (language, table) in &tables {
-        let missing: Vec<_> = asked.iter().filter(|s| !table.contains_key(*s)).collect();
+        let missing: Vec<_> = asked
+            .iter()
+            .filter(|s| {
+                !table.contains_key(*s)
+                    && !PREVIEW_ENGLISH_FALLBACKS.contains(&s.as_str())
+            })
+            .collect();
         assert!(
             missing.is_empty(),
             "lang/{}.json lacks {missing:#?}",
             language.code()
         );
+        for fallback in PREVIEW_ENGLISH_FALLBACKS {
+            if !table.contains_key(*fallback) {
+                assert_eq!(
+                    tr_in(*language, fallback),
+                    *fallback,
+                    "preview fallback changed for {} in {}",
+                    fallback,
+                    language.code()
+                );
+            }
+        }
         let unused: Vec<_> = table.keys().filter(|s| !all.contains(*s)).collect();
         assert!(
             unused.is_empty(),
