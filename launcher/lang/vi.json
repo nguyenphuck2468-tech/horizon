@@ -1106,5 +1106,8 @@
   "Import existing data": "Nhập dữ liệu hiện có",
   "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Chỉ áp dụng trên cùng máy tính. Hãy đóng mọi tiến trình trò chơi trước. Bạn có thể cần đăng nhập lại nếu không có thông tin xác thực.",
   "Close the running game and wait for preparation to finish before migrating.": "Hãy đóng trò chơi đang chạy và đợi quá trình chuẩn bị hoàn tất trước khi di chuyển.",
-  "Could not locate this computer's user data folder": "Không tìm thấy thư mục dữ liệu người dùng trên máy tính này."
+  "Could not locate this computer's user data folder": "Không tìm thấy thư mục dữ liệu người dùng trên máy tính này.",
+  "Copy missing files": "Sao chép các tệp còn thiếu",
+  "Review again": "Xem lại",
+  "Review existing data": "Xem lại dữ liệu hiện có"
 }
