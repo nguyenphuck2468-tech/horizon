@@ -66,6 +66,24 @@ fn workspace_is_active(
         .any(|entry| entry.workspace == workspace && entry.route == active)
 }
 
+fn select_route(this: &mut Launcher, route: horizon_launcher::next_navigation::Route) {
+    use horizon_launcher::next_navigation::Route;
+
+    // Reuse the mature legacy content workflows until their individual GPUI panels are migrated.
+    // Keep the package kinds distinct: .hmod registry mods, .hnmod native mods, and .hpack modpacks
+    // are handled by the existing Mods/Modpacks services rather than a parallel implementation.
+    match route {
+        Route::ContentBrowser | Route::InstalledContent | Route::ModWorkshop => {
+            this.mods_set_kind(horizon_launcher::browser::Kind::Mod);
+        }
+        Route::ModpackManager => {
+            this.mods_set_kind(horizon_launcher::browser::Kind::Modpack);
+        }
+        _ => {}
+    }
+    select_route(this, route);
+}
+
 fn description(route: horizon_launcher::next_navigation::Route) -> &'static str {
     use horizon_launcher::next_navigation::Route::*;
     match route {
@@ -123,6 +141,15 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
     let removing_versions = this.removing.clone();
     let version_error = this.install_error.clone();
     let confirm_remove = this.confirm_remove.clone();
+    let content_route = matches!(
+        active,
+        Route::ContentBrowser | Route::InstalledContent | Route::ModpackManager | Route::ModWorkshop
+    );
+    let content_page = if content_route {
+        Some(this.mods_page(cx))
+    } else {
+        None
+    };
 
     let mut navigation = div()
         .flex()
@@ -177,7 +204,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                         .text_color(if selected { t.accent } else { t.ink })
                         .when(selected, |element| element.bg(t.surface))
                         .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
-                            this.next_route = primary;
+                            select_route(this, primary);
                             cx.notify();
                         }))
                         .child(tr(label(primary))),
@@ -648,30 +675,10 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                     ),
             )
         })
-        .when(active == Route::ModWorkshop, |page| {
-            page.child(
-                div()
-                    .flex()
-                    .flex_col()
-                    .gap(px(12.))
-                    .p(px(24.))
-                    .rounded(px(14.))
-                    .bg(t.surface)
-                    .child(
-                        div()
-                            .text_size(px(18.))
-                            .text_color(t.ink)
-                            .child(tr("Native mod build workspace")),
-                    )
-                    .child(
-                        div()
-                            .text_size(px(13.))
-                            .text_color(t.ink_soft)
-                            .child(tr("The existing native build pipeline is now exposed through the typed next_facade boundary. The next screen step wires bundle discovery, profile selection, cancellable background execution and build logs.")),
-                    ),
-            )
+        .when(content_route, |page| {
+            page.child(content_page.expect("content route has an existing workflow panel"))
         })
-        .when(active != Route::Home && active != Route::ModWorkshop, |page| {
+        .when(!content_route && active != Route::Home, |page| {
             page.child(
                 div()
                     .flex()
