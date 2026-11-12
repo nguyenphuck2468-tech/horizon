@@ -398,12 +398,20 @@ fn concurrent_partial_file_creation_is_unique_and_bounded() {
 
     let paths: Vec<_> = created.iter().map(|(path, _)| path.clone()).collect();
     let unique: std::collections::HashSet<_> = paths.iter().collect();
-    assert_eq!(unique.len(), 16, "concurrent transfers must own distinct partials");
+    assert_eq!(
+        unique.len(),
+        16,
+        "concurrent transfers must own distinct partials"
+    );
     for path in &paths {
         let name = path.file_name().unwrap().to_string_lossy();
         assert!(name.starts_with(".horizon-download-"), "{name}");
         assert!(name.len() <= 64, "temporary name must stay bounded: {name}");
-        assert!(path.is_file(), "partial file should exist: {}", path.display());
+        assert!(
+            path.is_file(),
+            "partial file should exist: {}",
+            path.display()
+        );
     }
 
     drop(created);
