@@ -660,6 +660,8 @@
   "Could not check sign-in": "Không thể kiểm tra đăng nhập",
   "Minecraft account needs attention": "Tài khoản Minecraft cần được chú ý",
   "Sign-in not checked": "Đăng nhập chưa được kiểm tra",
+  "Not installed": "Chưa cài đặt",
+  "Another install is running": "Một quá trình cài đặt khác đang chạy",
   "Refresh": "Làm mới",
   "Sign in again in your browser.": "Đăng nhập lại trong trình duyệt của bạn.",
   "Check Minecraft: Java Edition ownership and your profile at minecraft.net.": "Kiểm tra quyền sở hữu Minecraft: Java Edition và hồ sơ của bạn tại minecraft.net.",
