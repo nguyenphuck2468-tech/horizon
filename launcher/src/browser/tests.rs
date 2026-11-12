@@ -380,7 +380,6 @@ fn a_download_is_kept_only_when_its_checksum_matches() {
     std::fs::remove_dir_all(&dir).unwrap();
 }
 
-
 #[test]
 fn a_download_does_not_truncate_another_transfer_partial_file() {
     let dir = scratch("partial-isolation");
