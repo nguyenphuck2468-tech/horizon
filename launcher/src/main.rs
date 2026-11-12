@@ -2765,6 +2765,8 @@ impl Launcher {
     fn sidebar(&mut self, window: &Window, cx: &mut Context<Self>) -> Stateful<Div> {
         let t = self.theme;
         let n = t.night;
+        // Preserve the instance list while returning space to the page on compact windows.
+        let sidebar_width = if self.window_width < 1120. { 216. } else { theme::SIDEBAR };
         self.load_packs();
         let heading = |label: String| shell::heading(label, &t);
         let add = shell::icon_button("add-instance", "plus", 24., false, &t).on_click(cx.listener(
@@ -2911,7 +2913,7 @@ impl Launcher {
                 - 110.;
             let mut side = div().relative().mb(px(8.)).child(partner::card(
                 "partner-side",
-                theme::SIDEBAR - 20.,
+                sidebar_width - 20.,
                 free < partner::TALL_HEIGHT,
                 &t,
             ));
@@ -2983,7 +2985,7 @@ impl Launcher {
             .flex()
             .flex_col()
             .flex_none()
-            .w(px(theme::SIDEBAR))
+            .w(px(sidebar_width))
             .h_full()
             .px(px(10.))
             .pb(px(12.))
