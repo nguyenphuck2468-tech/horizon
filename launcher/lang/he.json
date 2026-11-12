@@ -1106,5 +1106,8 @@
   "Import existing data": "ייבוא נתונים קיימים",
   "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "באותו מחשב בלבד. סגור תחילה את כל תהליכי המשחק. ייתכן שיהיה צורך להתחבר מחדש אם פרטי הכניסה אינם זמינים.",
   "Close the running game and wait for preparation to finish before migrating.": "סגור את המשחק שפועל והמתן לסיום ההכנה לפני העברת הנתונים.",
-  "Could not locate this computer's user data folder": "לא ניתן למצוא את תיקיית נתוני המשתמש במחשב הזה."
+  "Could not locate this computer's user data folder": "לא ניתן למצוא את תיקיית נתוני המשתמש במחשב הזה.",
+  "Copy missing files": "העתק קבצים חסרים",
+  "Review again": "בדוק שוב",
+  "Review existing data": "סקור נתונים קיימים"
 }
