@@ -731,6 +731,15 @@ mod tests {
     }
 
     #[test]
+    fn content_mods_and_registry_modpacks_have_separate_facades() {
+        let _: fn(&content::Query) -> Result<Vec<content::Project>, String> =
+            content::registry_mods;
+        let _: fn() -> Vec<modpacks::RegistryModpack> = modpacks::registry_modpacks;
+        assert_eq!(crate::browser::Kind::Mod.label(), "Mods");
+        assert_eq!(crate::browser::Kind::Modpack.label(), "Modpacks");
+    }
+
+    #[test]
     fn instance_play_time_and_old_metadata_are_stable() {
         assert_eq!(instances::play_time(12 * 60), "12 min");
         assert_eq!(instances::play_time(3 * 3600 + 5 * 60), "3 h 05 min");
