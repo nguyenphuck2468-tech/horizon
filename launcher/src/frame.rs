@@ -268,7 +268,7 @@ impl Launcher {
     }
 
     /// The glass sidebar: a plate 248 wide, 14 from the window's edges.
-    pub(super) fn glass_sidebar(&mut self, window: &Window, cx: &mut Context<Self>) -> Div {
+    pub(super) fn glass_sidebar(&mut self, cx: &mut Context<Self>) -> Div {
         let t = self.theme;
         let soft = self.look.accent_soft;
         // Give the content more room on compact desktop windows without hiding instance controls.
