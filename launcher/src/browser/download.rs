@@ -124,7 +124,7 @@ impl Hasher {
 
 /// Creates a collision-resistant partial file for one transfer. A fixed `.<name>.part` path
 /// lets concurrent downloads (or a stale partial from a previous process) truncate each other.
-fn create_part_file(folder: &Path) -> Result<(PathBuf, fs::File), String> {
+pub(super) fn create_part_file(folder: &Path) -> Result<(PathBuf, fs::File), String> {
     loop {
         let sequence = PART_FILE_SEQUENCE.fetch_add(1, Ordering::Relaxed);
         let part = folder.join(format!(
