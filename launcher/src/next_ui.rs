@@ -64,10 +64,7 @@ fn description(route: horizon_launcher::next_navigation::Route) -> &'static str 
 
 /// Render the replacement shell. Workflow panels are migrated incrementally through next_facade;
 /// until then, this shell is an honest navigation/layout preview, not a fake working launcher.
-pub(super) fn render(
-    this: &mut Launcher,
-    cx: &mut Context<Launcher>,
-) -> impl IntoElement {
+pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl IntoElement {
     use horizon_launcher::next_navigation::{Route, ROUTES};
 
     let t = this.theme;
