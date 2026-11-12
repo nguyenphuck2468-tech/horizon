@@ -590,10 +590,45 @@ pub fn links() -> Links {
         .map_or_else(Links::default, |text| Links::parse(&text))
 }
 
+/// A portable bundle keeps its data beside the executable, not in the user's platform data folder.
+/// Windows/Linux archives put `portable` beside the binary; macOS puts it beside Horizon.app.
+fn portable_data_dir(executable: &Path) -> Option<PathBuf> {
+    let parent = executable.parent()?;
+    if parent
+        .file_name()
+        .is_some_and(|name| name == std::ffi::OsStr::new("MacOS"))
+    {
+        let contents = parent.parent()?;
+        if contents
+            .file_name()
+            .is_some_and(|name| name == std::ffi::OsStr::new("Contents"))
+        {
+            let app = contents.parent()?;
+            let folder = app.parent()?;
+            if folder.join("portable").is_file() {
+                return Some(folder.join("Horizon-Data"));
+            }
+        }
+    }
+    parent
+        .join("portable")
+        .is_file()
+        .then(|| parent.join("Horizon-Data"))
+}
+
 /// The launcher's data folder; `HORIZON_LAUNCHER_HOME` overrides it (for tests and scripts).
+/// A portable archive opts in with a marker file, so ordinary installs and self-updates keep
+/// using the platform's normal per-user data folder.
 pub fn data_dir() -> PathBuf {
     if let Some(home) = std::env::var_os("HORIZON_LAUNCHER_HOME").filter(|h| !h.is_empty()) {
         return PathBuf::from(home);
+    }
+    if let Some(portable) = std::env::current_exe()
+        .ok()
+        .as_deref()
+        .and_then(portable_data_dir)
+    {
+        return portable;
     }
     dirs::data_dir()
         .unwrap_or_else(std::env::temp_dir)
@@ -2102,11 +2137,18 @@ pub fn prepare_in_process(
 }
 
 /// Where the game keeps saves and options.txt: `HORIZON_HOME`, else `horizon` in the platform's
-/// data folder (~/.local/share/horizon on Linux, as the release folders' horizon.sh uses). It is
-/// never inside a version folder, so installing, updating or removing a version keeps the saves.
+/// data folder (~/.local/share/horizon on Linux), or `Horizon-Data/horizon` in a portable bundle.
+/// It is never inside a version folder, so installing, updating or removing a version keeps the saves.
 pub fn game_home() -> PathBuf {
     if let Some(home) = std::env::var_os("HORIZON_HOME").filter(|h| !h.is_empty()) {
         return PathBuf::from(home);
+    }
+    if let Some(portable) = std::env::current_exe()
+        .ok()
+        .as_deref()
+        .and_then(portable_data_dir)
+    {
+        return portable.join("horizon");
     }
     dirs::data_dir()
         .unwrap_or_else(std::env::temp_dir)
@@ -5230,7 +5272,9 @@ pub fn {f}("
             fs::create_dir_all(app.join("Contents/MacOS")).unwrap();
             fs::create_dir_all(app.join("Contents/Resources")).unwrap();
             let bin = app.join("Contents/MacOS/horizon-launcher");
-            fs::copy("/usr/bin/true", &bin).unwrap();
+            // A script is architecture-neutral and still exercises executable permissions.
+            // Avoid copying a host-specific Mach-O binary into the test bundle.
+            fs::write(&bin, "#!/bin/sh\nexit 0\n").unwrap();
             fs::set_permissions(&bin, fs::Permissions::from_mode(0o755)).unwrap();
             fs::write(app.join("Contents/Resources/version"), version).unwrap();
             fs::write(
@@ -5435,5 +5479,59 @@ pub fn {f}("
             envs.get(OsStr::new("PIPEWIRE_PROPS")),
             Some(&Some(OsStr::new("kept")))
         );
+    }
+}
+
+#[cfg(test)]
+mod portable_bundle_tests {
+    use super::portable_data_dir;
+    use std::fs;
+    use std::path::{Path, PathBuf};
+
+    fn scratch(name: &str) -> PathBuf {
+        let path = std::env::temp_dir().join(format!(
+            "horizon-portable-{name}-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        fs::create_dir_all(&path).unwrap();
+        path
+    }
+
+    #[test]
+    fn portable_binary_uses_sibling_data_folder_only_with_marker() {
+        let root = scratch("binary");
+        let binary = if cfg!(windows) {
+            "horizon-launcher.exe"
+        } else {
+            "horizon-launcher"
+        };
+        let executable = root.join(binary);
+        assert_eq!(portable_data_dir(&executable), None);
+        fs::write(root.join("portable"), b"").unwrap();
+        assert_eq!(
+            portable_data_dir(&executable),
+            Some(root.join("Horizon-Data"))
+        );
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn portable_macos_app_uses_data_folder_next_to_bundle() {
+        let root = scratch("macos");
+        let executable = root.join("Horizon.app/Contents/MacOS/horizon-launcher");
+        fs::create_dir_all(executable.parent().unwrap()).unwrap();
+        let contents = executable.parent().unwrap().parent().unwrap();
+        fs::create_dir_all(contents.join("Resources")).unwrap();
+        assert_eq!(portable_data_dir(&executable), None);
+        fs::write(root.join("portable"), b"").unwrap();
+        assert_eq!(
+            portable_data_dir(Path::new(&executable)),
+            Some(root.join("Horizon-Data"))
+        );
+        fs::remove_dir_all(root).unwrap();
     }
 }

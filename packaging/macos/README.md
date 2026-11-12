@@ -13,6 +13,10 @@
   itself from this: inside Horizon.app it replaces the whole bundle (copied beside it, then
   swapped in by renaming, then restarted); a bare `horizon-launcher` binary, as launchers before
   the app shipped, finds the binary inside the zip and replaces only itself.
+- `horizon-launcher-macos-ARCH-portable.zip`: a separate copy of Horizon.app with a `portable`
+  marker beside `Horizon.app` (outside the replaceable bundle). When extracted outside `/Applications`,
+  it stores all launcher data in `Horizon-Data` beside the app. The ordinary update ZIP and the DMG app deliberately do
+  not carry this marker, so self-updates and drag-to-Applications installs keep their normal data path.
 
 ## Signing and notarization
 

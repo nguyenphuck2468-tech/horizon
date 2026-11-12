@@ -21,8 +21,25 @@ name: launcher
 #   gh workflow run launcher --ref main -f dry_run=false -f force=true
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'launcher/**'
+      - 'crates/horizon-bench/**'
+      - 'crates/horizon-friends/**'
+      - 'crates/horizon-mcp/**'
+      - 'crates/horizon-mods/**'
+      - 'crates/horizon-port-pack/**'
+      - 'crates/horizon-prepare/**'
+      - 'crates/horizon-release-sign/**'
+      - 'crates/horizon-telemetry/**'
+      - 'crates/horizon-theme/**'
+      - 'packaging/linux/**'
+      - 'packaging/macos/**'
+      - 'packaging/icons/**'
+      - '.github/workflows/launcher.yml'
   push:
-    branches: [main, launcher, 'launcher-*']
+    branches: [main, launcher, 'launcher-*', 'build/*']
     paths:
       # Everything the launcher is built and packaged from, as tools/release_train.py's LAUNCHER_PATHS.
       - 'launcher/**'
@@ -36,6 +53,7 @@ on:
       - 'crates/horizon-telemetry/**'
       - 'crates/horizon-theme/**'
       - 'packaging/linux/**'
+      - 'packaging/macos/**'
       - 'packaging/icons/**'
       - '.github/workflows/launcher.yml'
   schedule:
@@ -128,7 +146,7 @@ jobs:
             # The C runtime linked in: without it the launcher asks for VCRUNTIME140.dll,
             # which only the Visual C++ redistributable installs.
             rustflags: -C target-feature=+crt-static
-    runs-on: ${{ matrix.mac && (vars.MAC_RUNNER || 'ludovics-mac-mini') || matrix.os }}
+    runs-on: ${{ matrix.mac && (vars.MAC_RUNNER || (github.repository == 'horizon-rust/horizon' && 'ludovics-mac-mini' || (matrix.mac_arch == 'x64' && 'macos-15-intel' || 'macos-15'))) || matrix.os }}
     # Notarizing the app and then the .dmg can take a few minutes each.
     timeout-minutes: ${{ matrix.mac && 60 || 40 }}
     env:
@@ -288,6 +306,17 @@ jobs:
               (cd dist && tar czf ../out/${{ matrix.asset }} ${{ matrix.binary }})
             else
               (cd dist && 7z a ../out/${{ matrix.asset }} ${{ matrix.binary }})
+            fi
+            # Separate opt-in portable archives keep all launcher data beside the extracted
+            # executable. The self-update archives above deliberately remain unchanged.
+            mkdir -p portable-dist
+            cp "$BIN/${{ matrix.binary }}" portable-dist/
+            touch portable-dist/portable
+            printf '%s\n' 'Portable mode stores settings, accounts, versions and downloads in the Horizon-Data folder beside this launcher.' 'Keep the whole folder together when moving it.' > portable-dist/PORTABLE.txt
+            if [[ "$RUNNER_OS" == "Linux" ]]; then
+              (cd portable-dist && tar czf "../out/horizon-launcher-linux-x86_64-portable.tar.gz" *)
+            else
+              (cd portable-dist && 7z a "../out/horizon-launcher-windows-x64-portable.zip" *)
             fi
           fi
           ls -l out
