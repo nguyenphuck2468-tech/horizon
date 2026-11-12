@@ -284,12 +284,18 @@ pub mod content {
 
     /// The registry versions for a previously looked-up content mod.
     pub fn registry_mod_versions(project: &Project) -> Result<Vec<Version>, String> {
-        if crate::browser::horizon::is_native_mod(&project.id) {
-            return Err("Native mod versions belong in the Native Mods workspace.".into());
+        if project.kind != crate::browser::Kind::Mod {
+            return Err("This project is not a Horizon mod.".into());
         }
         let source = crate::browser::source(crate::browser::SourceId::Horizon)
             .ok_or_else(|| "Horizon registry is unavailable.".to_owned())?;
-        crate::browser::Source::versions(&*source, project)
+        // Resolve through the live registry before classifying: is_native_mod deliberately
+        // consults only the already-loaded index and must never guess from a stale UI object.
+        let current = crate::browser::Source::project(&*source, &project.id)?;
+        if crate::browser::horizon::is_native_mod(&current.id) {
+            return Err("Native mod versions belong in the Native Mods workspace.".into());
+        }
+        crate::browser::Source::versions(&*source, &current)
     }
 
     /// The trust and capability summary shown before installing a registry content mod.
