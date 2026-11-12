@@ -17,7 +17,6 @@ use crate::instances as launcher_instances;
 use crate::launch as launch_engine;
 use crate::native_status as native_engine;
 use crate::nightly as nightly_engine;
-use crate::packs as content_engine;
 use crate::servers as server_engine;
 use crate::tailscale as tailscale_engine;
 
