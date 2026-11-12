@@ -120,6 +120,8 @@ jobs:
     needs: decide
     if: needs.decide.outputs.release == 'true'
     name: build ${{ matrix.name }}
+    # Windows ARM64 is best-effort and must not block other platform packages.
+    continue-on-error: ${{ matrix.name == 'windows-arm64' }}
     strategy:
       fail-fast: false
       matrix:
@@ -142,9 +144,21 @@ jobs:
           - name: windows
             os: windows-latest
             asset: horizon-launcher-windows-x64.zip
+            portable_asset: horizon-launcher-windows-x64-portable.zip
+            setup_asset: horizon-launcher-setup.exe
             binary: horizon-launcher.exe
+            pe_arch: x64
             # The C runtime linked in: without it the launcher asks for VCRUNTIME140.dll,
             # which only the Visual C++ redistributable installs.
+            rustflags: -C target-feature=+crt-static
+          - name: windows-arm64
+            os: windows-11-vs2026-arm
+            target: aarch64-pc-windows-msvc
+            asset: horizon-launcher-windows-arm64.zip
+            portable_asset: horizon-launcher-windows-arm64-portable.zip
+            setup_asset: horizon-launcher-setup-arm64.exe
+            binary: horizon-launcher.exe
+            pe_arch: arm64
             rustflags: -C target-feature=+crt-static
     runs-on: ${{ matrix.mac && (vars.MAC_RUNNER || (github.repository == 'horizon-rust/horizon' && 'ludovics-mac-mini' || (matrix.mac_arch == 'x64' && 'macos-15-intel' || 'macos-15'))) || matrix.os }}
     # Notarizing the app and then the .dmg can take a few minutes each.
@@ -201,6 +215,12 @@ jobs:
       # Every test target (the library, the binary, tests/), on each system the launcher ships for.
       - run: cargo test --release --locked ${{ matrix.target && format('--target {0}', matrix.target) || '' }} ${LAUNCHER_FEATURES:+--features "$LAUNCHER_FEATURES"}
       - run: cargo build --release --locked ${{ matrix.target && format('--target {0}', matrix.target) || '' }} ${LAUNCHER_FEATURES:+--features "$LAUNCHER_FEATURES"}
+      - name: Verify Windows executable architecture
+        if: runner.os == 'Windows'
+        run: python ../tools/check_pe_arch.py "${{ matrix.pe_arch }}" "$BIN/${{ matrix.binary }}"
+      - name: Unrelated DLLs cannot intercept launcher or setup startup
+        if: runner.os == 'Windows'
+        run: python ../tools/test_launcher_dll_search.py "$BIN/${{ matrix.binary }}"
       - name: The version is the release's
         run: |
           out=$("$BIN/${{ matrix.binary }}" --version)
@@ -255,6 +275,11 @@ jobs:
           # release linked to a Nix store is a warning here, not a broken launcher.
           soft() { if [[ "$RUNNER_OS" == "Linux" ]]; then "$@" || echo "::warning::$* failed"; else "$@"; fi; }
           if [[ "$RUNNER_OS" == "Windows" ]]; then
+            if ! python ../tools/check_pe_arch.py "${{ matrix.pe_arch }}" "$client"; then
+              # ARM64 launchers may need the x64 game build when a release has no ARM64 client.
+              [[ "${{ matrix.pe_arch }}" == arm64 ]] && python ../tools/check_pe_arch.py x64 "$client" || exit 1
+              echo "::warning::the latest game has no ARM64 build: the launcher installed the x64 one"
+            fi
             python ../tools/check_imports.py "$client"
           elif [[ "$RUNNER_OS" == "Linux" ]]; then
             soft python3 ../tools/check_imports.py "$client"
@@ -266,8 +291,8 @@ jobs:
           # folder, and the copy it installs uninstalls itself. HKCU of the runner only.
           if [[ "$RUNNER_OS" == "Windows" ]]; then
             setup="$RUNNER_TEMP/setup-smoke"
-            cp "$launcher" "$RUNNER_TEMP/horizon-launcher-setup.exe"
-            "$RUNNER_TEMP/horizon-launcher-setup.exe" setup --quiet --dir "$setup"
+            cp "$launcher" "$RUNNER_TEMP/${{ matrix.setup_asset }}"
+            "$RUNNER_TEMP/${{ matrix.setup_asset }}" setup --quiet --dir "$setup"
             installed="$setup/Horizon Launcher/horizon-launcher.exe"
             [[ -f "$installed" ]] || { echo "::error::the setup copied no launcher"; exit 1; }
             "$installed" uninstall --quiet
@@ -316,7 +341,7 @@ jobs:
             if [[ "$RUNNER_OS" == "Linux" ]]; then
               (cd portable-dist && tar czf "../out/horizon-launcher-linux-x86_64-portable.tar.gz" *)
             else
-              (cd portable-dist && 7z a "../out/horizon-launcher-windows-x64-portable.zip" *)
+              (cd portable-dist && 7z a "../out/${{ matrix.portable_asset }}" *)
             fi
           fi
           ls -l out
@@ -325,7 +350,7 @@ jobs:
         # installer instead of Home (launcher/src/installer.rs). Its name is what makes it the setup,
         # so the ZIP's copy stays the launcher. Both go into the release's signed SHA256SUMS.
         if: runner.os == 'Windows'
-        run: cp "$BIN/${{ matrix.binary }}" out/horizon-launcher-setup.exe
+        run: cp "$BIN/${{ matrix.binary }}" "out/${{ matrix.setup_asset }}"
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset }}
@@ -403,6 +428,11 @@ jobs:
           key=(); [[ -n "$EPHEMERAL" ]] && key=(--key "$(cat dist/ephemeral.pub)")
           cargo run --locked --quiet -p horizon-release-sign -- verify --tag "$TAG" --publishing "${key[@]}" dist
       # Never marked latest: Horizon's own releases stay the repository's latest.
+      - name: The Windows ARM64 launcher, if it built
+        run: |
+          for file in horizon-launcher-windows-arm64.zip horizon-launcher-windows-arm64-portable.zip horizon-launcher-setup-arm64.exe; do
+            [[ -f "dist/$file" ]] || echo "::warning::$file is missing: this release goes out without it"
+          done
       - name: Publish ${{ needs.decide.outputs.tag }}
         if: needs.decide.outputs.dry_run != 'true'
         env:
