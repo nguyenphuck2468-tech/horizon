@@ -253,8 +253,8 @@ pub mod content {
     use super::*;
     use std::path::Path;
 
-    pub use crate::packs::Kind as PackKind;
     pub use crate::browser::horizon::pack::Installed as RegistryPack;
+    pub use crate::packs::Kind as PackKind;
 
     /// Whether a file is a resource pack or a shader pack; a mod jar is neither.
     pub fn pack_kind(path: &Path) -> Result<PackKind, String> {
@@ -583,7 +583,10 @@ mod tests {
         assert_eq!(Profile::parse("dev"), Some(Profile::Dev));
         assert_eq!(Profile::parse("release"), Some(Profile::Release));
         assert_eq!(Profile::parse("unknown"), None);
-        assert_eq!(Profile::ALL, [Profile::Performance, Profile::Dev, Profile::Release]);
+        assert_eq!(
+            Profile::ALL,
+            [Profile::Performance, Profile::Dev, Profile::Release]
+        );
     }
 
     #[test]
