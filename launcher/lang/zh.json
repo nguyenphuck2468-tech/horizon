@@ -1106,5 +1106,8 @@
   "Import existing data": "导入现有数据",
   "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "仅限同一台电脑。请先关闭所有游戏进程。如果无法使用现有凭据，可能需要重新登录。",
   "Close the running game and wait for preparation to finish before migrating.": "迁移前请关闭正在运行的游戏，并等待准备过程完成。",
-  "Could not locate this computer's user data folder": "找不到此电脑上的用户数据文件夹。"
+  "Could not locate this computer's user data folder": "找不到此电脑上的用户数据文件夹。",
+  "Copy missing files": "复制缺失文件",
+  "Review again": "重新检查",
+  "Review existing data": "查看现有数据"
 }
