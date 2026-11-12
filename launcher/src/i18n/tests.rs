@@ -108,9 +108,9 @@ fn the_scan_finds_multiline_calls_without_reading_comments_or_quoted_code() {
 }
 
 // The replacement UI is still a development preview. Vietnamese has reviewed copy;
- // other locales intentionally use the runtime's English fallback until human translation
- // review is complete. Keep this allowlist narrow so established launcher strings remain
- // required in every shipped language.
+// other locales intentionally use the runtime's English fallback until human translation
+// review is complete. Keep this allowlist narrow so established launcher strings remain
+// required in every shipped language.
 const PREVIEW_ENGLISH_FALLBACKS: &[&str] = &[
     "Account details",
     "Accounts",
@@ -177,10 +177,7 @@ fn every_language_has_every_string_the_code_asks_for() {
     for (language, table) in &tables {
         let missing: Vec<_> = asked
             .iter()
-            .filter(|s| {
-                !table.contains_key(*s)
-                    && !PREVIEW_ENGLISH_FALLBACKS.contains(&s.as_str())
-            })
+            .filter(|s| !table.contains_key(*s) && !PREVIEW_ENGLISH_FALLBACKS.contains(&s.as_str()))
             .collect();
         assert!(
             missing.is_empty(),
