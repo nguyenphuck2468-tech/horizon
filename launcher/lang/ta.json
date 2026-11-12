@@ -1098,5 +1098,9 @@
   "Sign in with Ely.by": "Ely.by மூலம் உள்நுழை",
   "Asking Ely.by…": "Ely.by கேட்கிறது…",
   "Use the {provider} account for {name}.": "{name}க்கு {provider} பயன்படுத்தவும்.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "உள்நுழைவுப் பக்கம் உங்கள் உலாவியில் திறக்கும். Horizon உங்கள் கடவுச்சொல்லை ஒருபோதும் பார்ப்பதில்லை."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "உள்நுழைவுப் பக்கம் உங்கள் உலாவியில் திறக்கும். Horizon உங்கள் கடவுச்சொல்லை ஒருபோதும் பார்ப்பதில்லை.",
+  "Close the running game and wait for preparation to finish before migrating.": "Close the running game and wait for preparation to finish before migrating.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.",
+  "Copy missing files": "Copy missing files",
+  "Could not locate this computer's user data folder": "Could not locate this computer's user data folder"
 }

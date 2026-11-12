@@ -1098,5 +1098,9 @@
   "Sign in with Ely.by": "Inscribe te cum Ely.by",
   "Asking Ely.by…": "Rogans Ely.by...",
   "Use the {provider} account for {name}.": "utere ratione {provider} pro {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Pagina inscriptionis in navigatro tuo aperit. Horizon numquam videt verbum tuum secretum."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Pagina inscriptionis in navigatro tuo aperit. Horizon numquam videt verbum tuum secretum.",
+  "Close the running game and wait for preparation to finish before migrating.": "Close the running game and wait for preparation to finish before migrating.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.",
+  "Copy missing files": "Copy missing files",
+  "Could not locate this computer's user data folder": "Could not locate this computer's user data folder"
 }

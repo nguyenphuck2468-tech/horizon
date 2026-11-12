@@ -1098,5 +1098,9 @@
   "Sign in with Ely.by": "Log masuk dengan Ely.by",
   "Asking Ely.by…": "Bertanya kepada Ely.by…",
   "Use the {provider} account for {name}.": "Gunakan {provider} untuk {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Halaman log masuk dibuka dalam penyemak imbas anda. Horizon tidak pernah melihat kata laluan anda."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Halaman log masuk dibuka dalam penyemak imbas anda. Horizon tidak pernah melihat kata laluan anda.",
+  "Close the running game and wait for preparation to finish before migrating.": "Close the running game and wait for preparation to finish before migrating.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.",
+  "Copy missing files": "Copy missing files",
+  "Could not locate this computer's user data folder": "Could not locate this computer's user data folder"
 }

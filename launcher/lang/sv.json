@@ -1098,5 +1098,9 @@
   "Sign in with Ely.by": "Logga in med Ely.by",
   "Asking Ely.by…": "Frågar Ely.by...",
   "Use the {provider} account for {name}.": "Använd {provider} för {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Inloggningssidan öppnas i din webbläsare. Horizon ser aldrig ditt lösenord."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Inloggningssidan öppnas i din webbläsare. Horizon ser aldrig ditt lösenord.",
+  "Close the running game and wait for preparation to finish before migrating.": "Close the running game and wait for preparation to finish before migrating.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.",
+  "Copy missing files": "Copy missing files",
+  "Could not locate this computer's user data folder": "Could not locate this computer's user data folder"
 }
