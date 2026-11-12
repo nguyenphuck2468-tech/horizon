@@ -9,8 +9,31 @@ use super::*;
 use gpui::{div, prelude::*, px, ClickEvent, SharedString};
 
 /// Whether the replacement shell is requested for local development and screenshot tests.
+fn preview_enabled(value: Option<&str>) -> bool {
+    value == Some("1")
+}
+
+/// Whether the replacement shell is requested for local development and screenshot tests.
+/// Require an explicit value so unrelated inherited environment variables cannot switch UIs.
 pub(super) fn wanted() -> bool {
-    std::env::var_os("HORIZON_LAUNCHER_NEXT_UI").is_some()
+    preview_enabled(
+        std::env::var("HORIZON_LAUNCHER_NEXT_UI")
+            .ok()
+            .as_deref(),
+    )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::preview_enabled;
+
+    #[test]
+    fn preview_requires_explicit_opt_in() {
+        assert!(preview_enabled(Some("1")));
+        for value in [None, Some(""), Some("0"), Some("true"), Some("yes")] {
+            assert!(!preview_enabled(value));
+        }
+    }
 }
 
 fn label(route: horizon_launcher::next_navigation::Route) -> &'static str {
