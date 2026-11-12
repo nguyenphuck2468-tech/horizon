@@ -81,7 +81,7 @@ fn select_route(this: &mut Launcher, route: horizon_launcher::next_navigation::R
         }
         _ => {}
     }
-    select_route(this, route);
+    this.next_route = route;
 }
 
 fn description(route: horizon_launcher::next_navigation::Route) -> &'static str {
