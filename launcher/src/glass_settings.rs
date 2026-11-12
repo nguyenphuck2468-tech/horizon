@@ -259,6 +259,120 @@ impl Launcher {
         )
     }
 
+    /// The portable bundle's preview-first import from the previous per-user installation.
+    fn portable_migration_row(&mut self, cx: &mut Context<Self>) -> Div {
+        let t = self.theme;
+        let busy = self.migration_busy;
+        let preview = self.migration_preview.clone();
+        let done = self.migration_done.clone();
+
+        let description = if busy {
+            "Scanning or copying files in the background. Keep Horizon open.".to_string()
+        } else if let Some(Ok(p)) = &preview {
+            format!(
+                "{} launcher files ({} MB), {} game files ({} MB); {} existing files will be kept and {} symbolic links skipped.",
+                p.launcher.files,
+                p.launcher.bytes as f64 / 1_048_576.0,
+                p.game.files,
+                p.game.bytes as f64 / 1_048_576.0,
+                p.launcher.conflicts + p.game.conflicts,
+                p.launcher.skipped_symlinks + p.game.skipped_symlinks,
+            )
+        } else if let Some(Err(error)) = &preview {
+            error.clone()
+        } else if let Some(Ok(result)) = &done {
+            format!(
+                "Copied {} launcher files and {} game files. Existing files were not overwritten; {} symbolic links were skipped.",
+                result.launcher.copied,
+                result.game.copied,
+                result.launcher.skipped_symlinks + result.game.skipped_symlinks,
+            )
+        } else if let Some(Err(error)) = &done {
+            error.clone()
+        } else {
+            "Review and copy data from this computer's previous Horizon installation".to_string()
+        };
+
+        let mut actions = div().flex().items_center().gap(px(8.));
+        if busy {
+            actions = actions.child(ui::text(12., FontWeight::MEDIUM, 0.65).child(tr("Working…")));
+        } else if let Some(Ok(p)) = &preview {
+            if p.launcher.files + p.game.files > 0 {
+                actions = actions.child(
+                    button(
+                        "portable-migration-copy",
+                        "Copy missing files",
+                        Kind::Primary,
+                        &t,
+                    )
+                    .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                        this.execute_portable_migration();
+                        cx.notify();
+                    })),
+                );
+            }
+            actions = actions.child(
+                button("portable-migration-cancel", "Cancel", Kind::Secondary, &t).on_click(
+                    cx.listener(|this, _: &ClickEvent, _, cx| {
+                        this.cancel_portable_migration();
+                        cx.notify();
+                    }),
+                ),
+            );
+        } else if preview.is_some() || done.is_some() {
+            actions = actions
+                .child(
+                    button(
+                        "portable-migration-retry",
+                        "Review again",
+                        Kind::Secondary,
+                        &t,
+                    )
+                    .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                        this.preview_portable_migration();
+                        cx.notify();
+                    })),
+                )
+                .child(
+                    button("portable-migration-dismiss", "Dismiss", Kind::Ghost, &t).on_click(
+                        cx.listener(|this, _: &ClickEvent, _, cx| {
+                            this.cancel_portable_migration();
+                            cx.notify();
+                        }),
+                    ),
+                );
+        } else {
+            actions = actions.child(
+                button(
+                    "portable-migration-review",
+                    "Review existing data",
+                    Kind::Secondary,
+                    &t,
+                )
+                .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                    this.preview_portable_migration();
+                    cx.notify();
+                })),
+            );
+        }
+
+        index_row(
+            0,
+            "Import existing data",
+            Some(
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(4.))
+                    .child(description)
+                    .child("Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.".to_string())
+                    .into_any_element(),
+            ),
+            Some(actions.into_any_element()),
+            &t,
+        )
+    }
+
     /// About's three tiles (the mockup's `AboutTile`s): Horizon and its update, the launcher and
     /// its own, and the data folder.
     fn about_tiles(
@@ -411,6 +525,9 @@ impl Launcher {
         };
         let about = card()
             .child(self.about_tiles(b.horizon, b.horizon_action, b.launcher, b.launcher_action))
+            .when(backend::is_portable_install(), |d| {
+                d.child(self.portable_migration_row(cx))
+            })
             .child(index_row(
                 0,
                 tr("Logs"),
