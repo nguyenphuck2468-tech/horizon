@@ -1596,7 +1596,7 @@ impl Launcher {
         let destination = backend::data_dir();
         std::thread::spawn(move || {
             let result = horizon_launcher::migration::Migration::from_user_data(&destination)
-                 .ok_or_else(|| tr("Could not locate this computer's user data folder").to_string())
+                .ok_or_else(|| tr("Could not locate this computer's user data folder").to_string())
                 .and_then(|migration| migration.preview());
             let _ = tx.send(Msg::MigrationPreview(result));
         });
