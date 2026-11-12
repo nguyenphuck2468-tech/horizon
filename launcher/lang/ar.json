@@ -1098,5 +1098,13 @@
   "Sign in with Ely.by": "تسجيل الدخول بواسطة Ely.by",
   "Asking Ely.by…": "جاري السؤال Ely.by…",
   "Use the {provider} account for {name}.": "استخدام حساب {provider} الخاص بـ {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "تُفتح صفحة تسجيل الدخول في متصفحك. لا يرى Horizon كلمة مرورك أبدًا."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "تُفتح صفحة تسجيل الدخول في متصفحك. لا يرى Horizon كلمة مرورك أبدًا.",
+  "Scanning or copying files in the background. Keep Horizon open.": "جارٍ فحص الملفات أو نسخها في الخلفية. أبقِ Horizon مفتوحًا.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "ملفات المشغّل: {launcher_files} ({launcher_mb} م.ب)، وملفات اللعبة: {game_files} ({game_mb} م.ب)؛ سيُحتفظ بـ{conflicts} ملفًا موجودًا وسيتم تخطي {symlinks} رابطًا رمزيًا.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "تم نسخ {launcher_files} ملفًا للمشغّل و{game_files} ملفًا للعبة. لم تتم الكتابة فوق الملفات الموجودة؛ وتم تخطي {symlinks} رابطًا رمزيًا.",
+  "Review and copy data from this computer's previous Horizon installation": "راجع بيانات تثبيت Horizon السابق على هذا الكمبيوتر وانسخها",
+  "Import existing data": "استيراد البيانات الموجودة",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "على الكمبيوتر نفسه فقط. أغلق جميع عمليات اللعبة أولًا. قد تحتاج إلى تسجيل الدخول مجددًا إذا لم تكن بيانات الاعتماد متاحة.",
+  "Close the running game and wait for preparation to finish before migrating.": "أغلق اللعبة قيد التشغيل وانتظر اكتمال التجهيز قبل نقل البيانات.",
+  "Could not locate this computer's user data folder": "تعذر العثور على مجلد بيانات المستخدم على هذا الكمبيوتر."
 }
