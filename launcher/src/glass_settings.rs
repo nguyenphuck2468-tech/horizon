@@ -267,30 +267,43 @@ impl Launcher {
         let done = self.migration_done.clone();
 
         let description = if busy {
-            "Scanning or copying files in the background. Keep Horizon open.".to_string()
+            tr("Scanning or copying files in the background. Keep Horizon open.").to_string()
         } else if let Some(Ok(p)) = &preview {
-            format!(
-                "{} launcher files ({} MB), {} game files ({} MB); {} existing files will be kept and {} symbolic links skipped.",
-                p.launcher.files,
-                p.launcher.bytes as f64 / 1_048_576.0,
-                p.game.files,
-                p.game.bytes as f64 / 1_048_576.0,
-                p.launcher.conflicts + p.game.conflicts,
-                p.launcher.skipped_symlinks + p.game.skipped_symlinks,
+            let launcher_files = p.launcher.files.to_string();
+            let launcher_mb = format!("{:.1}", p.launcher.bytes as f64 / 1_048_576.0);
+            let game_files = p.game.files.to_string();
+            let game_mb = format!("{:.1}", p.game.bytes as f64 / 1_048_576.0);
+            let conflicts = (p.launcher.conflicts + p.game.conflicts).to_string();
+            let symlinks = (p.launcher.skipped_symlinks + p.game.skipped_symlinks).to_string();
+            trf(
+                "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.",
+                &[
+                    ("launcher_files", &launcher_files),
+                    ("launcher_mb", &launcher_mb),
+                    ("game_files", &game_files),
+                    ("game_mb", &game_mb),
+                    ("conflicts", &conflicts),
+                    ("symlinks", &symlinks),
+                ],
             )
         } else if let Some(Err(error)) = &preview {
             error.clone()
         } else if let Some(Ok(result)) = &done {
-            format!(
-                "Copied {} launcher files and {} game files. Existing files were not overwritten; {} symbolic links were skipped.",
-                result.launcher.copied,
-                result.game.copied,
-                result.launcher.skipped_symlinks + result.game.skipped_symlinks,
+            let launcher_files = result.launcher.copied.to_string();
+            let game_files = result.game.copied.to_string();
+            let symlinks = (result.launcher.skipped_symlinks + result.game.skipped_symlinks).to_string();
+            trf(
+                "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.",
+                &[
+                    ("launcher_files", &launcher_files),
+                    ("game_files", &game_files),
+                    ("symlinks", &symlinks),
+                ],
             )
         } else if let Some(Err(error)) = &done {
             error.clone()
         } else {
-            "Review and copy data from this computer's previous Horizon installation".to_string()
+            tr("Review and copy data from this computer's previous Horizon installation").to_string()
         };
 
         let mut actions = div().flex().items_center().gap(px(8.));
@@ -358,14 +371,14 @@ impl Launcher {
 
         index_row(
             0,
-            "Import existing data",
+            tr("Import existing data"),
             Some(
                 div()
                     .flex()
                     .flex_col()
                     .gap(px(4.))
                     .child(description)
-                    .child("Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.".to_string())
+                    .child(tr("Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.").to_string())
                     .into_any_element(),
             ),
             Some(actions.into_any_element()),
