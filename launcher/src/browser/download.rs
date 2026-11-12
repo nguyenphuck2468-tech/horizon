@@ -124,10 +124,10 @@ impl Hasher {
 
 /// Creates a collision-resistant partial file for one transfer. A fixed `.<name>.part` path
 /// lets concurrent downloads (or a stale partial from a previous process) truncate each other.
-fn create_part_file(folder: &Path, name: &str) -> Result<(PathBuf, fs::File), String> {
+fn create_part_file(folder: &Path) -> Result<(PathBuf, fs::File), String> {
     loop {
         let sequence = PART_FILE_SEQUENCE.fetch_add(1, Ordering::Relaxed);
-        let part = folder.join(format!(".{name}.{}.{}.part", std::process::id(), sequence));
+        let part = folder.join(format!(".horizon-download-{}-{sequence}.part", std::process::id()));
         match OpenOptions::new().write(true).create_new(true).open(&part) {
             Ok(file) => return Ok((part, file)),
             Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => continue,
@@ -164,7 +164,7 @@ pub(super) fn save_from_anywhere(
     let (algo, want) = file.checksum().expect("refuse checks for one");
     fs::create_dir_all(folder).map_err(|e| format!("{}: {e}", folder.display()))?;
     let target = folder.join(&file.name);
-    let (part, mut out) = create_part_file(folder, &file.name)?;
+    let (part, mut out) = create_part_file(folder)?;
     let result = (|| {
         let mut hasher = Hasher::for_file(file);
         let (mut done, mut buf) = (0u64, vec![0u8; 1 << 16]);
