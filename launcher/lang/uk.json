@@ -1106,5 +1106,8 @@
   "Import existing data": "Імпортувати наявні дані",
   "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Лише на цьому самому комп’ютері. Спочатку закрийте всі ігрові процеси. Якщо облікові дані недоступні, може знадобитися повторний вхід.",
   "Close the running game and wait for preparation to finish before migrating.": "Перед перенесенням закрийте запущену гру та дочекайтеся завершення підготовки.",
-  "Could not locate this computer's user data folder": "Не вдалося знайти теку даних користувача на цьому комп’ютері."
+  "Could not locate this computer's user data folder": "Не вдалося знайти теку даних користувача на цьому комп’ютері.",
+  "Copy missing files": "Скопіювати відсутні файли",
+  "Review again": "Переглянути ще раз",
+  "Review existing data": "Переглянути наявні дані"
 }
