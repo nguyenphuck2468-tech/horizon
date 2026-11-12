@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Mag-sign in gamit ang Ely.by",
   "Asking Ely.by…": "Nagtatanong sa Ely.by...",
   "Use the {provider} account for {name}.": "Gamitin ang {provider} para sa {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Bubukas ang pahina ng pag-sign in sa iyong browser. Hindi kailanman nakikita ni Horizon ang iyong password."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Bubukas ang pahina ng pag-sign in sa iyong browser. Hindi kailanman nakikita ni Horizon ang iyong password.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Sinusuri o kinokopya sa background ang mga file. Panatilihing bukas ang Horizon.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} file ng launcher ({launcher_mb} MB), {game_files} file ng laro ({game_mb} MB); pananatilihin ang {conflicts} umiiral na file at lalaktawan ang {symlinks} simbolikong link.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Nakopya ang {launcher_files} file ng launcher at {game_files} file ng laro. Hindi pinalitan ang mga umiiral na file; nilaktawan ang {symlinks} simbolikong link.",
+  "Review and copy data from this computer's previous Horizon installation": "Suriin at kopyahin ang data mula sa dating instalasyon ng Horizon sa computer na ito",
+  "Import existing data": "Mag-import ng umiiral na data",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Sa parehong computer lamang. Isara muna ang lahat ng proseso ng laro. Maaaring kailanganin mong mag-sign in muli kung hindi available ang mga kredensyal.",
+  "Close the running game and wait for preparation to finish before migrating.": "Isara ang larong tumatakbo at hintaying matapos ang paghahanda bago maglipat.",
+  "Could not locate this computer's user data folder": "Hindi mahanap ang folder ng data ng user sa computer na ito.",
+  "Copy missing files": "Kopyahin ang mga nawawalang file",
+  "Review again": "Suriin muli",
+  "Review existing data": "Suriin ang umiiral na data"
 }
