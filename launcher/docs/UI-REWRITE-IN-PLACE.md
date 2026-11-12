@@ -1,68 +1,72 @@
-# Horizon Launcher UI rewrite
+# Horizon Launcher — complete frontend replacement
 
-## Scope
+## Product decision
 
-Rewrite the desktop launcher's user interface **in this repository**, under `launcher/`.
-Do not create a second repository, do not extract a separately published launcher core,
-and do not move the launcher out of the Horizon workspace.
+The existing launcher frontend is being replaced, not merely reskinned. The replacement ships from this same Horizon repository and continues to use the existing launcher backend. The old frontend is a migration reference only; it must not remain the default UI or a runtime dependency of the finished product.
 
-The existing launcher remains the product entry point and the source of truth for
-accounts, instances, Java discovery, downloads, modpacks, servers, updates and launch.
+This does not mean removing launcher capabilities or rewriting their trusted implementations. Preserve the services and workflows listed below and give them a new UI.
 
-## Migration strategy
+## What stays
 
-Build the replacement UI alongside the existing GPUI frontend in the same
-`launcher/` package, then switch the application entry point only after the replacement
-covers the existing workflows. Keep the current frontend available during migration so
-feature parity and rollback remain possible.
+Keep the existing Rust backend/services for:
+- Minecraft/Horizon version discovery, game build/download, installation, preparation and launch.
+- Instance creation, selection, editing, import/export, game directories and Java discovery.
+- Microsoft, Ely.by and offline accounts, including secure secret storage and ownership rules.
+- .homd package discovery/download, validation, installation, update and removal.
+- .hnmod discovery/download, validation, dependency resolution, installation and removal.
+- Native mod build pipeline, toolchain/dependency checks, build logs, artifact validation and packaging.
+- Modrinth/other content sources, modpacks, resource packs, shaders and datapacks.
+- Servers/multiplayer, worlds, screenshots, skins/cosmetics, settings, updates, diagnostics and CLI/MCP.
+- Existing persistence formats, paths, signed-update verification and security boundaries.
 
-The rewrite is a frontend replacement, not a backend rewrite. Reuse the established
-launcher services and persistence APIs; introduce typed view models and UI state adapters
-where the current UI/backend boundary is too coupled.
+The UI calls typed application services/facades. It must not read account secrets, implement archive extraction itself, bypass package validation, or reimplement build/launch logic.
 
-## Product direction
+## What is replaced
 
-- A clear, compact desktop shell with persistent navigation and a strong primary Play action.
-- Home centered on the selected instance, version/loader, account, Java readiness and launch state.
-- Dedicated, consistent pages for Instances, Versions, Mods, Modpacks, Servers, Skins and Settings.
-- A unified component system for typography, spacing, surfaces, controls, empty states, loading,
-  errors and confirmation dialogs.
-- Light and dark themes, localization across all shipped locales, keyboard navigation and
-  accessible focus states.
-- No sponsor/donation/ad surfaces in the personal fork.
+- The current desktop screen tree, page composition, navigation, visual components and interaction model are not the target architecture.
+- Do not preserve the old UI as a second selectable product after cutover.
+- Do not create another repository or move the launcher out of this repository.
+- Do not replace native GPUI with a WebView or a heavyweight UI runtime.
 
-## Performance constraints
+## New experience
 
-- Keep the native GPUI rendering path; do not add a WebView or a heavyweight UI runtime.
-- Avoid continuously animated backgrounds, repeated full-page rebuilds and eager loading of
-  off-screen content.
-- Prefer stable view state, incremental updates, bounded image caches and lazy page data.
-- Respect reduced-motion preferences and lower-end machines.
-- Measure startup, idle CPU/RAM, navigation responsiveness and scrolling before/after.
+Build a new native GPUI application shell with:
+- Home: selected instance, account, version/loader, Java/readiness, activity and one primary Play action.
+- Library: instances, versions and profiles.
+- Content: .homd packages, .hnmod mods, modpacks, resource packs and shaders.
+- Mod development: build configuration, dependency checks, build progress, logs and artifacts.
+- Accounts: provider-aware account management and sign-in.
+- Servers, worlds, cosmetics and diagnostics.
+- Settings: appearance, language, paths, Java, performance and update preferences.
 
-## Non-negotiable compatibility
+Use a coherent design system: compact typography, consistent spacing, accessible contrast/focus, clear loading/empty/error states, keyboard navigation, responsive layouts and light/dark themes. Avoid decorative motion that consumes CPU/GPU; respect reduced-motion preferences.
 
-- Preserve existing account storage and Microsoft/Ely.by/offline login behavior.
-- Preserve instance/game directory layouts, imports, Java selection, mod installation,
-  launch arguments, update/signature checks and user settings.
-- Do not migrate or delete user data as part of the UI rewrite.
-- Keep CLI/MCP behavior independent from desktop view code.
-- Do not change authentication ownership semantics or security boundaries for presentation reasons.
+## Migration and cutover
 
-## Phases
+1. Map each retained workflow to its current backend entry point and add parity coverage.
+2. Create the replacement UI module and app shell inside launcher/; keep it separate from the old screen modules during development.
+3. Implement Home, instance library, accounts and launch end-to-end.
+4. Implement .homd and .hnmod management and native mod building end-to-end.
+5. Migrate remaining retained workflows, with parity tests for each.
+6. Switch the app entry point to the new frontend and remove the old UI modules only after feature parity and Windows/Linux/macOS smoke tests pass.
 
-1. Inventory current screens, actions, state ownership and backend calls.
-2. Introduce the replacement shell, navigation and design tokens in `launcher/src/ui/`.
-3. Implement Home and account/instance selection end to end.
-4. Migrate remaining pages one by one with parity tests.
-5. Add visual/accessibility tests and performance baselines.
-6. Make the replacement the default only after Windows, Linux and macOS validation.
+The old frontend may be used as a temporary reference during migration, but the final executable launches the new frontend by default. Do not ship a dual-UI toggle as the final outcome.
+
+## Compatibility and performance
+
+- Preserve user data, account storage, instance layout and existing config migration behavior.
+- Preserve CLI/MCP independently from desktop UI.
+- Never weaken authentication, ownership, archive validation, package signatures or build checks.
+- Keep background work off the UI thread and expose cancellable progress where safe.
+- Lazy-load expensive content; bound image/log caches; avoid continuous scene animation by default.
+- Record before/after startup time, idle CPU/RAM, navigation latency and scrolling responsiveness.
 
 ## Acceptance criteria
 
-- All existing launcher workflows remain available.
-- No account, instance, world or settings data is lost or relocated.
-- No new mandatory network requests for decorative UI.
-- Keyboard-only navigation and reduced motion work.
-- No regression in launch, account, download or persistence tests.
-- Build and smoke tests pass on Windows, Linux and macOS before cutover.
+- The old UI is no longer the app default and is removed after migration.
+- All retained workflows above are reachable in the new UI.
+- .homd and .hnmod downloads/installations use the existing validated pipelines.
+- Native mod building exposes its real build stages, logs and verified artifacts.
+- No account, instance, world, mod or settings data is lost or relocated.
+- All existing security and backend tests pass; UI parity tests cover migrated workflows.
+- Windows, Linux and macOS builds and smoke tests pass before old UI removal.
