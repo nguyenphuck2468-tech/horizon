@@ -202,8 +202,10 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                             .text_size(px(13.))
                             .text_color(t.ink_soft)
                             .child(format!(
-                                "Version: {} · Installed builds: {}",
-                                selected_version.as_deref().unwrap_or("No build selected"),
+                                "{}: {} · {}: {}",
+                                tr("Version"),
+                                tr(selected_version.as_deref().unwrap_or("No build selected")),
+                                tr("Installed builds"),
                                 this.installed.len()
                             )),
                     )
