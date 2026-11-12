@@ -147,7 +147,10 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
     let confirm_remove = this.confirm_remove.clone();
     let content_route = matches!(
         active,
-        Route::ContentBrowser | Route::InstalledContent | Route::ModpackManager | Route::ModWorkshop
+        Route::ContentBrowser
+            | Route::InstalledContent
+            | Route::ModpackManager
+            | Route::ModWorkshop
     );
     let content_page = if content_route {
         Some(this.mods_page(cx))
