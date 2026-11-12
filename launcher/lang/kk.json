@@ -1106,5 +1106,8 @@
   "Import existing data": "Бар деректерді импорттау",
   "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Тек осы компьютерде. Алдымен барлық ойын процестерін жабыңыз. Тіркелгі деректері қолжетімсіз болса, қайта кіру қажет болуы мүмкін.",
   "Close the running game and wait for preparation to finish before migrating.": "Көшіру алдында іске қосылған ойынды жауып, дайындық аяқталғанша күтіңіз.",
-  "Could not locate this computer's user data folder": "Осы компьютердің пайдаланушы деректері қалтасы табылмады."
+  "Could not locate this computer's user data folder": "Осы компьютердің пайдаланушы деректері қалтасы табылмады.",
+  "Copy missing files": "Жетіспейтін файлдарды көшіру",
+  "Review again": "Қайта қарап шығу",
+  "Review existing data": "Бар деректерді қарап шығу"
 }
