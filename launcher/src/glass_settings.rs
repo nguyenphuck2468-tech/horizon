@@ -291,7 +291,8 @@ impl Launcher {
         } else if let Some(Ok(result)) = &done {
             let launcher_files = result.launcher.copied.to_string();
             let game_files = result.game.copied.to_string();
-            let symlinks = (result.launcher.skipped_symlinks + result.game.skipped_symlinks).to_string();
+            let symlinks =
+                (result.launcher.skipped_symlinks + result.game.skipped_symlinks).to_string();
             trf(
                 "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.",
                 &[
@@ -303,7 +304,8 @@ impl Launcher {
         } else if let Some(Err(error)) = &done {
             error.clone()
         } else {
-            tr("Review and copy data from this computer's previous Horizon installation").to_string()
+            tr("Review and copy data from this computer's previous Horizon installation")
+                .to_string()
         };
 
         let mut actions = div().flex().items_center().gap(px(8.));
