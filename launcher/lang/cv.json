@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Ely.byпа кӗрӗр",
   "Asking Ely.by…": "Ely.by ыйтатӑп…",
   "Use the {provider} account for {name}.": "{provider} шучӗпе {name} валли усӑ курӑр.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Кӗрӗ страници сирӗн браузерта уҫӑлать. Horizon сирӗн паролье нихӑҫан та курмасть."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Кӗрӗ страници сирӗн браузерта уҫӑлать. Horizon сирӗн паролье нихӑҫан та курмасть.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Файлсем фон режимӗнче тӗрӗслетӗпҫӗ те, копиленӗҫ те. Horizon-а уҫӑ хӑварӑр.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "Лаунчер файлӗсем: {launcher_files} ({launcher_mb} МБ), вӑйӑ файлӗсем: {game_files} ({game_mb} МБ); пур {conflicts} файл та юлать, {symlinks} символлӑ ссылкӑсем ирттерӗҫ.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Лаунчерӑн {launcher_files} файлӗпе вӑйӑн {game_files} файлӗ копиленӗ. Пур файлсене те ҫырса хӑварман; {symlinks} символлӑ ссылкӑ ирттернӗ.",
+  "Review and copy data from this computer's previous Horizon installation": "Ку компьютерти малтанхи Horizon установкинчен даннӑйсене тӗрӗслесе копилер",
+  "Import existing data": "Пур даннӑйсене импортлер",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Пӗр компьютер ҫинче ҫеҫ. Малтан вӑйӑ процессӗсене пӗтерӗр. Аккаунт даннӑйӗсем ҫук пулсан, тепӗр хут кӗрме кирлӗ пулма пултарать.",
+  "Close the running game and wait for preparation to finish before migrating.": "Кӗҫӗн вӑйӑна хупӑр та миграци умӗнче хатӗрлев вӗҫленӗччен кӗтӗр.",
+  "Could not locate this computer's user data folder": "Ку компьютерӑн усӑҫӑ даннӑйӗсен папки тупӑнмарӗ.",
+  "Copy missing files": "Пӗлмен файлсене копилер",
+  "Review again": "Тепӗр хут тӗрӗслер",
+  "Review existing data": "Пур даннӑйсене тӗрӗслер"
 }
