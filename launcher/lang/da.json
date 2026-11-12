@@ -1106,5 +1106,8 @@
   "Import existing data": "Importér eksisterende data",
   "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Kun på samme computer. Luk alle spilprocesser først. Du skal muligvis logge ind igen, hvis legitimationsoplysningerne ikke er tilgængelige.",
   "Close the running game and wait for preparation to finish before migrating.": "Luk det kørende spil, og vent på, at forberedelsen er færdig, før du flytter data.",
-  "Could not locate this computer's user data folder": "Kunne ikke finde denne computers brugerdatamappe."
+  "Could not locate this computer's user data folder": "Kunne ikke finde denne computers brugerdatamappe.",
+  "Copy missing files": "Kopiér manglende filer",
+  "Review again": "Gennemse igen",
+  "Review existing data": "Gennemse eksisterende data"
 }
