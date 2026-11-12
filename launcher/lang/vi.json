@@ -1098,5 +1098,13 @@
   "Sign in with Ely.by": "Đăng nhập bằng Ely.by",
   "Asking Ely.by…": "Yêu cầu Ely.by…",
   "Use the {provider} account for {name}.": "Sử dụng {provider} cho {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Trang đăng nhập mở trong trình duyệt của bạn. Horizon không bao giờ thấy mật khẩu của bạn."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Trang đăng nhập mở trong trình duyệt của bạn. Horizon không bao giờ thấy mật khẩu của bạn.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Các tệp đang được quét hoặc sao chép ở chế độ nền. Hãy giữ Horizon mở.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} tệp trình khởi chạy ({launcher_mb} MB), {game_files} tệp trò chơi ({game_mb} MB); sẽ giữ lại {conflicts} tệp đã tồn tại và bỏ qua {symlinks} liên kết tượng trưng.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Đã sao chép {launcher_files} tệp trình khởi chạy và {game_files} tệp trò chơi. Không ghi đè tệp hiện có; đã bỏ qua {symlinks} liên kết tượng trưng.",
+  "Review and copy data from this computer's previous Horizon installation": "Xem lại và sao chép dữ liệu từ bản Horizon cũ trên máy tính này",
+  "Import existing data": "Nhập dữ liệu hiện có",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Chỉ áp dụng trên cùng máy tính. Hãy đóng mọi tiến trình trò chơi trước. Bạn có thể cần đăng nhập lại nếu không có thông tin xác thực.",
+  "Close the running game and wait for preparation to finish before migrating.": "Hãy đóng trò chơi đang chạy và đợi quá trình chuẩn bị hoàn tất trước khi di chuyển.",
+  "Could not locate this computer's user data folder": "Không tìm thấy thư mục dữ liệu người dùng trên máy tính này."
 }
