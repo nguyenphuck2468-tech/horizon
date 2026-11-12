@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Hasi saioa Ely.by-rekin",
   "Asking Ely.by…": "Ely.by-ri galdetzen...",
   "Use the {provider} account for {name}.": "Erabili {provider} {name}-rako.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Saio-hasierako orria irekitzen da zure arakatzailean. Horizon ez du inoiz zure pasahitza ikusten."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Saio-hasierako orria irekitzen da zure arakatzailean. Horizon ez du inoiz zure pasahitza ikusten.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Fitxategiak atzeko planoan eskaneatzen edo kopiatzen ari dira. Mantendu Horizon irekita.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "Abiarazlearen {launcher_files} fitxategi ({launcher_mb} MB), jokoaren {game_files} fitxategi ({game_mb} MB); lehendik dauden {conflicts} fitxategi gordeko dira eta {symlinks} esteka sinboliko baztertuko dira.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Abiarazlearen {launcher_files} fitxategi eta jokoaren {game_files} fitxategi kopiatu dira. Lehendik zeuden fitxategiak ez dira gainidatzi; {symlinks} esteka sinboliko baztertu dira.",
+  "Review and copy data from this computer's previous Horizon installation": "Berrikusi eta kopiatu ordenagailu honetako aurreko Horizon instalazioaren datuak",
+  "Import existing data": "Inportatu lehendik dauden datuak",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Ordenagailu berean bakarrik. Itxi joko-prozesu guztiak lehenik. Baliteke berriro saioa hasi behar izatea kredentzialak erabilgarri ez badaude.",
+  "Close the running game and wait for preparation to finish before migrating.": "Itxi martxan dagoen jokoa eta itxaron prestaketa amaitu arte migratu aurretik.",
+  "Could not locate this computer's user data folder": "Ezin izan da ordenagailu honetako erabiltzaile-datuen karpeta aurkitu.",
+  "Copy missing files": "Kopiatu falta diren fitxategiak",
+  "Review again": "Berrikusi berriro",
+  "Review existing data": "Berrikusi lehendik dauden datuak"
 }
