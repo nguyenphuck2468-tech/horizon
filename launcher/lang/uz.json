@@ -1106,5 +1106,8 @@
   "Import existing data": "Mavjud ma’lumotlarni import qilish",
   "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Faqat shu kompyuterda. Avval barcha o‘yin jarayonlarini yoping. Hisob ma’lumotlari mavjud bo‘lmasa, qayta tizimga kirishingiz kerak bo‘lishi mumkin.",
   "Close the running game and wait for preparation to finish before migrating.": "Ko‘chirishdan oldin ishlayotgan o‘yinni yoping va tayyorlash tugashini kuting.",
-  "Could not locate this computer's user data folder": "Bu kompyuterning foydalanuvchi ma’lumotlari papkasi topilmadi."
+  "Could not locate this computer's user data folder": "Bu kompyuterning foydalanuvchi ma’lumotlari papkasi topilmadi.",
+  "Copy missing files": "Yetishmayotgan fayllarni nusxalash",
+  "Review again": "Qayta ko‘rib chiqish",
+  "Review existing data": "Mavjud ma’lumotlarni ko‘rib chiqish"
 }
