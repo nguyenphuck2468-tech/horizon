@@ -381,6 +381,60 @@ fn a_download_is_kept_only_when_its_checksum_matches() {
 }
 
 #[test]
+fn concurrent_partial_file_creation_is_unique_and_bounded() {
+    let dir = scratch("concurrent-partials");
+    std::fs::create_dir_all(&dir).unwrap();
+
+    let workers: Vec<_> = (0..16)
+        .map(|_| {
+            let folder = dir.clone();
+            std::thread::spawn(move || download::create_part_file(&folder).unwrap())
+        })
+        .collect();
+    let mut created = Vec::new();
+    for worker in workers {
+        created.push(worker.join().unwrap());
+    }
+
+    let paths: Vec<_> = created.iter().map(|(path, _)| path.clone()).collect();
+    let unique: std::collections::HashSet<_> = paths.iter().collect();
+    assert_eq!(
+        unique.len(),
+        16,
+        "concurrent transfers must own distinct partials"
+    );
+    for path in &paths {
+        let name = path.file_name().unwrap().to_string_lossy();
+        assert!(name.starts_with(".horizon-download-"), "{name}");
+        assert!(name.len() <= 64, "temporary name must stay bounded: {name}");
+        assert!(
+            path.is_file(),
+            "partial file should exist: {}",
+            path.display()
+        );
+    }
+
+    drop(created);
+    std::fs::remove_dir_all(&dir).unwrap();
+}
+
+#[test]
+fn a_download_does_not_truncate_another_transfer_partial_file() {
+    let dir = scratch("partial-isolation");
+    std::fs::create_dir_all(&dir).unwrap();
+    let stale = dir.join(".pack.zip.part");
+    let sentinel = b"another transfer owns this partial file";
+    std::fs::write(&stale, sentinel).unwrap();
+
+    let body = b"a resource pack";
+    let path = download::save(&file_for(body, true), &body[..], &dir, &|_| {}).unwrap();
+
+    assert_eq!(std::fs::read(&stale).unwrap(), sentinel);
+    assert_eq!(std::fs::read(&path).unwrap(), body);
+    std::fs::remove_dir_all(&dir).unwrap();
+}
+
+#[test]
 fn downloads_refused_before_any_byte() {
     let body = b"x";
     let mut file = file_for(body, true);
