@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Մուտք գործեք Ely.by",
   "Asking Ely.by…": "Խնդրում ենք Ely.by…",
   "Use the {provider} account for {name}.": "Օգտագործեք {provider} {name}-ի համար:",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Մուտքագրման էջը բացվում է Ձեր բրաուզերում: Horizon երբեք չի տեսնում Ձեր գաղտնաբառը:"
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Մուտքագրման էջը բացվում է Ձեր բրաուզերում: Horizon երբեք չի տեսնում Ձեր գաղտնաբառը:",
+  "Scanning or copying files in the background. Keep Horizon open.": "Ֆայլերը սկանավորվում կամ պատճենվում են հետին պլանում։ Horizon-ը բաց պահեք։",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "Գործարկիչի {launcher_files} ֆայլ ({launcher_mb} ՄԲ), խաղի {game_files} ֆայլ ({game_mb} ՄԲ). առկա {conflicts} ֆայլը կպահպանվի, իսկ {symlinks} խորհրդանշական հղումը բաց կթողնվի։",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Պատճենվել է գործարկիչի {launcher_files} ֆայլ և խաղի {game_files} ֆայլ։ Առկա ֆայլերը չեն վերագրվել, {symlinks} խորհրդանշական հղում բաց է թողնվել։",
+  "Review and copy data from this computer's previous Horizon installation": "Ստուգեք և պատճենեք այս համակարգչի Horizon-ի նախորդ տեղադրման տվյալները",
+  "Import existing data": "Ներմուծել առկա տվյալները",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Միայն նույն համակարգչում։ Նախ փակեք խաղի բոլոր գործընթացները։ Եթե մուտքի տվյալները հասանելի չեն, հնարավոր է՝ պետք լինի կրկին մուտք գործել։",
+  "Close the running game and wait for preparation to finish before migrating.": "Տեղափոխումից առաջ փակեք աշխատող խաղը և սպասեք պատրաստման ավարտին։",
+  "Could not locate this computer's user data folder": "Չհաջողվեց գտնել այս համակարգչի օգտատիրոջ տվյալների պանակը։",
+  "Copy missing files": "Պատճենել բացակայող ֆայլերը",
+  "Review again": "Կրկին ստուգել",
+  "Review existing data": "Ստուգել առկա տվյալները"
 }
