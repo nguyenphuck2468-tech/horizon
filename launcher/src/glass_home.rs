@@ -50,7 +50,7 @@ impl Launcher {
             },
         ));
         let actions = div()
-            .mt(px(32.))
+            .mt(px(24.))
             .flex()
             // One line, unlike the mockup's `flex-wrap`: at 1280 px the folder's ⋯ would wrap the
             // row away from under the pointer, which hides it again.
@@ -148,21 +148,23 @@ impl Launcher {
         let Some(instance) = self.selected_instance().cloned() else {
             return div();
         };
+        let title_size = (self.window_width * 0.045).clamp(40., 56.);
+        let icon_size = if self.window_width < 900. { 44. } else { 56. };
         div()
-            .mt(px(20.))
+            .mt(px(16.))
             .flex()
             .items_center()
-            .gap(px(16.))
+            .gap(px(if self.window_width < 900. { 12. } else { 16. }))
             .min_w_0()
-            .child(self.glass_instance_icon(&instance, 56.))
+            .child(self.glass_instance_icon(&instance, icon_size))
             .child(
                 div()
                     .min_w_0()
                     .truncate()
                     .font_family(horizon_theme::glass::DISPLAY_FONT)
                     .font_weight(FontWeight::SEMIBOLD)
-                    .text_size(px(64.))
-                    .line_height(px(64.))
+                    .text_size(px(title_size))
+                    .line_height(px(title_size))
                     .text_color(white(ink::FULL))
                     .child(instance.name),
             )
