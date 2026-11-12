@@ -322,10 +322,7 @@ mod tests {
             route_by_id("content.mod_workshop").unwrap().route,
             Route::ModWorkshop
         );
-        assert_eq!(
-            workspace_for(Route::ModWorkshop),
-            Workspace::ModDevelopment
-        );
+        assert_eq!(workspace_for(Route::ModWorkshop), Workspace::ModDevelopment);
         assert!(route_by_id("not-a-route").is_none());
         assert_eq!(workspace_for(Route::DownloadQueue), Workspace::Diagnostics);
     }
