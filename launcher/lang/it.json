@@ -1098,5 +1098,13 @@
   "Sign in with Ely.by": "Accedi con Ely.by",
   "Asking Ely.by…": "Chiedendo Ely.by...",
   "Use the {provider} account for {name}.": "Utilizza l'{provider} per {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "La pagina di accesso si apre nel browser. Horizon non vede mai la tua password."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "La pagina di accesso si apre nel browser. Horizon non vede mai la tua password.",
+  "Scanning or copying files in the background. Keep Horizon open.": "I file vengono analizzati o copiati in background. Lascia Horizon aperto.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} file del launcher ({launcher_mb} MB), {game_files} file di gioco ({game_mb} MB); i {conflicts} file esistenti verranno conservati e i {symlinks} collegamenti simbolici ignorati.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Copiati {launcher_files} file del launcher e {game_files} file di gioco. I file esistenti non sono stati sovrascritti; {symlinks} collegamenti simbolici sono stati ignorati.",
+  "Review and copy data from this computer's previous Horizon installation": "Controlla e copia i dati dalla precedente installazione di Horizon su questo computer",
+  "Import existing data": "Importa i dati esistenti",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Solo sullo stesso computer. Chiudi prima tutti i processi di gioco. Potrebbe essere necessario accedere di nuovo se le credenziali non sono disponibili.",
+  "Close the running game and wait for preparation to finish before migrating.": "Chiudi il gioco in esecuzione e attendi il completamento della preparazione prima di migrare.",
+  "Could not locate this computer's user data folder": "Impossibile trovare la cartella dei dati utente su questo computer."
 }
