@@ -1,0 +1,70 @@
+[package]
+name = "horizon-launcher-core"
+version = "0.1.0"
+edition = "2021"
+license.workspace = true
+rust-version.workspace = true
+description = "UI-independent launcher services shared by Horizon desktop frontends"
+
+# Keep the existing backend source in place during extraction. This avoids a risky
+# mass move while the new standalone frontend is being built and validated.
+[lib]
+path = "../../launcher/src/lib.rs"
+
+[dependencies]
+horizon-mod-api-gen = { path = "../horizon-mod-api-gen" }
+ureq = { version = "2", features = ["json", "tls"], default-features = false }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+libc = "0.2"
+syn = { version = "2", features = ["full"] }
+sha1 = "0.10"
+sha2 = "0.10"
+chacha20poly1305 = "0.10"
+flate2 = "1"
+tar = { version = "0.4", default-features = false }
+toml = "1.1"
+semver = "1"
+zip = { version = "9.1.3", default-features = false, features = ["deflate"] }
+dirs = "5"
+horizon-theme = { path = "../horizon-theme" }
+horizon-core = { path = "../horizon-core" }
+horizon-cosmetics = { path = "../horizon-cosmetics" }
+horizon-mcp = { path = "../horizon-mcp" }
+horizon-prepare = { path = "../horizon-prepare" }
+horizon-friends = { path = "../horizon-friends" }
+horizon-bench = { path = "../horizon-bench" }
+horizon-port-pack = { path = "../horizon-port-pack" }
+horizon-mods = { path = "../horizon-mods", features = ["index"] }
+horizon-release-sign = { path = "../horizon-release-sign" }
+horizon-telemetry = { path = "../horizon-telemetry" }
+horizon-protocol = { path = "../horizon-protocol" }
+horizon-world = { path = "../horizon-world" }
+trash = "5"
+base64 = "0.22"
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+getrandom = "0.3"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "webp", "gif"] }
+
+[target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies]
+oo7 = { version = "0.6", default-features = false, features = ["async-std", "native_crypto"] }
+futures-lite = "2"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+keyring = { version = "3", features = ["apple-native"] }
+security-framework = "3"
+objc2-app-kit = { version = "0.3", default-features = false, features = ["NSAccessibility", "NSAppearance", "NSView", "NSWindow", "NSWorkspace"] }
+raw-window-handle = "0.6"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+keyring = { version = "3", features = ["windows-native"] }
+windows-sys = { version = "0.61", features = ["Win32_Storage_FileSystem", "Win32_System_SystemInformation"] }
+windows = { version = "0.62", features = ["Win32_Foundation", "Win32_Storage_FileSystem", "Win32_System_Com", "Win32_UI_Shell"] }
+winreg = "0.56"
+
+[dev-dependencies]
+proc-macro2 = "1"
+syn = { version = "2", features = ["full"] }
+
+[lints]
+workspace = true
