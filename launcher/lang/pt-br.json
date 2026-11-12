@@ -1098,5 +1098,13 @@
   "Sign in with Ely.by": "Entrar com a Ely.by",
   "Asking Ely.by…": "Conectando Ely.by…",
   "Use the {provider} account for {name}.": "Use a {provider} de {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "A página de login abre no seu navegador. O Horizon nunca vê sua senha."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "A página de login abre no seu navegador. O Horizon nunca vê sua senha.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Os arquivos estão sendo verificados ou copiados em segundo plano. Mantenha o Horizon aberto.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} arquivos do inicializador ({launcher_mb} MB), {game_files} arquivos do jogo ({game_mb} MB); {conflicts} arquivos existentes serão mantidos e {symlinks} links simbólicos serão ignorados.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "{launcher_files} arquivos do inicializador e {game_files} arquivos do jogo foram copiados. Os arquivos existentes não foram sobrescritos; {symlinks} links simbólicos foram ignorados.",
+  "Review and copy data from this computer's previous Horizon installation": "Revise e copie os dados da instalação anterior do Horizon neste computador",
+  "Import existing data": "Importar dados existentes",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Somente no mesmo computador. Feche todos os processos do jogo primeiro. Talvez seja necessário entrar novamente se as credenciais não estiverem disponíveis.",
+  "Close the running game and wait for preparation to finish before migrating.": "Feche o jogo em execução e aguarde a conclusão da preparação antes de migrar.",
+  "Could not locate this computer's user data folder": "Não foi possível localizar a pasta de dados do usuário neste computador."
 }
