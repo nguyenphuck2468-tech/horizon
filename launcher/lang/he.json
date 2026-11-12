@@ -1098,5 +1098,13 @@
   "Sign in with Ely.by": "היכנס עם Ely.by",
   "Asking Ely.by…": "Asking Ely.by…",
   "Use the {provider} account for {name}.": "השתמש ב{provider} עבור {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "דף הכניסה נפתח בדפדפן שלך. Horizon אף פעם לא רואה את הסיסמה שלך."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "דף הכניסה נפתח בדפדפן שלך. Horizon אף פעם לא רואה את הסיסמה שלך.",
+  "Scanning or copying files in the background. Keep Horizon open.": "הקבצים נסרקים או מועתקים ברקע. השאר את Horizon פתוח.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} קובצי מפעיל ({launcher_mb} MB), {game_files} קובצי משחק ({game_mb} MB); {conflicts} קבצים קיימים יישמרו ו-{symlinks} קישורים סמליים יידלגו.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "הועתקו {launcher_files} קובצי מפעיל ו-{game_files} קובצי משחק. קבצים קיימים לא נדרסו; {symlinks} קישורים סמליים דולגו.",
+  "Review and copy data from this computer's previous Horizon installation": "סקור והעתק נתונים מהתקנת Horizon הקודמת במחשב הזה",
+  "Import existing data": "ייבוא נתונים קיימים",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "באותו מחשב בלבד. סגור תחילה את כל תהליכי המשחק. ייתכן שיהיה צורך להתחבר מחדש אם פרטי הכניסה אינם זמינים.",
+  "Close the running game and wait for preparation to finish before migrating.": "סגור את המשחק שפועל והמתן לסיום ההכנה לפני העברת הנתונים.",
+  "Could not locate this computer's user data folder": "לא ניתן למצוא את תיקיית נתוני המשתמש במחשב הזה."
 }
