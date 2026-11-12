@@ -1098,5 +1098,13 @@
   "Sign in with Ely.by": "使用 Ely.by 账户登录",
   "Asking Ely.by…": "正在询问 Ely.by…",
   "Use the {provider} account for {name}.": "请使用 {name} 的 {provider}。",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "登录页面会在浏览器中打开。Horizon 永远看不到你的密码。"
+  "The sign-in page opens in your browser. Horizon never sees your password.": "登录页面会在浏览器中打开。Horizon 永远看不到你的密码。",
+  "Scanning or copying files in the background. Keep Horizon open.": "正在后台扫描或复制文件。请保持 Horizon 开启。",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "启动器文件 {launcher_files} 个（{launcher_mb} MB），游戏文件 {game_files} 个（{game_mb} MB）；保留已有文件 {conflicts} 个，并跳过符号链接 {symlinks} 个。",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "已复制启动器文件 {launcher_files} 个和游戏文件 {game_files} 个。不会覆盖已有文件；已跳过符号链接 {symlinks} 个。",
+  "Review and copy data from this computer's previous Horizon installation": "查看并复制此电脑上旧版 Horizon 安装中的数据",
+  "Import existing data": "导入现有数据",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "仅限同一台电脑。请先关闭所有游戏进程。如果无法使用现有凭据，可能需要重新登录。",
+  "Close the running game and wait for preparation to finish before migrating.": "迁移前请关闭正在运行的游戏，并等待准备过程完成。",
+  "Could not locate this computer's user data folder": "找不到此电脑上的用户数据文件夹。"
 }
