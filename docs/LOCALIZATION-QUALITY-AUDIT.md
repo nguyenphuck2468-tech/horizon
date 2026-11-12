@@ -19,6 +19,8 @@ The first pass targets recurring UI terms and technical strings that were mistra
 
 The pass preserves every English key and every format placeholder. It changes values only.
 
+For Vietnamese, the player-facing term `instance` is rendered as `bản cài đặt`; the established Minecraft community term `skin` remains `skin` rather than the literal translation for human skin.
+
 ## Validation rules
 
 For every locale:
