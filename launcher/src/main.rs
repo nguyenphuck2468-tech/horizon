@@ -2766,7 +2766,7 @@ impl Launcher {
         let t = self.theme;
         let n = t.night;
         // Preserve the instance list while returning space to the page on compact windows.
-        let sidebar_width = if self.window_width < 1120. { 216. } else { theme::SIDEBAR };
+        let sidebar_width = frame::responsive_sidebar_width(self.window_width);
         self.load_packs();
         let heading = |label: String| shell::heading(label, &t);
         let add = shell::icon_button("add-instance", "plus", 24., false, &t).on_click(cx.listener(
