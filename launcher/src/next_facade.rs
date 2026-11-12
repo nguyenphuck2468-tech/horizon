@@ -250,32 +250,81 @@ pub mod instances {
 
 /// Installed content.
 pub mod content {
-    use super::*;
     use std::path::Path;
 
-    pub use crate::browser::horizon::pack::Installed as RegistryPack;
+    pub use crate::browser::{Project, Query, Version};
     pub use crate::packs::Kind as PackKind;
+
+    /// Search Horizon's registry for content-only .hmod mods.
+    ///
+    /// Native .hnmod entries (and future native .hmod entries) stay in the native-mod
+    /// workflow; the registry's shared browser kind is not enough to classify them.
+    pub fn registry_mods(query: &Query) -> Result<Vec<Project>, String> {
+        if query.kind != crate::browser::Kind::Mod {
+            return Err("A Horizon content-mod search must use the Mods kind.".into());
+        }
+        let source = crate::browser::source(crate::browser::SourceId::Horizon)
+            .ok_or_else(|| "Horizon registry is unavailable.".to_owned())?;
+        let projects = crate::browser::Source::search(&*source, query)?;
+        Ok(projects
+            .into_iter()
+            .filter(|project| !crate::browser::horizon::is_native_mod(&project.id))
+            .collect())
+    }
+
+    /// Look up a content-only registry mod by its stable project ID.
+    pub fn registry_mod(id: &str) -> Result<Project, String> {
+        let source = crate::browser::source(crate::browser::SourceId::Horizon)
+            .ok_or_else(|| "Horizon registry is unavailable.".to_owned())?;
+        let project = crate::browser::Source::project(&*source, id)?;
+        if crate::browser::horizon::is_native_mod(id) {
+            return Err("This project is a native mod; open it in the Native Mods workspace.".into());
+        }
+        Ok(project)
+    }
+
+    /// The registry versions for a previously looked-up content mod.
+    pub fn registry_mod_versions(project: &Project) -> Result<Vec<Version>, String> {
+        if crate::browser::horizon::is_native_mod(&project.id) {
+            return Err("Native mod versions belong in the Native Mods workspace.".into());
+        }
+        let source = crate::browser::source(crate::browser::SourceId::Horizon)
+            .ok_or_else(|| "Horizon registry is unavailable.".to_owned())?;
+        crate::browser::Source::versions(&*source, project)
+    }
+
+    /// The trust and capability summary shown before installing a registry content mod.
+    pub fn registry_mod_trust(id: &str) -> Vec<String> {
+        crate::browser::horizon::trust_and_capabilities(id)
+    }
 
     /// Whether a file is a resource pack or a shader pack; a mod jar is neither.
     pub fn pack_kind(path: &Path) -> Result<PackKind, String> {
-        content_engine::kind_of(path)
+        crate::packs::kind_of(path)
     }
+}
 
-    /// Installed Horizon registry packs, already checked and recorded by the existing service.
-    pub fn registry_packs() -> Vec<RegistryPack> {
+/// Registry .hpack modpacks. Kept separate from .hmod content mods and .hnmod native mods.
+pub mod modpacks {
+    use std::path::Path;
+
+    pub use crate::browser::horizon::pack::Installed as RegistryModpack;
+
+    /// Installed registry modpacks, each with its own profile and game folder.
+    pub fn registry_modpacks() -> Vec<RegistryModpack> {
         crate::browser::horizon::pack::list()
     }
 
-    /// Install a registry pack through its signed/hash-checked download pipeline.
-    pub fn install_registry_pack(
+    /// Install or update a registry .hpack through the signed/hash-checked pipeline.
+    pub fn install_registry_modpack(
         id: &str,
         progress: &dyn Fn(&str, f32),
-    ) -> Result<RegistryPack, String> {
+    ) -> Result<RegistryModpack, String> {
         crate::browser::horizon::pack::install(id, progress)
     }
 
-    /// Remove an installed registry pack through the existing service.
-    pub fn remove_registry_pack(work: &Path) -> Result<(), String> {
+    /// Remove an installed .hpack profile through the existing service.
+    pub fn remove_registry_modpack(work: &Path) -> Result<(), String> {
         crate::browser::horizon::pack::remove(work)
     }
 }
