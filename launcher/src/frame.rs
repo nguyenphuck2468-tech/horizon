@@ -262,6 +262,8 @@ impl Launcher {
     pub(super) fn glass_sidebar(&mut self, window: &Window, cx: &mut Context<Self>) -> Div {
         let t = self.theme;
         let soft = self.look.accent_soft;
+        // Give the content more room on compact desktop windows without hiding instance controls.
+        let sidebar_width = if self.window_width < 1120. { 216. } else { SIDEBAR };
         self.load_packs();
         let add = ui::icon_button(
             "add-instance",
@@ -412,7 +414,7 @@ impl Launcher {
                 - 190.;
             let mut side = div().relative().mt(px(12.)).child(partner::card(
                 "partner-side",
-                SIDEBAR - 20.,
+                sidebar_width - 20.,
                 free < partner::TALL_HEIGHT,
                 &t,
             ));
@@ -518,7 +520,7 @@ impl Launcher {
             .flex()
             .flex_col()
             .flex_none()
-            .w(px(SIDEBAR))
+            .w(px(sidebar_width))
             .my(px(MARGIN))
             .ml(px(MARGIN))
             .overflow_hidden()
