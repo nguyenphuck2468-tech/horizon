@@ -17,4 +17,4 @@ SOUL AI's current Phase 1 skills are trained for MiniCraft, not Minecraft. Their
 
 The reported `T_wood` / `T_tools` / `T_iron` task-success values and `learned_agreement` values are separate metrics. The supplied package summary is not a substitute for artifact-level verification. Before packaging SOUL skills with Horizon, verify the ZIP's complete file inventory, manifest hashes, schemas, feature/action mappings and seed provenance. Do not interpret agreement with the mapped fallback as independent task success.
 
-See the matching SOUL-side contract in `Soul-AI/docs/SOUL-HORIZON-INTEGRATION.md`. The contract is intentionally proposal-only until a Minecraft-specific adapter exists.
+See the matching SOUL-side [integration contract](https://github.com/nguyenphuck2468-tech/Soul-AI/blob/research/g31-action-ablation-diagnostic/docs/SOUL-HORIZON-INTEGRATION.md) and [external test report](https://github.com/nguyenphuck2468-tech/Soul-AI/blob/research/g31-action-ablation-diagnostic/docs/EXTERNAL-TEST-REPORT-20261112.md). The contract is intentionally proposal-only until a Minecraft-specific adapter exists.
