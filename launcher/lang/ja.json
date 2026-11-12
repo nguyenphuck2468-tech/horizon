@@ -1106,5 +1106,8 @@
   "Import existing data": "既存のデータをインポート",
   "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "同じコンピューターでのみ使用できます。最初にすべてのゲームプロセスを終了してください。認証情報を利用できない場合は、再度サインインが必要になることがあります。",
   "Close the running game and wait for preparation to finish before migrating.": "データを移行する前に、実行中のゲームを終了し、準備が完了するまでお待ちください。",
-  "Could not locate this computer's user data folder": "このコンピューターのユーザーデータフォルダーが見つかりませんでした。"
+  "Could not locate this computer's user data folder": "このコンピューターのユーザーデータフォルダーが見つかりませんでした。",
+  "Copy missing files": "不足しているファイルをコピー",
+  "Review again": "もう一度確認",
+  "Review existing data": "既存データを確認"
 }
