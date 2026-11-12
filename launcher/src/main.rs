@@ -5094,7 +5094,7 @@ impl Render for Launcher {
         // feature parity is complete. This preview switch is development-only; the final cutover
         // removes the legacy renderer rather than shipping a dual-UI product.
         if next_ui::wanted() {
-            return next_ui::render(self, cx);
+            return div().child(next_ui::render(self, cx));
         }
         let content = match self.page {
             Page::Play => self.play_page(cx),
