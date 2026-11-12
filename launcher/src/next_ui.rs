@@ -351,6 +351,11 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                     .gap(px(8.))
                     .children(accounts.iter().map(|account| {
                         let uuid = account.uuid.clone();
+                        let provider = match horizon_launcher::next_facade::accounts::card(account).provider {
+                            horizon_launcher::next_facade::accounts::Provider::Microsoft => tr("Microsoft"),
+                            horizon_launcher::next_facade::accounts::Provider::ElyBy => tr("Ely.by"),
+                            horizon_launcher::next_facade::accounts::Provider::Unavailable => tr("Provider unavailable"),
+                        };
                         let state = auth_status
                             .get(&uuid)
                             .map(|status| format!("{:?}", status.state))
@@ -374,6 +379,12 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                                     .justify_between()
                                     .child(account.name.clone())
                                     .child(if selected { tr("Selected") } else { tr("Select account") }),
+                            )
+                            .child(
+                                div()
+                                    .text_size(px(11.))
+                                    .text_color(t.muted)
+                                    .child(provider),
                             )
                             .child(
                                 div()
