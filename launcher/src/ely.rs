@@ -4,6 +4,7 @@
 //! The loopback Authorization Code flow remains available only when an
 //! explicitly configured client secret is present.
 
+use crate::config::{ely_client_id_from_config, resolve_client_id};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::net::{TcpListener, TcpStream};
@@ -18,18 +19,36 @@ const DEFAULT_PORT: u16 = 39871;
 const SCOPES: &str = "account_info offline_access minecraft_server_session";
 const DEVICE_GRANT: &str = "urn:ietf:params:oauth:grant-type:device_code";
 
+/// Public client ID of the Horizon-registered Ely.by application.
+/// Replace this value if you register your own application.
+const DEFAULT_ELY_CLIENT_ID: &str = "horizon-launcher2";
+
 #[derive(Clone, Debug)]
 pub struct Profile {
     pub uuid: String,
     pub name: String,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct Tokens {
     pub access_token: String,
     pub refresh_token: Option<String>,
     pub expires_at: u64,
     pub profile: Profile,
+}
+
+impl std::fmt::Debug for Tokens {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Tokens")
+            .field("access_token", &"<hidden>")
+            .field(
+                "refresh_token",
+                &self.refresh_token.as_ref().map(|_| "<hidden>"),
+            )
+            .field("expires_at", &self.expires_at)
+            .field("profile", &self.profile)
+            .finish()
+    }
 }
 
 /// Public information shown while waiting for device authorization.
@@ -65,13 +84,30 @@ pub enum DevicePoll {
 
 /// How many polls in a row may fail to reach Ely.by before the sign-in gives up.
 const MAX_OFFLINE_POLLS: u32 = 6;
+const MAX_POLL_INTERVAL: u64 = 60;
+
+fn bounded_poll_interval(seconds: u64) -> u64 {
+    seconds.clamp(1, MAX_POLL_INTERVAL)
+}
+
+fn slowed_poll_interval(seconds: u64) -> u64 {
+    seconds.saturating_add(5).min(MAX_POLL_INTERVAL)
+}
+
+fn backoff_poll_interval(seconds: u64) -> u64 {
+    seconds.saturating_mul(2).min(MAX_POLL_INTERVAL)
+}
+
+fn choose_client_id(config: Option<&str>, runtime: Option<&str>, built_in: &str) -> Option<String> {
+    resolve_client_id(config, runtime, built_in)
+}
 
 pub fn client_id() -> Option<String> {
-    std::env::var("HORIZON_ELY_CLIENT_ID")
-        .ok()
-        .or_else(|| option_env!("HORIZON_ELY_CLIENT_ID").map(str::to_owned))
-        .map(|value| value.trim().to_owned())
-        .filter(|value| !value.is_empty())
+    choose_client_id(
+        ely_client_id_from_config().as_deref(),
+        std::env::var("HORIZON_ELY_CLIENT_ID").ok().as_deref(),
+        DEFAULT_ELY_CLIENT_ID,
+    )
 }
 
 fn client_secret() -> Option<String> {
@@ -104,15 +140,20 @@ pub fn device_code() -> Result<DeviceCode, String> {
             user_code,
             verification_uri: string_field(&body, "verification_uri")
                 .unwrap_or_else(|| DEVICE_VERIFICATION_URL.to_owned()),
-            interval: body
-                .get("interval")
-                .and_then(Value::as_u64)
-                .unwrap_or(5)
-                .max(1),
-            expires_at: now() + body.get("expires_in").and_then(Value::as_u64).unwrap_or(900),
+            interval: bounded_poll_interval(
+                body.get("interval").and_then(Value::as_u64).unwrap_or(5),
+            ),
+            expires_at: now().saturating_add(
+                body.get("expires_in")
+                    .and_then(Value::as_u64)
+                    .unwrap_or(900),
+            ),
             device_code,
         }),
-        _ => Err(error_message(&body, "Ely.by device sign-in is unavailable.")),
+        _ => Err(error_message(
+            &body,
+            "Ely.by device sign-in is unavailable.",
+        )),
     }
 }
 
@@ -140,11 +181,13 @@ pub fn wait_for_device_code(
             DevicePoll::Pending => offline = 0,
             DevicePoll::SlowDown => {
                 offline = 0;
-                interval = interval.saturating_add(5);
+                interval = slowed_poll_interval(interval);
             }
-            // One dropped request must not end a sign-in the player is still completing.
+            // RFC 8628 recommends backing off after a timeout. Treat server/network outages
+            // conservatively too, while keeping the code alive for a few retries.
             DevicePoll::Offline(error) => {
                 offline += 1;
+                interval = backoff_poll_interval(interval);
                 if offline >= MAX_OFFLINE_POLLS {
                     return Err(error);
                 }
@@ -177,23 +220,38 @@ fn poll_device(code: &DeviceCode) -> Result<DevicePoll, String> {
     match body.get("error").and_then(Value::as_str) {
         Some("authorization_pending") => return Ok(DevicePoll::Pending),
         Some("slow_down") => return Ok(DevicePoll::SlowDown),
-        Some("expired_token") => {
-            return Err("The Ely.by sign-in code expired. Start again.".into())
-        }
+        Some("expired_token") => return Err("The Ely.by sign-in code expired. Start again.".into()),
         Some("access_denied") | Some("authorization_declined") => {
             return Err("Ely.by sign-in was declined.".into())
         }
         _ => {}
     }
-    tokens(status, &body).map(DevicePoll::Done)
+    initial_tokens(status, &body).map(DevicePoll::Done)
 }
 
 /// Why a refresh failed: Ely.by refused the token (sign in again), or could not be asked
 /// (network or server trouble: the sign-in is still good, try later).
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub enum RefreshError {
     Rejected(String),
     Unavailable(String),
+    /// The provider rotated the refresh token, but profile lookup failed afterwards.
+    /// Keep the replacement so a transient profile outage cannot strand the account.
+    UnavailableWithRefresh(String, Option<String>),
+}
+
+impl std::fmt::Debug for RefreshError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Rejected(message) => f.debug_tuple("Rejected").field(message).finish(),
+            Self::Unavailable(message) => f.debug_tuple("Unavailable").field(message).finish(),
+            Self::UnavailableWithRefresh(message, refresh) => f
+                .debug_tuple("UnavailableWithRefresh")
+                .field(message)
+                .field(&refresh.as_ref().map(|_| "<hidden>"))
+                .finish(),
+        }
+    }
 }
 
 pub fn refresh(refresh_token: &str) -> Result<Tokens, RefreshError> {
@@ -211,9 +269,14 @@ pub fn refresh(refresh_token: &str) -> Result<Tokens, RefreshError> {
     )
     .map_err(RefreshError::Unavailable)?;
     if status != 200 {
-        return Err(refresh_failure(status, error_message(&body, "Ely.by refused the sign-in.")));
+        return Err(refresh_failure(
+            status,
+            error_message(&body, "Ely.by refused the sign-in."),
+        ));
     }
-    tokens(status, &body).map_err(RefreshError::Unavailable)
+    let rotated_refresh = string_field(&body, "refresh_token");
+    tokens(status, &body)
+        .map_err(|error| RefreshError::UnavailableWithRefresh(error, rotated_refresh))
 }
 
 /// A refresh that did not give tokens: only a real refusal (4xx other than "too many requests"
@@ -230,13 +293,17 @@ fn tokens(status: u16, body: &Value) -> Result<Tokens, String> {
     if status != 200 {
         return Err(error_message(body, "Ely.by refused the sign-in."));
     }
-    let access_token = string_field(body, "access_token")
-        .ok_or("Ely.by returned no access token.")?;
+    let access_token =
+        string_field(body, "access_token").ok_or("Ely.by returned no access token.")?;
     let profile = profile(&access_token)?;
     Ok(Tokens {
         access_token,
         refresh_token: string_field(body, "refresh_token"),
-        expires_at: now() + body.get("expires_in").and_then(Value::as_u64).unwrap_or(86400),
+        expires_at: now().saturating_add(
+            body.get("expires_in")
+                .and_then(Value::as_u64)
+                .unwrap_or(86400),
+        ),
         profile,
     })
 }
@@ -260,21 +327,34 @@ fn profile(token: &str) -> Result<Profile, String> {
         }
     };
     let status = response.status();
-    let body: Value = serde_json::from_str(&response.into_string().unwrap_or_default())
-        .unwrap_or(Value::Null);
+    let body: Value =
+        serde_json::from_str(&response.into_string().unwrap_or_default()).unwrap_or(Value::Null);
     if status != 200 {
         return Err(error_message(
             &body,
             "Ely.by could not provide the account profile.",
         ));
     }
-    Ok(Profile {
-        uuid: string_field(&body, "uuid")
-            .ok_or("Ely.by returned no account UUID.")?
-            .replace('-', "")
-            .to_lowercase(),
-        name: string_field(&body, "username").ok_or("Ely.by returned no username.")?,
-    })
+    parse_profile(&body)
+}
+
+fn parse_profile(body: &Value) -> Result<Profile, String> {
+    let uuid = string_field(body, "uuid")
+        .ok_or("Ely.by returned no account UUID.")?
+        .replace('-', "")
+        .to_lowercase();
+    if uuid.len() != 32 || !uuid.bytes().all(|byte| byte.is_ascii_hexdigit()) {
+        return Err("Ely.by returned an invalid account UUID.".into());
+    }
+    let name = string_field(body, "username").ok_or("Ely.by returned no username.")?;
+    if !(3..=16).contains(&name.chars().count())
+        || !name
+            .chars()
+            .all(|character| character.is_ascii_alphanumeric() || character == '_')
+    {
+        return Err("Ely.by returned an invalid Minecraft profile name.".into());
+    }
+    Ok(Profile { uuid, name })
 }
 
 /// A loopback callback for installations that explicitly configure a
@@ -384,7 +464,21 @@ fn exchange(redirect_uri: &str, code: &str) -> Result<Tokens, String> {
             ("code", &code.to_owned()),
         ],
     )?;
-    tokens(status, &body)
+    initial_tokens(status, &body)
+}
+
+/// Initial authorization must grant a refresh token: without offline_access the account would
+/// work only until the first access-token expiry and then silently become unusable.
+fn initial_tokens(status: u16, body: &Value) -> Result<Tokens, String> {
+    if status != 200 {
+        return Err(error_message(body, "Ely.by refused the sign-in."));
+    }
+    if !string_field(body, "refresh_token").is_some_and(|token| !token.is_empty()) {
+        return Err(
+            "Ely.by did not return a refresh token. Check that offline_access is enabled.".into(),
+        );
+    }
+    tokens(status, body)
 }
 
 fn post_form(url: &str, fields: &[(&str, &String)]) -> Result<(u16, Value), String> {
@@ -468,10 +562,18 @@ fn read_callback(stream: &mut TcpStream) -> Result<CallbackRequest, String> {
 
 fn respond(stream: &mut TcpStream, message: &str) {
     use std::io::Write;
+    // Callback error descriptions originate outside the launcher. Render them as text,
+    // never as HTML, even though the callback is bound to loopback.
+    let message = message
+        .replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('"', "&quot;")
+        .replace('\'', "&#39;");
     let body = format!("<!doctype html><title>Horizon</title><p>{message}</p>");
     let _ = write!(
         stream,
-        "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+        "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nX-Content-Type-Options: nosniff\r\nContent-Security-Policy: default-src 'none'; style-src 'none'\r\nConnection: close\r\n\r\n{}",
         body.len(),
         body
     );
@@ -557,6 +659,90 @@ mod tests {
     use std::io::{Read, Write};
 
     #[test]
+    fn empty_runtime_client_id_falls_back_to_the_embedded_public_id() {
+        assert_eq!(
+            choose_client_id(Some("  "), Some(" embedded-id "), "built-in-id"),
+            Some("embedded-id".into())
+        );
+        assert_eq!(
+            choose_client_id(Some(" runtime-id "), Some("embedded-id"), "built-in-id"),
+            Some("runtime-id".into())
+        );
+        assert_eq!(
+            choose_client_id(None, None, "embedded-id"),
+            Some("embedded-id".into())
+        );
+        // An empty built-in id (no embedded default) yields nothing to use.
+        assert_eq!(choose_client_id(Some("  "), None, ""), None);
+    }
+
+    #[test]
+    fn device_poll_interval_is_bounded_and_backed_off() {
+        assert_eq!(bounded_poll_interval(0), 1);
+        assert_eq!(bounded_poll_interval(5), 5);
+        assert_eq!(bounded_poll_interval(u64::MAX), 60);
+        assert_eq!(slowed_poll_interval(5), 10);
+        assert_eq!(slowed_poll_interval(60), 60);
+        assert_eq!(backoff_poll_interval(5), 10);
+        assert_eq!(backoff_poll_interval(40), 60);
+        assert_eq!(backoff_poll_interval(60), 60);
+    }
+
+    #[test]
+    fn initial_authorization_requires_a_refresh_token() {
+        let body = serde_json::json!({"access_token": "access-only"});
+        assert_eq!(
+            initial_tokens(200, &body).unwrap_err(),
+            "Ely.by did not return a refresh token. Check that offline_access is enabled."
+        );
+        assert!(initial_tokens(401, &body).is_err());
+    }
+
+    #[test]
+    fn profile_parser_rejects_invalid_minecraft_identity_fields() {
+        let valid = serde_json::json!({
+            "uuid": "11111111-1111-1111-1111-111111111111",
+            "username": "Valid_Player"
+        });
+        let parsed = parse_profile(&valid).unwrap();
+        assert_eq!(parsed.uuid, "11111111111111111111111111111111");
+        assert_eq!(parsed.name, "Valid_Player");
+
+        let bad_uuid = serde_json::json!({"uuid": "not-a-uuid", "username": "Valid_Player"});
+        assert!(parse_profile(&bad_uuid).is_err());
+        let bad_name = serde_json::json!({
+            "uuid": "11111111111111111111111111111111",
+            "username": "name with spaces"
+        });
+        assert!(parse_profile(&bad_name).is_err());
+        let too_long = serde_json::json!({
+            "uuid": "11111111111111111111111111111111",
+            "username": "ThisNameIsMuchTooLong"
+        });
+        assert!(parse_profile(&too_long).is_err());
+    }
+
+    #[test]
+    fn callback_response_escapes_untrusted_error_text() {
+        let listener = TcpListener::bind(("127.0.0.1", 0)).unwrap();
+        let port = listener.local_addr().unwrap().port();
+        let client = std::thread::spawn(move || {
+            let mut stream = TcpStream::connect(("127.0.0.1", port)).unwrap();
+            let mut response = String::new();
+            stream.read_to_string(&mut response).unwrap();
+            response
+        });
+        let (mut stream, _) = listener.accept().unwrap();
+        respond(&mut stream, "<script>alert(1)</script> & \"quoted\"");
+        drop(stream);
+        let response = client.join().unwrap();
+        assert!(response.contains("&lt;script&gt;alert(1)&lt;/script&gt;"));
+        assert!(response.contains("&amp; &quot;quoted&quot;"));
+        assert!(!response.contains("<script>"));
+        assert!(response.contains("Content-Security-Policy: default-src 'none'"));
+    }
+
+    #[test]
     fn encode_and_decode_round_trip() {
         let text = "account_info offline_access/ü &=+%";
         assert_eq!(decode(&encode(text)).as_deref(), Some(text));
@@ -567,8 +753,26 @@ mod tests {
     }
 
     #[test]
+    fn debug_output_redacts_access_and_refresh_tokens() {
+        let tokens = Tokens {
+            access_token: "access-secret-fixture".into(),
+            refresh_token: Some("refresh-secret-fixture".into()),
+            expires_at: 1,
+            profile: Profile {
+                uuid: "11111111111111111111111111111111".into(),
+                name: "ElyPlayer".into(),
+            },
+        };
+        let debug = format!("{tokens:?}");
+        assert!(!debug.contains("access-secret-fixture"));
+        assert!(!debug.contains("refresh-secret-fixture"));
+        assert!(debug.contains("<hidden>"));
+    }
+
+    #[test]
     fn error_message_prefers_the_description() {
-        let v: Value = serde_json::json!({"error": "invalid_grant", "error_description": "Expired"});
+        let v: Value =
+            serde_json::json!({"error": "invalid_grant", "error_description": "Expired"});
         assert_eq!(error_message(&v, "x"), "Expired");
         assert_eq!(error_message(&Value::Null, "fallback"), "fallback");
     }
@@ -596,6 +800,23 @@ mod tests {
     }
 
     #[test]
+    fn refresh_error_redacts_a_rotated_refresh_token() {
+        let error = RefreshError::UnavailableWithRefresh(
+            "profile lookup timed out".into(),
+            Some("rotated-refresh-secret".into()),
+        );
+        let debug = format!("{error:?}");
+        assert!(debug.contains("profile lookup timed out"));
+        assert!(debug.contains("<hidden>"));
+        assert!(!debug.contains("rotated-refresh-secret"));
+        assert!(matches!(
+            error,
+            RefreshError::UnavailableWithRefresh(message, Some(token))
+                if message == "profile lookup timed out" && token == "rotated-refresh-secret"
+        ));
+    }
+
+    #[test]
     fn only_a_refusal_ends_the_sign_in() {
         for status in [500, 502, 503, 429, 408] {
             assert!(matches!(
@@ -620,7 +841,8 @@ mod tests {
             s.set_nodelay(true).unwrap();
             s.write_all(b"GET /callback?code=abc").unwrap();
             std::thread::sleep(Duration::from_millis(150));
-            s.write_all(b"&state=s1 HTTP/1.1\r\nHost: x\r\n\r\n").unwrap();
+            s.write_all(b"&state=s1 HTTP/1.1\r\nHost: x\r\n\r\n")
+                .unwrap();
             let mut out = String::new();
             let _ = s.read_to_string(&mut out);
         });

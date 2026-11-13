@@ -142,6 +142,7 @@ Sign in with a Microsoft account in your browser (device code). Play needs one t
     horizon-launcher account sign-in
 
 - `--for`: Sign this account (name or UUID) in again: another Microsoft account is refused and who plays stays the same
+- `--provider` (microsoft, elyby): Authentication provider
 
 MCP: `account_sign_in`.
 

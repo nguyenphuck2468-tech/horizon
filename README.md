@@ -32,7 +32,7 @@ Minecraft: Java Edition 26.3, rewritten in Rust. Same worlds, same rules, same t
 
 Get **the Horizon launcher** from [playhorizon.dev](https://playhorizon.dev) or [the launcher releases](https://github.com/horizon-rust/horizon/releases?q=launcher-v&expanded=true) (Linux x86-64, macOS on Apple Silicon, macOS on Intel from the next Nightly, Windows x64). It installs and updates the game, prepares its files from your copy of Minecraft, and updates itself.
 
-**You need** a Microsoft account that owns Java Edition ([why](docs/microsoft-account.md)) and a GPU with Vulkan or OpenGL 3.3 (Linux), Vulkan or DirectX 12 (Windows), or a Mac (Apple Silicon, or Intel from the next Nightly). An existing Minecraft install (official launcher, Prism, MultiMC...) is reused; without one, Play downloads 26.3 from Mojang for your account. Step by step: [Install and first launch](https://playhorizon.dev/docs/install).
+**For Mojang downloads and Java Edition instances**, you need a Microsoft account that owns Java Edition ([account sign-in and ownership](docs/microsoft-account.md)). You can also sign in with Ely.by to play through the Horizon Client on servers that accept Ely.by; Ely.by does not establish Java ownership or authorize Mojang downloads, so an existing 26.3 install is required if you use Ely.by without a Microsoft owner account. An existing Minecraft install (official launcher, Prism, MultiMC...) is reused; otherwise Play downloads 26.3 from Mojang for your owner account. You also need a GPU with Vulkan or OpenGL 3.3 (Linux), Vulkan or DirectX 12 (Windows), or a Mac (Apple Silicon, or Intel from the next Nightly). Step by step: [Install and first launch](https://playhorizon.dev/docs/install).
 
 <table>
   <tr>

@@ -6,7 +6,11 @@ use std::process::Command;
 /// Variables only the launcher itself may read. A child process (the game, a mod it loads, a
 /// pre-launch or post-exit command, a wrapper) inherits the launcher's environment unless told
 /// otherwise, so each is removed from every program the launcher starts.
-pub const LAUNCHER_ONLY_ENV: &[&str] = &["HORIZON_ELY_CLIENT_SECRET"];
+pub const LAUNCHER_ONLY_ENV: &[&str] = &[
+    "HORIZON_ELY_CLIENT_SECRET",
+    "HORIZON_GITHUB_TOKEN",
+    "HORIZON_CURSEFORGE_API_KEY",
+];
 
 /// Keeps [`LAUNCHER_ONLY_ENV`] out of `command`'s environment.
 pub fn scrub_secrets(command: &mut Command) -> &mut Command {
@@ -57,9 +61,13 @@ mod tests {
             plain
         }] {
             assert!(removed(&command, "HORIZON_ELY_CLIENT_SECRET"));
+            assert!(removed(&command, "HORIZON_GITHUB_TOKEN"));
+            assert!(removed(&command, "HORIZON_CURSEFORGE_API_KEY"));
         }
         let mut direct = Command::new("true");
         scrub_secrets(&mut direct);
         assert!(removed(&direct, "HORIZON_ELY_CLIENT_SECRET"));
+        assert!(removed(&direct, "HORIZON_GITHUB_TOKEN"));
+        assert!(removed(&direct, "HORIZON_CURSEFORGE_API_KEY"));
     }
 }

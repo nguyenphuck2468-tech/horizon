@@ -23,6 +23,7 @@ fn player() -> Player {
         uuid: "069a79f444e94726a5befca90e38aaf5".into(),
         token: "mc-token".into(),
         xuid: "2535400000000000".into(),
+        elyby: false,
     }
 }
 
@@ -63,6 +64,47 @@ fn modern() -> Value {
             {"name": "a:common:1-again", "downloads": {"artifact": {"path": "a/common/1/common-1.jar"}}}
         ]
     })
+}
+
+/// E1.0.1: `${user_type}` says `msa` for a Microsoft sign-in and never borrows that label for an
+/// Ely.by one (`account::java_player` refuses the launch itself; this is defense in depth).
+#[test]
+fn user_type_never_calls_an_elyby_sign_in_msa() {
+    let dir = scratch("usertype");
+    let (mc, game, natives) = (dir.join("mc"), dir.join("game"), dir.join("natives"));
+    let java = dir.join("java");
+    let extra = Vec::new();
+    let build = |elyby| {
+        let p = Player { elyby, ..player() };
+        let cmd = command(
+            &modern(),
+            &Launch {
+                minecraft: &mc,
+                game_dir: &game,
+                natives: &natives,
+                java: &java,
+                memory_mb: 2048,
+                jvm_args: &extra,
+                player: &p,
+                os: "linux",
+                window: None,
+                server: None,
+            },
+        )
+        .unwrap();
+        args(&cmd)
+    };
+    let msa = build(false);
+    let i = msa.iter().position(|a| a == "--userType").unwrap();
+    assert_eq!(msa[i + 1], "msa");
+    let ely = build(true);
+    let i = ely.iter().position(|a| a == "--userType").unwrap();
+    assert_ne!(
+        ely[i + 1],
+        "msa",
+        "an Ely.by token must not claim a Microsoft purchase"
+    );
+    let _ = fs::remove_dir_all(&dir);
 }
 
 #[test]
