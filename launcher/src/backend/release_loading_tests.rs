@@ -57,7 +57,7 @@ fn separate_lists_preserve_the_startup_results() {
     let list = serde_json::from_str::<serde_json::Value>(&text).unwrap();
     assert_eq!(
         serde_json::to_value(&releases).unwrap(),
-        serde_json::to_value(&parse_releases(&list, ASSET, is_game_tag)).unwrap()
+        serde_json::to_value(parse_releases(&list, ASSET, is_game_tag)).unwrap()
     );
     assert_eq!(
         serde_json::to_value(&updates).unwrap(),
