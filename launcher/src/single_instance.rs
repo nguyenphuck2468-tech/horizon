@@ -129,11 +129,35 @@ fn process_alive(pid: u32) -> bool {
     }
 }
 
-#[cfg(not(unix))]
-fn process_alive(_pid: u32) -> bool {
-    // Windows has no portable liveness probe without platform APIs; treat an existing lock as
-    // held so a second instance is refused, and clear the lock file after a crash manually.
-    true
+#[cfg(windows)]
+fn process_alive(pid: u32) -> bool {
+    // Ask the kernel whether the owning process handle is signalled. If Windows refuses
+    // access for any reason other than an invalid PID, fail closed and keep the lock.
+    use windows_sys::Win32::Foundation::{
+        CloseHandle, GetLastError, ERROR_INVALID_PARAMETER, WAIT_OBJECT_0, WAIT_TIMEOUT,
+    };
+    use windows_sys::Win32::System::Threading::{
+        OpenProcess, WaitForSingleObject, PROCESS_QUERY_LIMITED_INFORMATION, SYNCHRONIZE,
+    };
+
+    unsafe {
+        let process = OpenProcess(
+            PROCESS_QUERY_LIMITED_INFORMATION | SYNCHRONIZE,
+            0,
+            pid,
+        );
+        if process.is_null() {
+            return GetLastError() != ERROR_INVALID_PARAMETER;
+        }
+        let status = WaitForSingleObject(process, 0);
+        CloseHandle(process);
+        match status {
+            WAIT_OBJECT_0 => false,
+            WAIT_TIMEOUT => true,
+            // Unknown wait failures must never cause a live process's lock to be stolen.
+            _ => true,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -173,26 +197,18 @@ mod tests {
         assert!(SingleInstance::acquire(&dir).is_ok());
     }
 
-    // Unix can distinguish a dead PID from a live process. Windows deliberately treats
-    // existing lock files as held because this implementation has no portable process probe;
-    // after a crash, the user clears that stale lock rather than risking a second launcher.
-    #[cfg(unix)]
     #[test]
     fn single_instance_reuses_stale_lock_from_dead_process() {
         let dir = scratch("stale");
         let lock = dir.join(LAUNCHER_LOCK);
-        fs::write(&lock, "999999999\n").unwrap(); // a PID that does not exist
+        fs::write(&lock, "4294967295\\n").unwrap(); // an invalid PID on supported platforms
         assert!(SingleInstance::acquire(&dir).is_ok());
     }
 
     #[cfg(windows)]
     #[test]
-    fn single_instance_does_not_reclaim_an_existing_lock_without_a_process_probe() {
-        let dir = scratch("stale");
-        let lock = dir.join(LAUNCHER_LOCK);
-        fs::write(&lock, "999999999\n").unwrap();
-        assert!(SingleInstance::acquire(&dir).is_err());
-        assert!(lock.exists(), "an unverified lock must not be removed");
+    fn windows_process_probe_keeps_the_current_process_alive() {
+        assert!(process_alive(std::process::id()));
     }
 
     #[test]
