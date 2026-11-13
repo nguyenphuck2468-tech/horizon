@@ -155,6 +155,102 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
     } else {
         None
     };
+    // Worlds get a native workspace surface: load through the existing world service, then
+    // present the selected instance's saves without changing their on-disk representation.
+    let world_library_page = if active == Route::WorldLibrary {
+        let count = this.worlds_count(cx);
+        let worlds = this.worlds.list.clone();
+        let mut panel = div().flex().flex_col().gap(px(10.));
+        panel = panel.child(
+            div()
+                .flex()
+                .items_center()
+                .justify_between()
+                .p(px(16.))
+                .rounded(px(12.))
+                .bg(t.surface)
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(4.))
+                        .child(tr("Worlds"))
+                        .child(
+                            div()
+                                .text_size(px(11.))
+                                .text_color(t.muted)
+                                .child(format!("{} worlds", count.unwrap_or(worlds.len()))),
+                        ),
+                ),
+        );
+        if this.selected_instance().is_none() {
+            panel = panel.child(
+                div()
+                    .p(px(18.))
+                    .rounded(px(10.))
+                    .bg(t.plate_soft)
+                    .text_color(t.muted)
+                    .child(tr("Select an instance to view its worlds.")),
+            );
+        } else if worlds.is_empty() {
+            panel = panel.child(
+                div()
+                    .p(px(18.))
+                    .rounded(px(10.))
+                    .bg(t.plate_soft)
+                    .text_color(t.muted)
+                    .child(tr("No worlds yet: they appear here once you play one.")),
+            );
+        } else {
+            panel = panel.children(worlds.into_iter().map(|world| {
+                let folder = world.path.clone();
+                div()
+                    .flex()
+                    .items_center()
+                    .justify_between()
+                    .gap(px(12.))
+                    .p(px(15.))
+                    .rounded(px(11.))
+                    .bg(t.surface)
+                    .child(
+                        div()
+                            .flex()
+                            .flex_col()
+                            .flex_1()
+                            .min_w_0()
+                            .gap(px(4.))
+                            .child(world.name)
+                            .child(
+                                div()
+                                    .text_size(px(11.))
+                                    .text_color(t.muted)
+                                    .child(format!(
+                                        "{} · {} · {} · {:.1} MB",
+                                        tr(world.mode),
+                                        world.version.as_deref().unwrap_or("Unknown version"),
+                                        crate::worlds_page::ago(world.last_played),
+                                        world.size as f64 / 1_048_576.0
+                                    )),
+                            ),
+                    )
+                    .child(
+                        div()
+                            .px(px(11.))
+                            .py(px(8.))
+                            .rounded(px(8.))
+                            .bg(t.plate)
+                            .text_size(px(11.))
+                            .text_color(t.ink)
+                            .cursor_pointer()
+                            .child(tr("Open folder"))
+                            .on_click(move |_, _, cx| crate::glass_toast::open(cx, &folder)),
+                    )
+            }));
+        }
+        Some(panel)
+    } else {
+        None
+    };
     // The native workshop has its own route and reuses only the trusted .hnmod build/import
     // services; it is not routed through the .hmod browser or .hpack profile manager.
     let native_workshop_page = if active == Route::ModWorkshop {
@@ -1008,6 +1104,9 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
         .when(active == Route::InstanceDetails, |page| {
             page.child(instance_details_page.expect("instance details route has its page"))
         })
+        .when(active == Route::WorldLibrary, |page| {
+            page.child(world_library_page.expect("world library route has its page"))
+        })
         .when(active == Route::AccountDetails, |page| {
             page.child(account_details_page.expect("account details route has its page"))
         })
@@ -1117,7 +1216,8 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
             !content_route
                 && active != Route::Home
                 && active != Route::ModWorkshop
-                && active != Route::InstanceDetails,
+                && active != Route::InstanceDetails
+                && active != Route::WorldLibrary,
             |page| {
             page.child(
                 div()
