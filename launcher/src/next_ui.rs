@@ -77,7 +77,7 @@ fn content_kind(
         }
         Route::ModpackManager => Some(horizon_launcher::browser::Kind::Modpack),
         // Native .hnmod bundles use next_facade::native_mods, never the .hmod browser.
-        Route::ModWorkshop | _ => None,
+        _ => None,
     }
 }
 
