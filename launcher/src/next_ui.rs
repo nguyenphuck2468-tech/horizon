@@ -175,9 +175,8 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                 .cloned()
                 .unwrap_or_else(|| tr("No build selected").to_string());
             let home = instance.home.clone();
-            let played = horizon_launcher::next_facade::instances::play_time(
-                instance.played.as_secs(),
-            );
+            let played =
+                horizon_launcher::next_facade::instances::play_time(instance.played.as_secs());
             div()
                 .flex()
                 .flex_col()
@@ -190,29 +189,48 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                         .p(px(22.))
                         .rounded(px(14.))
                         .bg(t.surface)
-                        .child(div().text_size(px(11.)).text_color(t.muted).child(tr("My instance")))
-                        .child(div().font_family(theme::DISPLAY_FONT).text_size(px(25.)).text_color(t.ink).child(instance.name.clone()))
-                        .child(div().text_size(px(12.)).text_color(t.muted).child(instance.id.clone())),
+                        .child(
+                            div()
+                                .text_size(px(11.))
+                                .text_color(t.muted)
+                                .child(tr("My instance")),
+                        )
+                        .child(
+                            div()
+                                .font_family(theme::DISPLAY_FONT)
+                                .text_size(px(25.))
+                                .text_color(t.ink)
+                                .child(instance.name.clone()),
+                        )
+                        .child(
+                            div()
+                                .text_size(px(12.))
+                                .text_color(t.muted)
+                                .child(instance.id.clone()),
+                        ),
                 )
                 .child(
-                    div()
-                        .flex()
-                        .gap(px(10.))
-                        .children([
-                            ("Version", version),
-                            ("Time played", played),
-                        ].into_iter().map(|(label, value)| {
-                            div()
-                                .flex()
-                                .flex_col()
-                                .flex_1()
-                                .gap(px(6.))
-                                .p(px(16.))
-                                .rounded(px(11.))
-                                .bg(t.plate_soft)
-                                .child(div().text_size(px(10.)).text_color(t.muted).child(tr(label)))
-                                .child(div().text_size(px(15.)).text_color(t.ink).child(value))
-                        })),
+                    div().flex().gap(px(10.)).children(
+                        [("Version", version), ("Time played", played)]
+                            .into_iter()
+                            .map(|(label, value)| {
+                                div()
+                                    .flex()
+                                    .flex_col()
+                                    .flex_1()
+                                    .gap(px(6.))
+                                    .p(px(16.))
+                                    .rounded(px(11.))
+                                    .bg(t.plate_soft)
+                                    .child(
+                                        div()
+                                            .text_size(px(10.))
+                                            .text_color(t.muted)
+                                            .child(tr(label)),
+                                    )
+                                    .child(div().text_size(px(15.)).text_color(t.ink).child(value))
+                            }),
+                    ),
                 )
                 .child(
                     div()
@@ -222,8 +240,18 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                         .p(px(16.))
                         .rounded(px(11.))
                         .bg(t.plate_soft)
-                        .child(div().text_size(px(10.)).text_color(t.muted).child(tr("Folder")))
-                        .child(div().text_size(px(12.)).text_color(t.ink_soft).child(home.display().to_string())),
+                        .child(
+                            div()
+                                .text_size(px(10.))
+                                .text_color(t.muted)
+                                .child(tr("Folder")),
+                        )
+                        .child(
+                            div()
+                                .text_size(px(12.))
+                                .text_color(t.ink_soft)
+                                .child(home.display().to_string()),
+                        ),
                 )
                 .child(
                     div()
@@ -267,7 +295,12 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                 .p(px(22.))
                 .rounded(px(12.))
                 .bg(t.plate_soft)
-                .child(div().text_size(px(15.)).text_color(t.ink).child(tr("Instances")))
+                .child(
+                    div()
+                        .text_size(px(15.))
+                        .text_color(t.ink)
+                        .child(tr("Instances")),
+                )
                 .child(
                     div()
                         .id("next-instance-details-back")
@@ -1078,3 +1111,4 @@ mod tests {
         }
     }
 }
+
