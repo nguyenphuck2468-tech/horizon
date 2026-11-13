@@ -248,6 +248,10 @@ pub mod instances {
 }
 
 /// Installed content.
+fn is_content_mod(kind: crate::browser::Kind, native: bool) -> bool {
+    kind == crate::browser::Kind::Mod && !native
+}
+
 pub mod content {
     use std::path::Path;
 
@@ -267,7 +271,12 @@ pub mod content {
         let projects = crate::browser::Source::search(&*source, query)?;
         Ok(projects
             .into_iter()
-            .filter(|project| !crate::browser::horizon::is_native_mod(&project.id))
+            .filter(|project| {
+                super::is_content_mod(
+                    project.kind,
+                    crate::browser::horizon::is_native_mod(&project.id),
+                )
+            })
             .collect())
     }
 
@@ -276,10 +285,15 @@ pub mod content {
         let source = crate::browser::source(crate::browser::SourceId::Horizon)
             .ok_or_else(|| "Horizon registry is unavailable.".to_owned())?;
         let project = crate::browser::Source::project(&*source, id)?;
-        if crate::browser::horizon::is_native_mod(id) {
-            return Err(
-                "This project is a native mod; open it in the Native Mods workspace.".into(),
-            );
+        if !super::is_content_mod(
+            project.kind,
+            crate::browser::horizon::is_native_mod(&project.id),
+        ) {
+            return Err(if project.kind != crate::browser::Kind::Mod {
+                "This project is a modpack, not a Horizon content mod; open it in the Modpacks workspace.".into()
+            } else {
+                "This project is a native mod; open it in the Native Mods workspace.".into()
+            });
         }
         Ok(project)
     }
@@ -294,8 +308,15 @@ pub mod content {
         // Resolve through the live registry before classifying: is_native_mod deliberately
         // consults only the already-loaded index and must never guess from a stale UI object.
         let current = crate::browser::Source::project(&*source, &project.id)?;
-        if crate::browser::horizon::is_native_mod(&current.id) {
-            return Err("Native mod versions belong in the Native Mods workspace.".into());
+        if !super::is_content_mod(
+            current.kind,
+            crate::browser::horizon::is_native_mod(&current.id),
+        ) {
+            return Err(if current.kind != crate::browser::Kind::Mod {
+                "This project is no longer a Horizon content mod; modpacks use the Modpacks workspace.".into()
+            } else {
+                "Native mod versions belong in the Native Mods workspace.".into()
+            });
         }
         crate::browser::Source::versions(&*source, &current)
     }
@@ -730,6 +751,15 @@ mod tests {
             diagnostics::native_state(&mods, Some(&other)),
             diagnostics::BuildState::Outdated
         );
+    }
+
+    #[test]
+    fn content_mod_facade_keeps_modpacks_and_native_mods_separate() {
+        let kind = crate::browser::Kind::Mod;
+        let modpack = crate::browser::Kind::Modpack;
+        assert!(is_content_mod(kind, false));
+        assert!(!is_content_mod(kind, true));
+        assert!(!is_content_mod(modpack, false));
     }
 
     #[test]
