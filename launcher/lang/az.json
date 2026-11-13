@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Ely.by ilə daxil olun",
   "Asking Ely.by…": "Ely.by soruşulur...",
   "Use the {provider} account for {name}.": "{name} üçün {provider} hesabından istifadə edin.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Giriş səhifəsi brauzerinizdə açılır. Horizon parolunuzu heç vaxt görmür."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Giriş səhifəsi brauzerinizdə açılır. Horizon parolunuzu heç vaxt görmür.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Fayllar arxa planda yoxlanılır və ya kopyalanır. Horizon-u açıq saxlayın.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "Başladıcı faylları: {launcher_files} ({launcher_mb} MB), oyun faylları: {game_files} ({game_mb} MB); mövcud {conflicts} fayl saxlanacaq, {symlinks} simvolik keçid ötürüləcək.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Başladıcının {launcher_files} faylı və oyunun {game_files} faylı kopyalandı. Mövcud faylların üzərinə yazılmadı; {symlinks} simvolik keçid ötürüldü.",
+  "Review and copy data from this computer's previous Horizon installation": "Bu kompüterdəki əvvəlki Horizon quraşdırmasının məlumatlarını nəzərdən keçirin və kopyalayın",
+  "Import existing data": "Mövcud məlumatları idxal et",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Yalnız eyni kompüterdə. Əvvəlcə bütün oyun proseslərini bağlayın. Giriş məlumatları əlçatan deyilsə, yenidən daxil olmalı ola bilərsiniz.",
+  "Close the running game and wait for preparation to finish before migrating.": "Köçürmədən əvvəl işləyən oyunu bağlayın və hazırlığın bitməsini gözləyin.",
+  "Could not locate this computer's user data folder": "Bu kompüterin istifadəçi məlumatları qovluğu tapılmadı.",
+  "Copy missing files": "Çatışmayan faylları kopyala",
+  "Review again": "Yenidən nəzərdən keçir",
+  "Review existing data": "Mövcud məlumatları nəzərdən keçir"
 }

@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Kevreañ gant Ely.by",
   "Asking Ely.by…": "Goulenn Ely.by…",
   "Use the {provider} account for {name}.": "Implijit ar gont {provider} evit {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Pajenn ar gevreañ a zigor en ho merdeer. Horizon ne wel ket ho ker-tremen morse."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Pajenn ar gevreañ a zigor en ho merdeer. Horizon ne wel ket ho ker-tremen morse.",
+  "Scanning or copying files in the background. Keep Horizon open.": "O vezañ emañ ar restroù o vezañ skannet pe eilet en drekleur. Lezit Horizon digor.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "Restroù al lañser: {launcher_files} ({launcher_mb} MB), restroù ar c'hoari: {game_files} ({game_mb} MB); miret e vo {conflicts} restr a zo anezhi ha tremenet e vo {symlinks} ere arouezel.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Eilet ez eus bet {launcher_files} restr al lañser ha {game_files} restr ar c'hoari. N'eo ket bet skrivet war ar restroù a oa anezho; tremenet ez eus bet {symlinks} ere arouezel.",
+  "Review and copy data from this computer's previous Horizon installation": "Gwelet ha kopiañ roadennoù eus staliadur Horizon kent war an urzhiataer-mañ",
+  "Import existing data": "Enporzhiañ ar roadennoù a zo anezho",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "War an hevelep urzhiataer hepken. Serrit holl argerzhioù ar c'hoari da gentañ. Ret e vo deoc'h kevreañ en-dro ma n'eo ket hegerz ar roadennoù kevreañ.",
+  "Close the running game and wait for preparation to finish before migrating.": "Serrit ar c'hoari a zo o vont ha gortozit ma vo echuet ar prientiñ a-raok treuzkas.",
+  "Could not locate this computer's user data folder": "N'haller ket kavout teuliad roadennoù an arveriad war an urzhiataer-mañ.",
+  "Copy missing files": "Kopiañ ar restroù a vank",
+  "Review again": "Adwelet en-dro",
+  "Review existing data": "Adwelet ar roadennoù a zo anezho"
 }

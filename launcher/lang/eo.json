@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Ensalutu per Ely.by",
   "Asking Ely.by…": "Demandante Ely.by...",
   "Use the {provider} account for {name}.": "Uzu la {provider} por {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "La ensaluta paĝo malfermiĝas en via retumilo. Horizon neniam vidas vian pasvorton."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "La ensaluta paĝo malfermiĝas en via retumilo. Horizon neniam vidas vian pasvorton.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Dosieroj estas skanataj aŭ kopiataj fone. Lasu Horizon malfermita.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} lanĉilaj dosieroj ({launcher_mb} MB), {game_files} ludaj dosieroj ({game_mb} MB); {conflicts} ekzistantaj dosieroj estos konservitaj kaj {symlinks} simbolaj ligiloj preterlasitaj.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Kopiis {launcher_files} lanĉilajn dosierojn kaj {game_files} ludajn dosierojn. Ekzistantaj dosieroj ne estis anstataŭigitaj; {symlinks} simbolaj ligiloj estis preterlasitaj.",
+  "Review and copy data from this computer's previous Horizon installation": "Kontrolu kaj kopiu datumojn el la antaŭa instalado de Horizon en ĉi tiu komputilo",
+  "Import existing data": "Importi ekzistantajn datumojn",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Nur en la sama komputilo. Unue fermu ĉiujn ludajn procezojn. Eble vi devos ensaluti denove se la ensalutaj datumoj ne disponeblas.",
+  "Close the running game and wait for preparation to finish before migrating.": "Fermu la rulantan ludon kaj atendu ĝis la preparado finiĝos antaŭ ol migri.",
+  "Could not locate this computer's user data folder": "Ne eblis trovi la uzantodatuman dosierujon en ĉi tiu komputilo.",
+  "Copy missing files": "Kopii mankantajn dosierojn",
+  "Review again": "Kontroli denove",
+  "Review existing data": "Kontroli ekzistantajn datumojn"
 }

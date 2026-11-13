@@ -107,11 +107,20 @@ fn the_scan_finds_multiline_calls_without_reading_comments_or_quoted_code() {
     assert!(!all.contains("block comment"));
 }
 
-fn holes(s: &str) -> BTreeSet<&str> {
-    s.split('{')
+fn holes(s: &str) -> Vec<&str> {
+    let mut holes: Vec<_> = s
+        .split('{')
         .skip(1)
         .filter_map(|part| part.split_once('}').map(|(name, _)| name))
-        .collect()
+        .collect();
+    holes.sort_unstable();
+    holes
+}
+
+#[test]
+fn placeholder_validation_preserves_duplicate_occurrences() {
+    assert_eq!(holes("Hello {name}, welcome {name}"), vec!["name", "name"]);
+    assert_ne!(holes("Hello {name}, welcome {name}"), holes("Hello {name}"));
 }
 
 #[test]
@@ -132,19 +141,19 @@ fn every_language_has_every_string_the_code_asks_for() {
     for (_, table) in &tables {
         asked.extend(table.keys().cloned());
     }
+    let mut language_failures = Vec::new();
     for (language, table) in &tables {
         let missing: Vec<_> = asked.iter().filter(|s| !table.contains_key(*s)).collect();
-        assert!(
-            missing.is_empty(),
-            "lang/{}.json lacks {missing:#?}",
-            language.code()
-        );
+        if !missing.is_empty() {
+            language_failures.push(format!("lang/{}.json lacks {missing:#?}", language.code()));
+        }
         let unused: Vec<_> = table.keys().filter(|s| !all.contains(*s)).collect();
-        assert!(
-            unused.is_empty(),
-            "lang/{}.json has strings the code no longer has: {unused:#?}",
-            language.code()
-        );
+        if !unused.is_empty() {
+            language_failures.push(format!(
+                "lang/{}.json has strings the code no longer has: {unused:#?}",
+                language.code()
+            ));
+        }
         for (en, said) in table {
             assert_eq!(holes(en), holes(said), "{}: {en:?}", language.code());
             assert!(
@@ -154,6 +163,11 @@ fn every_language_has_every_string_the_code_asks_for() {
             );
         }
     }
+    assert!(
+        language_failures.is_empty(),
+        "Localization table audit found issues:\n{}",
+        language_failures.join("\n")
+    );
 }
 
 #[test]

@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Oanmelde mei Ely.by",
   "Asking Ely.by…": "Freegje Ely.by…",
   "Use the {provider} account for {name}.": "Brûk it {provider} foar {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "De oanmeldside iepenet yn jo browser. Horizon sjocht jo wachtwurd nea."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "De oanmeldside iepenet yn jo browser. Horizon sjocht jo wachtwurd nea.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Bestannen wurde op 'e eftergrûn skend of kopiearre. Lit Horizon iepen.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} launcherbestannen ({launcher_mb} MB), {game_files} spulbestannen ({game_mb} MB); {conflicts} besteande bestannen wurde bewarre en {symlinks} symboalyske keppelings oerslein.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "{launcher_files} launcherbestannen en {game_files} spulbestannen binne kopiearre. Besteande bestannen binne net oerskreaun; {symlinks} symboalyske keppelings binne oerslein.",
+  "Review and copy data from this computer's previous Horizon installation": "Besjoch en kopiearje gegevens fan de foarige Horizon-ynstallaasje op dizze kompjûter",
+  "Import existing data": "Besteande gegevens ymportearje",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Allinnich op deselde kompjûter. Slút earst alle spulprosessen. Jo moatte mooglik opnij oanmelde as de oanmeldgegevens net beskikber binne.",
+  "Close the running game and wait for preparation to finish before migrating.": "Slút it rinnende spul en wachtsje oant de tarieding klear is foardat jo migrearje.",
+  "Could not locate this computer's user data folder": "De map mei brûkersgegevens op dizze kompjûter koe net fûn wurde.",
+  "Copy missing files": "Untbrekkende bestannen kopiearje",
+  "Review again": "Opnij besjen",
+  "Review existing data": "Besteande gegevens besjen"
 }

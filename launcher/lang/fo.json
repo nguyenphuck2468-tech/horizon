@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Rita inn við Ely.by",
   "Asking Ely.by…": "Spyrja Ely.by...",
   "Use the {provider} account for {name}.": "Brúka {provider} kontuna til {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Innritanarsíðan letur upp í tínum kaga. Horizon sær ongantíð títt loyniorð."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Innritanarsíðan letur upp í tínum kaga. Horizon sær ongantíð títt loyniorð.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Skráir verða kannaðar ella avritaðar í bakgrundini. Lat Horizon vera opið.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} startaraskráir ({launcher_mb} MB), {game_files} spælskrár ({game_mb} MB); {conflicts} verandi skrár verða varðveittar og {symlinks} symbolskar leinkjur verða lopnar um.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "{launcher_files} startaraskráir og {game_files} spælskrár eru avritaðar. Verandi skrár eru ikki skrivaðar yvir; {symlinks} symbolskar leinkjur eru lopnar um.",
+  "Review and copy data from this computer's previous Horizon installation": "Kanna og avrita dáta frá fyrrverandi Horizon-innlegging á hesi teldu",
+  "Import existing data": "Innflyt verandi dáta",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Bert á somu teldu. Lat fyrst allar spæltilgongdir aftur. Tú mást møguliga rita inn aftur, um innritingarupplýsingar ikki eru tøkar.",
+  "Close the running game and wait for preparation to finish before migrating.": "Lat spælið, sum koyrir, aftur og bíða til fyrireikingin er liðug, áðrenn tú flytur dáta.",
+  "Could not locate this computer's user data folder": "Fann ikki brúkaradátumappuna á hesi teldu.",
+  "Copy missing files": "Avrita vantandi skrár",
+  "Review again": "Kanna aftur",
+  "Review existing data": "Kanna verandi dáta"
 }

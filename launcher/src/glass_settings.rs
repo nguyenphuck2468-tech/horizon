@@ -259,6 +259,135 @@ impl Launcher {
         )
     }
 
+    /// The portable bundle's preview-first import from the previous per-user installation.
+    fn portable_migration_row(&mut self, cx: &mut Context<Self>) -> Div {
+        let t = self.theme;
+        let busy = self.migration_busy;
+        let preview = self.migration_preview.clone();
+        let done = self.migration_done.clone();
+
+        let description = if busy {
+            tr("Scanning or copying files in the background. Keep Horizon open.").to_string()
+        } else if let Some(Ok(p)) = &preview {
+            let launcher_files = p.launcher.files.to_string();
+            let launcher_mb = format!("{:.1}", p.launcher.bytes as f64 / 1_048_576.0);
+            let game_files = p.game.files.to_string();
+            let game_mb = format!("{:.1}", p.game.bytes as f64 / 1_048_576.0);
+            let conflicts = (p.launcher.conflicts + p.game.conflicts).to_string();
+            let symlinks = (p.launcher.skipped_symlinks + p.game.skipped_symlinks).to_string();
+            trf(
+                "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.",
+                &[
+                    ("launcher_files", &launcher_files),
+                    ("launcher_mb", &launcher_mb),
+                    ("game_files", &game_files),
+                    ("game_mb", &game_mb),
+                    ("conflicts", &conflicts),
+                    ("symlinks", &symlinks),
+                ],
+            )
+        } else if let Some(Err(error)) = &preview {
+            error.clone()
+        } else if let Some(Ok(result)) = &done {
+            let launcher_files = result.launcher.copied.to_string();
+            let game_files = result.game.copied.to_string();
+            let symlinks =
+                (result.launcher.skipped_symlinks + result.game.skipped_symlinks).to_string();
+            trf(
+                "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.",
+                &[
+                    ("launcher_files", &launcher_files),
+                    ("game_files", &game_files),
+                    ("symlinks", &symlinks),
+                ],
+            )
+        } else if let Some(Err(error)) = &done {
+            error.clone()
+        } else {
+            tr("Review and copy data from this computer's previous Horizon installation")
+                .to_string()
+        };
+
+        let mut actions = div().flex().items_center().gap(px(8.));
+        if busy {
+            actions = actions.child(ui::text(12., FontWeight::MEDIUM, 0.65).child(tr("Working…")));
+        } else if let Some(Ok(p)) = &preview {
+            if p.launcher.files + p.game.files > 0 {
+                actions = actions.child(
+                    button(
+                        "portable-migration-copy",
+                        "Copy missing files",
+                        Kind::Primary,
+                        &t,
+                    )
+                    .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                        this.execute_portable_migration();
+                        cx.notify();
+                    })),
+                );
+            }
+            actions = actions.child(
+                button("portable-migration-cancel", "Cancel", Kind::Secondary, &t).on_click(
+                    cx.listener(|this, _: &ClickEvent, _, cx| {
+                        this.cancel_portable_migration();
+                        cx.notify();
+                    }),
+                ),
+            );
+        } else if preview.is_some() || done.is_some() {
+            actions = actions
+                .child(
+                    button(
+                        "portable-migration-retry",
+                        "Review again",
+                        Kind::Secondary,
+                        &t,
+                    )
+                    .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                        this.preview_portable_migration();
+                        cx.notify();
+                    })),
+                )
+                .child(
+                    button("portable-migration-dismiss", "Dismiss", Kind::Ghost, &t).on_click(
+                        cx.listener(|this, _: &ClickEvent, _, cx| {
+                            this.cancel_portable_migration();
+                            cx.notify();
+                        }),
+                    ),
+                );
+        } else {
+            actions = actions.child(
+                button(
+                    "portable-migration-review",
+                    "Review existing data",
+                    Kind::Secondary,
+                    &t,
+                )
+                .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                    this.preview_portable_migration();
+                    cx.notify();
+                })),
+            );
+        }
+
+        index_row(
+            0,
+            tr("Import existing data"),
+            Some(
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(4.))
+                    .child(description)
+                    .child(tr("Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.").to_string())
+                    .into_any_element(),
+            ),
+            Some(actions.into_any_element()),
+            &t,
+        )
+    }
+
     /// About's three tiles (the mockup's `AboutTile`s): Horizon and its update, the launcher and
     /// its own, and the data folder.
     fn about_tiles(
@@ -411,6 +540,9 @@ impl Launcher {
         };
         let about = card()
             .child(self.about_tiles(b.horizon, b.horizon_action, b.launcher, b.launcher_action))
+            .when(backend::is_portable_install(), |d| {
+                d.child(self.portable_migration_row(cx))
+            })
             .child(index_row(
                 0,
                 tr("Logs"),

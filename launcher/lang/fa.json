@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "با Ely.by وارد شوید",
   "Asking Ely.by…": "سوال از Ely.by…",
   "Use the {provider} account for {name}.": "از حساب {provider} برای {name} استفاده کنید.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "صفحهٔ ورود در مرورگرتان باز می‌شود. Horizon هرگز رمز عبور شما را نمی‌بیند."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "صفحهٔ ورود در مرورگرتان باز می‌شود. Horizon هرگز رمز عبور شما را نمی‌بیند.",
+  "Scanning or copying files in the background. Keep Horizon open.": "پرونده‌ها در پس‌زمینه بررسی یا کپی می‌شوند. Horizon را باز نگه دارید.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} پروندهٔ راه‌انداز ({launcher_mb} مگابایت)، {game_files} پروندهٔ بازی ({game_mb} مگابایت)؛ {conflicts} پروندهٔ موجود حفظ می‌شود و {symlinks} پیوند نمادین نادیده گرفته می‌شود.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "{launcher_files} پروندهٔ راه‌انداز و {game_files} پروندهٔ بازی کپی شد. پرونده‌های موجود بازنویسی نشدند؛ {symlinks} پیوند نمادین نادیده گرفته شد.",
+  "Review and copy data from this computer's previous Horizon installation": "داده‌های نصب قبلی Horizon در این رایانه را بررسی و کپی کنید",
+  "Import existing data": "وارد کردن داده‌های موجود",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "فقط روی همین رایانه. ابتدا همهٔ فرایندهای بازی را ببندید. اگر اطلاعات ورود در دسترس نباشد، ممکن است لازم باشد دوباره وارد شوید.",
+  "Close the running game and wait for preparation to finish before migrating.": "پیش از انتقال، بازی در حال اجرا را ببندید و منتظر پایان آماده‌سازی بمانید.",
+  "Could not locate this computer's user data folder": "پوشهٔ داده‌های کاربر در این رایانه پیدا نشد.",
+  "Copy missing files": "کپی پرونده‌های موجودنبود",
+  "Review again": "بازبینی دوباره",
+  "Review existing data": "بازبینی داده‌های موجود"
 }

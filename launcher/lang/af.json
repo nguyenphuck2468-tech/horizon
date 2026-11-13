@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Meld aan met Ely.by",
   "Asking Ely.by…": "Vra Ely.by…",
   "Use the {provider} account for {name}.": "Gebruik die {provider} vir {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Die aanmeldingsblad maak in jou blaaier oop. Horizon sien nooit jou wagwoord nie."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Die aanmeldingsblad maak in jou blaaier oop. Horizon sien nooit jou wagwoord nie.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Lêers word in die agtergrond geskandeer of gekopieer. Hou Horizon oop.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} lanseerderlêers ({launcher_mb} MB), {game_files} speletjielêers ({game_mb} MB); {conflicts} bestaande lêers word behou en {symlinks} simboliese skakels oorgeslaan.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "{launcher_files} lanseerderlêers en {game_files} speletjielêers is gekopieer. Bestaande lêers is nie oorskryf nie; {symlinks} simboliese skakels is oorgeslaan.",
+  "Review and copy data from this computer's previous Horizon installation": "Hersien en kopieer data van hierdie rekenaar se vorige Horizon-installasie",
+  "Import existing data": "Voer bestaande data in",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Slegs op dieselfde rekenaar. Maak eers alle speletjieprosesse toe. Jy moet dalk weer aanmeld as aanmeldbewyse nie beskikbaar is nie.",
+  "Close the running game and wait for preparation to finish before migrating.": "Maak die lopende speletjie toe en wag totdat voorbereiding voltooi is voordat jy migreer.",
+  "Could not locate this computer's user data folder": "Kon nie die gebruikerdata-lêergids op hierdie rekenaar vind nie.",
+  "Copy missing files": "Kopieer ontbrekende lêers",
+  "Review again": "Hersien weer",
+  "Review existing data": "Hersien bestaande data"
 }

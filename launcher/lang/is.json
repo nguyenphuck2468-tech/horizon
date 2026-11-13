@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Skráðu þig inn með Ely.by",
   "Asking Ely.by…": "Spyr Ely.by…",
   "Use the {provider} account for {name}.": "Notaðu {provider} fyrir {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Innskráningarsíðan opnast í vafranum þínum. Horizon sér aldrei lykilorðið þitt."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Innskráningarsíðan opnast í vafranum þínum. Horizon sér aldrei lykilorðið þitt.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Verið er að skanna eða afrita skrár í bakgrunni. Hafðu Horizon opið.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} ræsiforritsskrár ({launcher_mb} MB), {game_files} leikjaskrár ({game_mb} MB); {conflicts} skrár sem þegar eru til verða varðveittar og {symlinks} táknrænum tenglum sleppt.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Afrituð voru {launcher_files} ræsiforritsskrár og {game_files} leikjaskrár. Skrár sem þegar voru til voru ekki yfirskrifaðar; {symlinks} táknrænum tenglum var sleppt.",
+  "Review and copy data from this computer's previous Horizon installation": "Skoðaðu og afritaðu gögn úr fyrri Horizon-uppsetningu á þessari tölvu",
+  "Import existing data": "Flytja inn gögn sem þegar eru til",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Aðeins á sömu tölvu. Lokaðu fyrst öllum leikjaferlum. Þú gætir þurft að skrá þig inn aftur ef aðgangsupplýsingar eru ekki tiltækar.",
+  "Close the running game and wait for preparation to finish before migrating.": "Lokaðu leiknum sem er í gangi og bíddu þar til undirbúningi lýkur áður en þú flytur gögnin.",
+  "Could not locate this computer's user data folder": "Ekki tókst að finna gagnamöppu notandans á þessari tölvu.",
+  "Copy missing files": "Afrita skrár sem vantar",
+  "Review again": "Skoða aftur",
+  "Review existing data": "Skoða gögn sem þegar eru til"
 }

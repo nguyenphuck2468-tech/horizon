@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Mewngofnodwch gyda Ely.by",
   "Asking Ely.by…": "Wrth ofyn Ely.by…",
   "Use the {provider} account for {name}.": "Defnyddiwch y {provider} am {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Mae'r dudalen mewngofnodi yn agor yn eich porwr. Nid yw Horizon byth yn gweld eich cyfrinair."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Mae'r dudalen mewngofnodi yn agor yn eich porwr. Nid yw Horizon byth yn gweld eich cyfrinair.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Mae'r ffeiliau'n cael eu sganio neu eu copïo yn y cefndir. Cadwch Horizon ar agor.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} o ffeiliau'r lansiwr ({launcher_mb} MB), {game_files} o ffeiliau'r gêm ({game_mb} MB); cedwir {conflicts} ffeil sy'n bodoli eisoes a hepgorir {symlinks} dolen symbolaidd.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Copïwyd {launcher_files} o ffeiliau'r lansiwr a {game_files} o ffeiliau'r gêm. Ni throsysgrifenwyd ffeiliau presennol; hepgorwyd {symlinks} dolen symbolaidd.",
+  "Review and copy data from this computer's previous Horizon installation": "Adolygu a chopïo data o osodiad Horizon blaenorol y cyfrifiadur hwn",
+  "Import existing data": "Mewnforio data presennol",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Ar yr un cyfrifiadur yn unig. Caewch bob proses gêm yn gyntaf. Efallai y bydd angen mewngofnodi eto os nad yw'r manylion mewngofnodi ar gael.",
+  "Close the running game and wait for preparation to finish before migrating.": "Caewch y gêm sy'n rhedeg ac arhoswch i'r paratoi orffen cyn mudo.",
+  "Could not locate this computer's user data folder": "Methu dod o hyd i ffolder data defnyddiwr y cyfrifiadur hwn.",
+  "Copy missing files": "Copïo ffeiliau coll",
+  "Review again": "Adolygu eto",
+  "Review existing data": "Adolygu data presennol"
 }

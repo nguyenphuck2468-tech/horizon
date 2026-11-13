@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Συνδεθείτε με Ely.by",
   "Asking Ely.by…": "Ρωτώντας το Ely.by…",
   "Use the {provider} account for {name}.": "Χρησιμοποιήστε τον {provider} για {name}.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Η σελίδα σύνδεσης ανοίγει στο πρόγραμμα περιήγησής σας. Το Horizon δεν βλέπει ποτέ τον κωδικό πρόσβασής σας."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Η σελίδα σύνδεσης ανοίγει στο πρόγραμμα περιήγησής σας. Το Horizon δεν βλέπει ποτέ τον κωδικό πρόσβασής σας.",
+  "Close the running game and wait for preparation to finish before migrating.": "Close the running game and wait for preparation to finish before migrating.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.",
+  "Copy missing files": "Copy missing files",
+  "Could not locate this computer's user data folder": "Could not locate this computer's user data folder",
+  "Import existing data": "Import existing data",
+  "Review again": "Review again",
+  "Review and copy data from this computer's previous Horizon installation": "Review and copy data from this computer's previous Horizon installation",
+  "Review existing data": "Review existing data",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Τα αρχεία σαρώνονται ή αντιγράφονται στο παρασκήνιο. Αφήστε το Horizon ανοιχτό."
 }

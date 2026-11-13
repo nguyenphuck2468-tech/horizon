@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Logige sisse Ely.by",
   "Asking Ely.by…": "Ely.by küsides…",
   "Use the {provider} account for {name}.": "Kasutage {provider} kontot {name} jaoks.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Sisselogimisleht avaneb teie brauseris. Horizon ei näe kunagi teie parooli."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Sisselogimisleht avaneb teie brauseris. Horizon ei näe kunagi teie parooli.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Faile kontrollitakse või kopeeritakse taustal. Hoidke Horizon avatuna.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "Käiviti failid: {launcher_files} ({launcher_mb} MB), mängufailid: {game_files} ({game_mb} MB); {conflicts} olemasolevat faili säilitatakse ja {symlinks} sümboolset linki jäetakse vahele.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Kopeeriti {launcher_files} käiviti faili ja {game_files} mängufaili. Olemasolevaid faile ei kirjutatud üle; {symlinks} sümboolset linki jäeti vahele.",
+  "Review and copy data from this computer's previous Horizon installation": "Vaata üle ja kopeeri selle arvuti varasema Horizon-i installatsiooni andmed",
+  "Import existing data": "Impordi olemasolevad andmed",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Ainult samas arvutis. Sulge esmalt kõik mänguprotsessid. Kui sisselogimisandmed pole saadaval, võib olla vaja uuesti sisse logida.",
+  "Close the running game and wait for preparation to finish before migrating.": "Sulge töötav mäng ja oota enne migreerimist ettevalmistuse lõppemist.",
+  "Could not locate this computer's user data folder": "Selle arvuti kasutajaandmete kausta ei leitud.",
+  "Copy missing files": "Kopeeri puuduvad failid",
+  "Review again": "Vaata uuesti üle",
+  "Review existing data": "Vaata olemasolevad andmed üle"
 }

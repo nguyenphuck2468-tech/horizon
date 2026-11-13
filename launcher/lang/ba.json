@@ -1098,5 +1098,16 @@
   "Sign in with Ely.by": "Ely.by менән инергә",
   "Asking Ely.by…": "Һорау Ely.by...",
   "Use the {provider} account for {name}.": "{provider} иҫәбен {name} өсөн ҡулланығыҙ.",
-  "The sign-in page opens in your browser. Horizon never sees your password.": "Керееү бите браузерығыҙҙа асыла. Horizon бер ҡасан да һеҙҙең паролде күрмәй."
+  "The sign-in page opens in your browser. Horizon never sees your password.": "Керееү бите браузерығыҙҙа асыла. Horizon бер ҡасан да һеҙҙең паролде күрмәй.",
+  "Scanning or copying files in the background. Keep Horizon open.": "Файлдар фон режимында тикшерелә йәки күсерелә. Horizon-ды асыҡ ҡалдырығыҙ.",
+  "{launcher_files} launcher files ({launcher_mb} MB), {game_files} game files ({game_mb} MB); {conflicts} existing files will be kept and {symlinks} symbolic links skipped.": "Эшләткес файлдары: {launcher_files} ({launcher_mb} МБ), уйын файлдары: {game_files} ({game_mb} МБ); булған {conflicts} файл һаҡланасаҡ, {symlinks} символик һылтанма үткәреп ебәреләсәк.",
+  "Copied {launcher_files} launcher files and {game_files} game files. Existing files were not overwritten; {symlinks} symbolic links were skipped.": "Эшләткестең {launcher_files} файлы һәм уйындың {game_files} файлы күсерелде. Булған файлдар яңынан яҙылманы; {symlinks} символик һылтанма үткәреп ебәрелде.",
+  "Review and copy data from this computer's previous Horizon installation": "Был компьютерҙағы элекке Horizon ҡоролмаһынан мәғлүмәтте ҡарау һәм күсереү",
+  "Import existing data": "Булған мәғлүмәтте импортлау",
+  "Same computer only. Close every game process first. Account sign-in may need to be repeated if credentials are unavailable.": "Шул уҡ компьютерҙа ғына. Башта бөтә уйын процестарын ябығыҙ. Инеү мәғлүмәттәре булмаһа, яңынан инергә кәрәк булыуы мөмкин.",
+  "Close the running game and wait for preparation to finish before migrating.": "Күсерер алдынан эшләп торған уйынды ябығыҙ һәм әҙерләү тамамланғанын көтөгөҙ.",
+  "Could not locate this computer's user data folder": "Был компьютерҙың ҡулланыусы мәғлүмәттәре папкаһы табылманы.",
+  "Copy missing files": "Етмәгән файлдарҙы күсереү",
+  "Review again": "Ҡабат ҡарау",
+  "Review existing data": "Булған мәғлүмәтте ҡарау"
 }
