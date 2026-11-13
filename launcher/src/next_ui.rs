@@ -861,16 +861,27 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
         });
 
     let mut root = div()
+        .id("next-launcher-root")
         .flex()
         .size_full()
         .bg(t.page)
         .font_family(theme::FONT)
         .child(navigation)
         .child(page);
-    // The new screen tree keeps the existing instance save/copy/edit transaction intact while
-    // its dedicated dialog is being redesigned.
+    // Preserve file-drop import, background build logs, account ownership gating and the
+    // existing instance transaction while their new visual surfaces are migrated.
+    root = this.import_drop_target(root, cx);
+    if let Some(note) = this.import_note(cx) {
+        root = root.child(note);
+    }
     if let Some(dialog) = this.instance_dialog(cx) {
         root = root.child(dialog);
+    }
+    if let Some(panel) = this.native_log_panel(cx) {
+        root = root.child(panel);
+    }
+    if this.asking_owner() {
+        root = root.child(this.owner_screen(cx));
     }
     root
 }
