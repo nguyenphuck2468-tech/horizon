@@ -485,7 +485,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                         .child(account.name),
                 )
                 .child(div().text_size(px(12.)).text_color(t.muted).child(provider))
-                .child(div().text_size(px(12.)).text_color(t.muted).child(uuid))
+                .child(div().text_size(px(12.)).text_color(t.muted).child(uuid.clone()))
                 .child(
                     div()
                         .text_size(px(13.))
