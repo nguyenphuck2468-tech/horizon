@@ -1114,9 +1114,7 @@ fn settings_json(s: &backend::Settings) -> serde_json::Value {
 }
 
 /// Runs a subcommand and returns the exit code, or None when the window should open.
-fn parse_cli_from(
-    args: impl IntoIterator<Item = std::ffi::OsString>,
-) -> Result<Cli, clap::Error> {
+fn parse_cli_from(args: impl IntoIterator<Item = std::ffi::OsString>) -> Result<Cli, clap::Error> {
     use clap::FromArgMatches;
     let no_ai = backend::no_ai();
     let mut definition = command();
