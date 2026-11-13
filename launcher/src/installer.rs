@@ -483,6 +483,14 @@ pub fn after_update(version: &str) {
     }
 }
 
+/// Whether this window mode must serialize against a running launcher instance.
+///
+/// Installing only copies the executable and writes per-user shortcuts/registry entries, so it
+/// must be allowed while Horizon is open. Uninstalling can remove shared files and keeps the lock.
+pub fn needs_launcher_lock(mode: Option<Mode>) -> bool {
+    !matches!(mode, Some(Mode::Install))
+}
+
 /// `setup --quiet [--dir <folder>] [--desktop-shortcut]` (the setup exe only) and
 /// `uninstall --quiet [--remove-data]`: no window, for scripts. None: not a quiet command.
 pub fn run_quiet() -> Option<i32> {
@@ -532,6 +540,17 @@ pub fn run_quiet() -> Option<i32> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_install_wizard_does_not_require_the_launcher_instance_lock() {
+        assert!(!needs_launcher_lock(Some(Mode::Install)));
+    }
+
+    #[test]
+    fn uninstall_and_normal_launch_keep_the_launcher_instance_lock() {
+        assert!(needs_launcher_lock(Some(Mode::Uninstall)));
+        assert!(needs_launcher_lock(None));
+    }
 
     #[test]
     fn the_install_folder_is_always_ours() {
