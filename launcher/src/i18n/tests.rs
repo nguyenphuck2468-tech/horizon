@@ -151,6 +151,7 @@ const PREVIEW_ENGLISH_FALLBACKS: &[&str] = &[
     "Session",
     "The existing native build pipeline is now exposed through the typed next_facade boundary. The next screen step wires bundle discovery, profile selection, cancellable background execution and build logs.",
     "The legacy workflow remains available during migration; this preview does not pretend that this panel is functional yet.",
+    "Time played",
     "This workspace is being migrated.",
     "Your game, instances and next action in one clear place.",
     "seconds played",
