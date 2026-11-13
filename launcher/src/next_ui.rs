@@ -360,7 +360,9 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
             let provider = match card.provider {
                 horizon_launcher::next_facade::accounts::Provider::Microsoft => tr("Microsoft"),
                 horizon_launcher::next_facade::accounts::Provider::ElyBy => tr("Ely.by"),
-                horizon_launcher::next_facade::accounts::Provider::Unavailable => tr("Provider unavailable"),
+                horizon_launcher::next_facade::accounts::Provider::Unavailable => {
+                    tr("Provider unavailable")
+                }
             };
             let status = auth_status
                 .get(&uuid)
@@ -373,12 +375,24 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                 .p(px(20.))
                 .rounded(px(14.))
                 .bg(t.surface)
-                .child(div().text_size(px(21.)).text_color(t.ink).child(account.name))
+                .child(
+                    div()
+                        .text_size(px(21.))
+                        .text_color(t.ink)
+                        .child(account.name),
+                )
                 .child(div().text_size(px(12.)).text_color(t.muted).child(provider))
                 .child(div().text_size(px(12.)).text_color(t.muted).child(uuid))
-                .child(div().text_size(px(13.)).text_color(t.ink_soft).child(format!("{}: {status}", tr("Session"))))
                 .child(
-                    div().flex().gap(px(8.))
+                    div()
+                        .text_size(px(13.))
+                        .text_color(t.ink_soft)
+                        .child(format!("{}: {status}", tr("Session"))),
+                )
+                .child(
+                    div()
+                        .flex()
+                        .gap(px(8.))
                         .child(
                             div()
                                 .id("next-account-details-refresh")
@@ -418,7 +432,12 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                 .p(px(20.))
                 .rounded(px(12.))
                 .bg(t.plate_soft)
-                .child(div().text_size(px(14.)).text_color(t.ink).child(tr("No account selected")))
+                .child(
+                    div()
+                        .text_size(px(14.))
+                        .text_color(t.ink)
+                        .child(tr("No account selected")),
+                )
                 .child(
                     div()
                         .id("next-account-details-choose")
