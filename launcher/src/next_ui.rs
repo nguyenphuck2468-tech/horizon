@@ -347,6 +347,98 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
         None
     };
 
+    // Account details are a first-class screen, not a placeholder. Provider and session
+    // information come from the safe facade/cache; refresh stays in the existing auth worker.
+    let account_details_page = if active == Route::AccountDetails {
+        let account = accounts
+            .iter()
+            .find(|account| selected_account.as_deref() == Some(account.uuid.as_str()))
+            .cloned();
+        Some(if let Some(account) = account {
+            let uuid = account.uuid.clone();
+            let card = horizon_launcher::next_facade::accounts::card(&account);
+            let provider = match card.provider {
+                horizon_launcher::next_facade::accounts::Provider::Microsoft => tr("Microsoft"),
+                horizon_launcher::next_facade::accounts::Provider::ElyBy => tr("Ely.by"),
+                horizon_launcher::next_facade::accounts::Provider::Unavailable => tr("Provider unavailable"),
+            };
+            let status = auth_status
+                .get(&uuid)
+                .map(|status| format!("{:?}", status.state))
+                .unwrap_or_else(|| "Checking".into());
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(12.))
+                .p(px(20.))
+                .rounded(px(14.))
+                .bg(t.surface)
+                .child(div().text_size(px(21.)).text_color(t.ink).child(account.name))
+                .child(div().text_size(px(12.)).text_color(t.muted).child(provider))
+                .child(div().text_size(px(12.)).text_color(t.muted).child(uuid))
+                .child(div().text_size(px(13.)).text_color(t.ink_soft).child(format!("{}: {status}", tr("Session"))))
+                .child(
+                    div().flex().gap(px(8.))
+                        .child(
+                            div()
+                                .id("next-account-details-refresh")
+                                .px(px(13.))
+                                .py(px(9.))
+                                .rounded(px(8.))
+                                .bg(t.accent)
+                                .text_color(t.page)
+                                .cursor_pointer()
+                                .child(tr("Refresh"))
+                                .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
+                                    this.refresh_account(uuid.clone());
+                                    cx.notify();
+                                })),
+                        )
+                        .child(
+                            div()
+                                .id("next-account-details-back")
+                                .px(px(13.))
+                                .py(px(9.))
+                                .rounded(px(8.))
+                                .bg(t.plate)
+                                .text_color(t.ink)
+                                .cursor_pointer()
+                                .child(tr("Accounts"))
+                                .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                                    select_route(this, Route::AccountCenter);
+                                    cx.notify();
+                                })),
+                        ),
+                )
+        } else {
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(10.))
+                .p(px(20.))
+                .rounded(px(12.))
+                .bg(t.plate_soft)
+                .child(div().text_size(px(14.)).text_color(t.ink).child(tr("No account selected")))
+                .child(
+                    div()
+                        .id("next-account-details-choose")
+                        .px(px(12.))
+                        .py(px(8.))
+                        .rounded(px(8.))
+                        .bg(t.accent)
+                        .text_color(t.page)
+                        .cursor_pointer()
+                        .child(tr("Accounts"))
+                        .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                            select_route(this, Route::AccountCenter);
+                            cx.notify();
+                        })),
+                )
+        })
+    } else {
+        None
+    };
+
     let mut navigation = div()
         .flex()
         .flex_col()
@@ -896,6 +988,9 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
         })
         .when(active == Route::InstanceDetails, |page| {
             page.child(instance_details_page.expect("instance details route has its page"))
+        })
+        .when(active == Route::AccountDetails, |page| {
+            page.child(account_details_page.expect("account details route has its page"))
         })
         .when(active == Route::AccountCenter, |page| {
             page.child(
