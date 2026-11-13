@@ -436,10 +436,7 @@ pub(crate) fn game_releases(list: &serde_json::Value) -> Vec<Release> {
     game_releases_with_asset(list, ASSET)
 }
 
-fn game_releases_with_asset(
-    list: &serde_json::Value,
-    asset: Option<&str>,
-) -> Vec<Release> {
+fn game_releases_with_asset(list: &serde_json::Value, asset: Option<&str>) -> Vec<Release> {
     let mut out = parse_releases(list, asset, |tag| {
         is_game_tag(tag) || horizon_release_sign::is_nightly(tag)
     });
@@ -492,11 +489,7 @@ fn launcher_releases_in_with_asset(
     }
     for tag in tags.into_iter().take(3) {
         if let Ok(release) = json(format!("{api}/releases/tags/{tag}")) {
-            let one = parse_releases(
-                &serde_json::json!([release]),
-                asset,
-                is_launcher_tag,
-            );
+            let one = parse_releases(&serde_json::json!([release]), asset, is_launcher_tag);
             if one.iter().any(|r| r.asset.is_some()) {
                 return one;
             }
@@ -5215,7 +5208,8 @@ pub fn {f}("
                 "Font assets ready: 2 files, 0.0 MB",
                 "Language assets ready: 2 files, 0.0 MB",
                 "Sound assets ready: 1 files, 0.0 MB",
-            ].map(str::to_string)
+            ]
+            .map(str::to_string)
         );
         for (name, data) in &assets {
             assert_eq!(asset("v0.2.1", name).as_ref(), Some(data), "{name}");
