@@ -444,6 +444,38 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
             page.child(
                 div()
                     .flex()
+                    .items_center()
+                    .justify_between()
+                    .p(px(14.))
+                    .rounded(px(10.))
+                    .bg(t.plate_soft)
+                    .child(
+                        div()
+                            .flex()
+                            .flex_col()
+                            .gap(px(3.))
+                            .child(div().text_size(px(14.)).text_color(t.ink).child(tr("Your instances")))
+                            .child(div().text_size(px(11.)).text_color(t.muted).child(tr("Create, select or edit a game profile."))),
+                    )
+                    .child(
+                        div()
+                            .id("next-instance-create")
+                            .px(px(14.))
+                            .py(px(9.))
+                            .rounded(px(8.))
+                            .bg(t.accent)
+                            .text_color(t.page)
+                            .cursor_pointer()
+                            .child(tr("New instance"))
+                            .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                                this.open_instance_dialog(None);
+                                cx.notify();
+                            })),
+                    ),
+            )
+            .child(
+                div()
+                    .flex()
                     .flex_col()
                     .gap(px(8.))
                     .children(instances.iter().map(|instance| {
@@ -806,13 +838,19 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
             )
         });
 
-    div()
+    let mut root = div()
         .flex()
         .size_full()
         .bg(t.page)
         .font_family(theme::FONT)
         .child(navigation)
-        .child(page)
+        .child(page);
+    // The new screen tree keeps the existing instance save/copy/edit transaction intact while
+    // its dedicated dialog is being redesigned.
+    if let Some(dialog) = this.instance_dialog(cx) {
+        root = root.child(dialog);
+    }
+    root
 }
 
 #[cfg(test)]
