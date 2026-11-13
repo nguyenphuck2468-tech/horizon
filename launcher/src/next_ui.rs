@@ -179,7 +179,11 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                             div()
                                 .text_size(px(11.))
                                 .text_color(t.muted)
-                                .child(format!("{} · {}", count.unwrap_or(worlds.len()), tr("Worlds"))),
+                                .child(format!(
+                                    "{} · {}",
+                                    count.unwrap_or(worlds.len()),
+                                    tr("Worlds")
+                                )),
                         ),
                 ),
         );
