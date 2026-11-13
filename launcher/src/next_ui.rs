@@ -192,6 +192,15 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                     .text_color(t.muted)
                     .child(tr("No instance selected")),
             );
+        } else if count.is_none() {
+            panel = panel.child(
+                div()
+                    .p(px(18.))
+                    .rounded(px(10.))
+                    .bg(t.plate_soft)
+                    .text_color(t.muted)
+                    .child(tr("Loading…")),
+            );
         } else if worlds.is_empty() {
             panel = panel.child(
                 div()
