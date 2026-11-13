@@ -9,7 +9,7 @@ fn main() {
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("windows")
         && std::env::var("CARGO_CFG_TARGET_ENV").as_deref() == Ok("msvc")
     {
-        println!("cargo:rustc-link-arg-bin=horizon-launcher=/DEPENDENTLOADFLAG:0x800");
+        println!("cargo:rustc-link-arg-bins=/DEPENDENTLOADFLAG:0x800");
     }
     #[cfg(windows)]
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("windows") {
