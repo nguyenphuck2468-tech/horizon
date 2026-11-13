@@ -190,7 +190,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                         .p(px(22.))
                         .rounded(px(14.))
                         .bg(t.surface)
-                        .child(div().text_size(px(11.)).text_color(t.muted).child(tr("INSTANCE PROFILE")))
+                        .child(div().text_size(px(11.)).text_color(t.muted).child(tr("My instance")))
                         .child(div().font_family(theme::DISPLAY_FONT).text_size(px(25.)).text_color(t.ink).child(instance.name.clone()))
                         .child(div().text_size(px(12.)).text_color(t.muted).child(instance.id.clone())),
                 )
@@ -199,8 +199,8 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                         .flex()
                         .gap(px(10.))
                         .children([
-                            ("VERSION", version),
-                            ("PLAY TIME", played),
+                            ("Version", version),
+                            ("Instances", played),
                         ].into_iter().map(|(label, value)| {
                             div()
                                 .flex()
@@ -222,7 +222,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                         .p(px(16.))
                         .rounded(px(11.))
                         .bg(t.plate_soft)
-                        .child(div().text_size(px(10.)).text_color(t.muted).child(tr("GAME DIRECTORY")))
+                        .child(div().text_size(px(10.)).text_color(t.muted).child(tr("Folder")))
                         .child(div().text_size(px(12.)).text_color(t.ink_soft).child(home.display().to_string())),
                 )
                 .child(
@@ -253,10 +253,10 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                                 .bg(t.plate)
                                 .text_color(t.ink)
                                 .cursor_pointer()
-                                .child(tr("Open game folder"))
-                                .on_click(cx.listener(move |_, _: &ClickEvent, _, cx| {
+                                .child(tr("Open folder"))
+                                .on_click(move |_, _, cx| {
                                     crate::glass_toast::open(cx, &home);
-                                })),
+                                }),
                         ),
                 )
         } else {
@@ -267,7 +267,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                 .p(px(22.))
                 .rounded(px(12.))
                 .bg(t.plate_soft)
-                .child(div().text_size(px(15.)).text_color(t.ink).child(tr("No instance selected")))
+                .child(div().text_size(px(15.)).text_color(t.ink).child(tr("Instances")))
                 .child(
                     div()
                         .id("next-instance-details-back")
@@ -277,7 +277,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                         .bg(t.accent)
                         .text_color(t.page)
                         .cursor_pointer()
-                        .child(tr("Browse instances"))
+                        .child(tr("Instances"))
                         .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
                             select_route(this, Route::InstanceLibrary);
                             cx.notify();
