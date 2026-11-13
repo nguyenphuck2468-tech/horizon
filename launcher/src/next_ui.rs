@@ -277,12 +277,11 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                         .flex_col()
                         .gap(px(4.))
                         .child(tr("Screenshots"))
-                        .child(
-                            div()
-                                .text_size(px(11.))
-                                .text_color(t.muted)
-                                .child(format!("{} · {}", count, tr("Screenshots"))),
-                        ),
+                        .child(div().text_size(px(11.)).text_color(t.muted).child(format!(
+                            "{} · {}",
+                            count,
+                            tr("Screenshots")
+                        ))),
                 ),
         );
         if this.selected_instance().is_none() {
@@ -542,7 +541,12 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                         .child(account.name),
                 )
                 .child(div().text_size(px(12.)).text_color(t.muted).child(provider))
-                .child(div().text_size(px(12.)).text_color(t.muted).child(uuid.clone()))
+                .child(
+                    div()
+                        .text_size(px(12.))
+                        .text_color(t.muted)
+                        .child(uuid.clone()),
+                )
                 .child(
                     div()
                         .text_size(px(13.))
