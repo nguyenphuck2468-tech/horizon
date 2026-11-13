@@ -5532,7 +5532,7 @@ fn main() {
     }
     gpui_platform::application()
         .with_assets(blocks::Assets)
-        .run(|cx: &mut App| {
+        .run(move |cx: &mut App| {
             cx.text_system()
                 .add_fonts(vec![
                     Cow::Borrowed(horizon_theme::fonts::GEIST_MONO),
