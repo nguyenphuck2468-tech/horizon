@@ -947,6 +947,7 @@ impl Audio {
         }
     }
     #[cfg(not(feature = "audio"))]
+    #[allow(dead_code)] // The no-audio server build has no caller for this client-only stub.
     fn open_named(_: Arc<Mutex<Mixer>>, _: &str) -> Result<Stream> {
         Err("this build has no sound output (built without the `audio` feature)".into())
     }
