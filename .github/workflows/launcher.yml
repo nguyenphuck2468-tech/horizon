@@ -120,8 +120,6 @@ jobs:
     needs: decide
     if: needs.decide.outputs.release == 'true'
     name: build ${{ matrix.name }}
-    # Windows ARM64 is best-effort and must not block other platform packages.
-    continue-on-error: ${{ matrix.name == 'windows-arm64' }}
     strategy:
       fail-fast: false
       matrix:
@@ -150,15 +148,6 @@ jobs:
             pe_arch: x64
             # The C runtime linked in: without it the launcher asks for VCRUNTIME140.dll,
             # which only the Visual C++ redistributable installs.
-            rustflags: -C target-feature=+crt-static
-          - name: windows-arm64
-            os: windows-11-vs2026-arm
-            target: aarch64-pc-windows-msvc
-            asset: horizon-launcher-windows-arm64.zip
-            portable_asset: horizon-launcher-windows-arm64-portable.zip
-            setup_asset: horizon-launcher-setup-arm64.exe
-            binary: horizon-launcher.exe
-            pe_arch: arm64
             rustflags: -C target-feature=+crt-static
     runs-on: ${{ matrix.mac && (vars.MAC_RUNNER || (github.repository == 'horizon-rust/horizon' && 'ludovics-mac-mini' || (matrix.mac_arch == 'x64' && 'macos-15-intel' || 'macos-15'))) || matrix.os }}
     # Notarizing the app and then the .dmg can take a few minutes each.
@@ -275,11 +264,7 @@ jobs:
           # release linked to a Nix store is a warning here, not a broken launcher.
           soft() { if [[ "$RUNNER_OS" == "Linux" ]]; then "$@" || echo "::warning::$* failed"; else "$@"; fi; }
           if [[ "$RUNNER_OS" == "Windows" ]]; then
-            if ! python ../tools/check_pe_arch.py "${{ matrix.pe_arch }}" "$client"; then
-              # ARM64 launchers may need the x64 game build when a release has no ARM64 client.
-              [[ "${{ matrix.pe_arch }}" == arm64 ]] && python ../tools/check_pe_arch.py x64 "$client" || exit 1
-              echo "::warning::the latest game has no ARM64 build: the launcher installed the x64 one"
-            fi
+            python ../tools/check_pe_arch.py x64 "$client"
             python ../tools/check_imports.py "$client"
           elif [[ "$RUNNER_OS" == "Linux" ]]; then
             soft python3 ../tools/check_imports.py "$client"
@@ -428,11 +413,6 @@ jobs:
           key=(); [[ -n "$EPHEMERAL" ]] && key=(--key "$(cat dist/ephemeral.pub)")
           cargo run --locked --quiet -p horizon-release-sign -- verify --tag "$TAG" --publishing "${key[@]}" dist
       # Never marked latest: Horizon's own releases stay the repository's latest.
-      - name: The Windows ARM64 launcher, if it built
-        run: |
-          for file in horizon-launcher-windows-arm64.zip horizon-launcher-windows-arm64-portable.zip horizon-launcher-setup-arm64.exe; do
-            [[ -f "dist/$file" ]] || echo "::warning::$file is missing: this release goes out without it"
-          done
       - name: Publish ${{ needs.decide.outputs.tag }}
         if: needs.decide.outputs.dry_run != 'true'
         env:
