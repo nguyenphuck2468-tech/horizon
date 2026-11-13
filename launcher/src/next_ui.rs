@@ -155,6 +155,26 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
     } else {
         None
     };
+    // Reuse the established device-code sign-in state machine and its safe actions. The new
+    // account screen owns the presentation, while the existing provider flows remain authoritative.
+    let account_sign_in_panel = if active == Route::AccountCenter {
+        let (title, detail, actions) = this.sign_in_parts(cx);
+        let mut panel = div()
+            .flex()
+            .flex_col()
+            .gap(px(8.))
+            .p(px(18.))
+            .rounded(px(12.))
+            .bg(t.plate_soft)
+            .child(div().text_size(px(15.)).text_color(t.ink).child(title))
+            .child(div().text_size(px(12.)).text_color(t.ink_soft).child(detail));
+        if let Some(actions) = actions {
+            panel = panel.child(actions);
+        }
+        Some(panel)
+    } else {
+        None
+    };
 
     let mut navigation = div()
         .flex()
@@ -741,7 +761,8 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                                 this.next_route = Route::AccountCenter;
                                 cx.notify();
                             })),
-                    ),
+                    )
+                    .child(account_sign_in_panel.expect("account route has its sign-in panel")),
             )
         })
         .when(content_route, |page| {
