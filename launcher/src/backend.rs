@@ -3687,7 +3687,7 @@ mod tests {
                     let _ = stream.read(&mut request);
                     write!(
                         stream,
-                        "HTTP/1.1 200 OK\\r\\nContent-Length: 2\\r\\nConnection: close\\r\\n\\r\\nok"
+                        "HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nok"
                     )
                     .unwrap();
                 }
