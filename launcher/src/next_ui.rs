@@ -232,7 +232,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                                 .text_color(if selected { t.accent } else { t.ink_soft })
                                 .when(selected, |element| element.bg(t.surface))
                                 .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
-                                    this.next_route = route;
+                                    select_route(this, route);
                                     cx.notify();
                                 }))
                                 .child(tr(label(route)))
@@ -339,9 +339,73 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                     )
                     .child(
                         div()
-                            .text_size(px(12.))
-                            .text_color(t.muted)
-                            .child(tr("Play delegates to Horizon's existing owner, session, preparation and launch checks.")),
+                            .flex()
+                            .gap(px(10.))
+                            .child(
+                                div()
+                                    .flex()
+                                    .flex_col()
+                                    .flex_1()
+                                    .gap(px(4.))
+                                    .p(px(13.))
+                                    .rounded(px(10.))
+                                    .bg(t.plate_soft)
+                                    .child(div().text_size(px(22.)).text_color(t.ink).child(instances.len().to_string()))
+                                    .child(div().text_size(px(11.)).text_color(t.muted).child(tr("Instances"))),
+                            )
+                            .child(
+                                div()
+                                    .flex()
+                                    .flex_col()
+                                    .flex_1()
+                                    .gap(px(4.))
+                                    .p(px(13.))
+                                    .rounded(px(10.))
+                                    .bg(t.plate_soft)
+                                    .child(div().text_size(px(22.)).text_color(t.ink).child(installed_versions.len().to_string()))
+                                    .child(div().text_size(px(11.)).text_color(t.muted).child(tr("Installed builds"))),
+                            )
+                            .child(
+                                div()
+                                    .flex()
+                                    .flex_col()
+                                    .flex_1()
+                                    .gap(px(4.))
+                                    .p(px(13.))
+                                    .rounded(px(10.))
+                                    .bg(t.plate_soft)
+                                    .child(div().text_size(px(22.)).text_color(t.ink).child((accounts.len() + offline_names.len()).to_string()))
+                                    .child(div().text_size(px(11.)).text_color(t.muted).child(tr("Available identities"))),
+                            ),
+                    )
+                    .child(
+                        div()
+                            .flex()
+                            .gap(px(8.))
+                            .children([
+                                (Route::InstanceLibrary, "Instances"),
+                                (Route::VersionManager, "Versions"),
+                                (Route::ContentBrowser, "Content"),
+                                (Route::AccountCenter, "Accounts"),
+                            ].into_iter().map(|(route, title)| {
+                                div()
+                                    .id(SharedString::from(format!("next-home-quick-{title}")))
+                                    .flex()
+                                    .flex_1()
+                                    .justify_center()
+                                    .px(px(12.))
+                                    .py(px(10.))
+                                    .rounded(px(8.))
+                                    .bg(t.plate)
+                                    .text_size(px(12.))
+                                    .text_color(t.ink)
+                                    .cursor_pointer()
+                                    .child(tr(title))
+                                    .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
+                                        select_route(this, route);
+                                        cx.notify();
+                                    }))
+                            })),
                     ),
             )
         })
