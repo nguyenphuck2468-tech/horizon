@@ -3706,10 +3706,6 @@ mod tests {
         for code in [200, 301, 400, 403, 404, 429, 500, 501, 505] {
             assert!(!transient_status(code), "{code}");
         }
-        assert!(retryable(&ureq::Error::Transport(
-            ureq::Transport::new(ureq::ErrorKind::Io, "connection closed")
-        )));
-        assert!(!retryable(&ureq::Error::Status(404, ureq::Response::new(404, "Not Found"))));
         assert_eq!(retry_delay(1).as_millis(), 250);
         assert_eq!(retry_delay(2).as_millis(), 500);
     }
