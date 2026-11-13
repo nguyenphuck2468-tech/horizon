@@ -198,8 +198,19 @@ fn get_once(url: &str) -> Result<ureq::Response, Box<ureq::Error>> {
     request.call().map_err(Box::new)
 }
 
-/// `url`'s answer, asking again while a proxy or GitHub answers 502, 503 or 504 (a deploy or a
-/// proxy's brief outage), rather than failing a download on a status that usually clears at once.
+/// Whether an HTTP response or connection failure is likely to clear on another attempt.
+/// TLS handshakes can be cut off by a busy proxy or an intermittent route (ureq reports these as
+/// transport errors, e.g. "tls connection init failed: unexpected end of file"). Retry those too;
+/// certificate validation and malformed-request failures still surface after the bounded attempts.
+fn retryable(e: &ureq::Error) -> bool {
+    match e {
+        ureq::Error::Status(code, _) => transient_status(*code),
+        ureq::Error::Transport(_) => true,
+    }
+}
+
+/// `url`'s answer, asking again after a transient HTTP status or connection/TLS interruption,
+/// rather than failing a download on a brief network interruption.
 pub(crate) fn get(url: &str) -> Result<ureq::Response, String> {
     let mut attempt = 1;
     loop {
@@ -207,9 +218,7 @@ pub(crate) fn get(url: &str) -> Result<ureq::Response, String> {
             Ok(response) => return Ok(response),
             Err(e) => {
                 let e = *e;
-                let retry = matches!(&e, ureq::Error::Status(code, _) if transient_status(*code))
-                    && attempt < GET_ATTEMPTS;
-                if !retry {
+                if !retryable(&e) || attempt >= GET_ATTEMPTS {
                     return Err(match e {
                         ureq::Error::Status(code, r)
                             if url.starts_with("https://api.github.com/")
@@ -3663,14 +3672,44 @@ mod tests {
         server.join().unwrap();
     }
 
+    /// A TLS/connection interruption (the server closes before sending an HTTP response) is
+    /// retried, and a later successful handshake/request is used.
     #[test]
-    fn only_a_briefly_unavailable_status_is_asked_again() {
+    fn a_dropped_connection_is_asked_again() {
+        use std::io::{Read, Write};
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let server = std::thread::spawn(move || {
+            for attempt in 0..GET_ATTEMPTS {
+                let (mut stream, _) = listener.accept().unwrap();
+                if attempt + 1 == GET_ATTEMPTS {
+                    let mut request = [0u8; 1024];
+                    let _ = stream.read(&mut request);
+                    write!(
+                        stream,
+                        "HTTP/1.1 200 OK\\r\\nContent-Length: 2\\r\\nConnection: close\\r\\n\\r\\nok"
+                    )
+                    .unwrap();
+                }
+                // The first two connections close without an HTTP response.
+            }
+        });
+        assert_eq!(get_bytes(&format!("http://{address}/file")).unwrap(), b"ok");
+        server.join().unwrap();
+    }
+
+    #[test]
+    fn only_briefly_unavailable_failures_are_asked_again() {
         for code in [502, 503, 504] {
             assert!(transient_status(code), "{code}");
         }
         for code in [200, 301, 400, 403, 404, 429, 500, 501, 505] {
             assert!(!transient_status(code), "{code}");
         }
+        assert!(retryable(&ureq::Error::Transport(
+            ureq::Transport::new(ureq::ErrorKind::Io, "connection closed")
+        )));
+        assert!(!retryable(&ureq::Error::Status(404, ureq::Response::new(404, "Not Found"))));
         assert_eq!(retry_delay(1).as_millis(), 250);
         assert_eq!(retry_delay(2).as_millis(), 500);
     }
