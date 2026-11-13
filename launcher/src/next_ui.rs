@@ -175,16 +175,11 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                         .flex_col()
                         .gap(px(4.))
                         .child(tr("Worlds"))
-                        .child(
-                            div()
-                                .text_size(px(11.))
-                                .text_color(t.muted)
-                                .child(format!(
-                                    "{} · {}",
-                                    count.unwrap_or(worlds.len()),
-                                    tr("Worlds")
-                                )),
-                        ),
+                        .child(div().text_size(px(11.)).text_color(t.muted).child(format!(
+                            "{} · {}",
+                            count.unwrap_or(worlds.len()),
+                            tr("Worlds")
+                        ))),
                 ),
         );
         if this.selected_instance().is_none() {
