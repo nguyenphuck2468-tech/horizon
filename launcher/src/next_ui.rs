@@ -178,7 +178,12 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
             .rounded(px(12.))
             .bg(t.plate_soft)
             .child(div().text_size(px(15.)).text_color(t.ink).child(title))
-            .child(div().text_size(px(12.)).text_color(t.ink_soft).child(detail));
+            .child(
+                div()
+                    .text_size(px(12.))
+                    .text_color(t.ink_soft)
+                    .child(detail),
+            );
         if let Some(actions) = actions {
             panel = panel.child(actions);
         }
