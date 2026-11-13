@@ -238,6 +238,10 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                     )
                     .child(
                         div()
+                            .id(SharedString::from(format!(
+                                "next-world-open-folder-{}",
+                                folder.display()
+                            )))
                             .px(px(11.))
                             .py(px(8.))
                             .rounded(px(8.))
