@@ -5472,20 +5472,18 @@ fn main() {
         eprintln!("Could not restore the launcher's terminal streams: {error}");
         std::process::exit(1);
     }
-    // Windows setup: `setup --quiet` / `uninstall --quiet` run here without a window, and never
-    // reach the CLI parser below (so neither the MCP tools nor the completions list them).
+    // Resolve both window and quiet setup modes before acquiring the shared-state lock.
+    // Quiet install may run beside Horizon; both interactive and quiet uninstall must serialize.
     #[cfg(windows)]
-    if let Some(code) = horizon_launcher::installer::run_quiet() {
-        std::process::exit(code);
-    }
+    let installer_mode = horizon_launcher::installer::window_mode();
+    #[cfg(windows)]
+    let quiet_mode = horizon_launcher::installer::quiet_mode();
     // The setup wizard only copies the executable and writes per-user shortcuts/registry
     // entries. It must remain launchable while an installed Horizon instance is running.
     // Keep the lock for the uninstaller and all normal launcher/CLI paths: uninstall can remove
     // shared files, and normal commands must still serialize access to launcher state.
     #[cfg(windows)]
-    let installer_mode = horizon_launcher::installer::window_mode();
-    #[cfg(windows)]
-    let _single_instance = if horizon_launcher::installer::needs_launcher_lock(installer_mode) {
+    let _single_instance = if horizon_launcher::installer::needs_launcher_lock(quiet_mode.or(installer_mode)) {
         Some(
             horizon_launcher::single_instance::SingleInstance::acquire(
                 &horizon_launcher::backend::data_dir(),
@@ -5508,6 +5506,13 @@ fn main() {
             std::process::exit(2);
         }),
     );
+    // Quiet commands run only after their lock policy has been applied. Release the guard
+    // explicitly before process::exit so uninstall leaves no stale lock.
+    #[cfg(windows)]
+    if let Some(code) = horizon_launcher::installer::run_quiet() {
+        drop(_single_instance);
+        std::process::exit(code);
+    }
     perf::process_started();
     // Do not run launcher maintenance or load launcher settings from the setup process: it is
     // independent of the running launcher and should not race its update cleanup or state reads.
