@@ -141,11 +141,7 @@ fn process_alive(pid: u32) -> bool {
     };
 
     unsafe {
-        let process = OpenProcess(
-            PROCESS_QUERY_LIMITED_INFORMATION | SYNCHRONIZE,
-            0,
-            pid,
-        );
+        let process = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION | SYNCHRONIZE, 0, pid);
         if process.is_null() {
             return GetLastError() != ERROR_INVALID_PARAMETER;
         }
