@@ -72,11 +72,12 @@ fn content_kind(
     use horizon_launcher::next_navigation::Route;
 
     match route {
-        Route::ContentBrowser | Route::InstalledContent | Route::ModWorkshop => {
+        Route::ContentBrowser | Route::InstalledContent => {
             Some(horizon_launcher::browser::Kind::Mod)
         }
         Route::ModpackManager => Some(horizon_launcher::browser::Kind::Modpack),
-        _ => None,
+        // Native .hnmod bundles use next_facade::native_mods, never the .hmod browser.
+        Route::ModWorkshop | _ => None,
     }
 }
 
@@ -147,10 +148,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
     let confirm_remove = this.confirm_remove.clone();
     let content_route = matches!(
         active,
-        Route::ContentBrowser
-            | Route::InstalledContent
-            | Route::ModpackManager
-            | Route::ModWorkshop
+        Route::ContentBrowser | Route::InstalledContent | Route::ModpackManager
     );
     let content_page = if content_route {
         Some(this.mods_page(cx))
@@ -759,10 +757,7 @@ mod tests {
             super::content_kind(Route::InstalledContent),
             Some(horizon_launcher::browser::Kind::Mod)
         );
-        assert_eq!(
-            super::content_kind(Route::ModWorkshop),
-            Some(horizon_launcher::browser::Kind::Mod)
-        );
+        assert_eq!(super::content_kind(Route::ModWorkshop), None);
         assert_eq!(
             super::content_kind(Route::ModpackManager),
             Some(horizon_launcher::browser::Kind::Modpack)
