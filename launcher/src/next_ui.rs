@@ -406,7 +406,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                                     .rounded(px(10.))
                                     .bg(t.plate_soft)
                                     .child(div().text_size(px(22.)).text_color(t.ink).child((accounts.len() + offline_names.len()).to_string()))
-                                    .child(div().text_size(px(11.)).text_color(t.muted).child(tr("Available identities"))),
+                                    .child(div().text_size(px(11.)).text_color(t.muted).child(tr("Accounts"))),
                             ),
                     )
                     .child(
@@ -454,8 +454,8 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                             .flex()
                             .flex_col()
                             .gap(px(3.))
-                            .child(div().text_size(px(14.)).text_color(t.ink).child(tr("Your instances")))
-                            .child(div().text_size(px(11.)).text_color(t.muted).child(tr("Create, select or edit a game profile."))),
+                            .child(div().text_size(px(14.)).text_color(t.ink).child(tr("Instances")))
+                            .child(div().text_size(px(11.)).text_color(t.muted).child(tr("Manage game profiles, versions, Java and per-instance configuration."))),
                     )
                     .child(
                         div()
@@ -520,7 +520,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                                             .rounded(px(7.))
                                             .bg(t.plate)
                                             .text_size(px(11.))
-                                            .child(tr("Edit"))
+                                            .child(tr("Edit instance"))
                                             .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
                                                 cx.stop_propagation();
                                                 this.open_instance_dialog(Some(editing.clone()));
