@@ -1116,7 +1116,7 @@ fn settings_json(s: &backend::Settings) -> serde_json::Value {
 /// Runs a subcommand and returns the exit code, or None when the window should open.
 fn parse_cli_from(
     args: impl IntoIterator<Item = std::ffi::OsString>,
-) -> Result<Cli, clap::Error> {
+) -> Result<(Cli, bool), clap::Error> {
     use clap::FromArgMatches;
     let no_ai = backend::no_ai();
     let mut definition = command();
@@ -1127,13 +1127,13 @@ fn parse_cli_from(
         }
     }
     let matches = definition.try_get_matches_from(args)?;
-    Cli::from_arg_matches(&matches)
+    Ok((Cli::from_arg_matches(&matches)?, no_ai))
 }
 
 /// Runs a subcommand and returns the exit code, or None when the window should open.
 pub fn run() -> Option<i32> {
-    let cli = match parse_cli_from(std::env::args_os()) {
-        Ok(cli) => cli,
+    let (cli, no_ai) = match parse_cli_from(std::env::args_os()) {
+        Ok(parsed) => parsed,
         Err(error) => {
             // Do not let clap call process::exit: main must drop the single-instance guard first.
             let code = error.exit_code();
