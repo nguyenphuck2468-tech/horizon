@@ -137,8 +137,12 @@ fn process_alive(pid: u32) -> bool {
         CloseHandle, GetLastError, ERROR_INVALID_PARAMETER, WAIT_OBJECT_0, WAIT_TIMEOUT,
     };
     use windows_sys::Win32::System::Threading::{
-        OpenProcess, WaitForSingleObject, PROCESS_QUERY_LIMITED_INFORMATION, SYNCHRONIZE,
+        OpenProcess, WaitForSingleObject, PROCESS_QUERY_LIMITED_INFORMATION,
     };
+
+    // SYNCHRONIZE is a standard process access right (0x0010_0000), not a
+    // Threading-module constant in windows-sys 0.61.
+    const SYNCHRONIZE: u32 = 0x0010_0000;
 
     unsafe {
         let process = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION | SYNCHRONIZE, 0, pid);
