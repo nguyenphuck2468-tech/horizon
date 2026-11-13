@@ -155,6 +155,17 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
     } else {
         None
     };
+    // The native workshop has its own route and reuses only the trusted .hnmod build/import
+    // services; it is not routed through the .hmod browser or .hpack profile manager.
+    let native_workshop_page = if active == Route::ModWorkshop {
+        let mut panel = div().flex().flex_col().gap(px(14.));
+        if let Some(build) = this.native_build(cx) {
+            panel = panel.child(build);
+        }
+        Some(panel.child(this.github_panel(cx)))
+    } else {
+        None
+    };
     // Reuse the established device-code sign-in state machine and its safe actions. The new
     // account screen owns the presentation, while the existing provider flows remain authoritative.
     let account_sign_in_panel = if active == Route::AccountCenter {
@@ -768,7 +779,10 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
         .when(content_route, |page| {
             page.child(content_page.expect("content route has an existing workflow panel"))
         })
-        .when(!content_route && active != Route::Home, |page| {
+        .when(active == Route::ModWorkshop, |page| {
+            page.child(native_workshop_page.expect("native workshop route has its own workflow"))
+        })
+        .when(!content_route && active != Route::Home && active != Route::ModWorkshop, |page| {
             page.child(
                 div()
                     .flex()
