@@ -5,7 +5,6 @@ The release includes opt-in portable archives alongside the normal installer and
 | Platform | Portable archive | Data folder |
 | --- | --- | --- |
 | Windows x64 | `horizon-launcher-windows-x64-portable.zip` | `Horizon-Data` beside `horizon-launcher.exe` |
-| Windows ARM64 | `horizon-launcher-windows-arm64-portable.zip` | `Horizon-Data` beside `horizon-launcher.exe` |
 | Linux x86_64 | `horizon-launcher-linux-x86_64-portable.tar.gz` | `Horizon-Data` beside `horizon-launcher` |
 | macOS Apple Silicon | `horizon-launcher-macos-arm64-portable.zip` | `Horizon-Data` beside `Horizon.app` |
 | macOS Intel | `horizon-launcher-macos-x64-portable.zip` | `Horizon-Data` beside `Horizon.app` |
@@ -18,4 +17,4 @@ portable installation keeps using its adjacent data folder after a self-update.
 
 The ordinary Windows ZIP, Linux self-update tarball and macOS app ZIP do not contain the portable marker:
 they keep using the normal per-user data location and remain compatible with the launcher's self-updater.
-The Windows x64 setup (`horizon-launcher-setup.exe`) and best-effort ARM64 setup (`horizon-launcher-setup-arm64.exe`), macOS DMGs and Linux AppImage remain available as convenience formats. ARM64 assets are omitted with a release warning if the ARM runner cannot build them.
+The Windows x64 setup (`horizon-launcher-setup.exe`), macOS DMGs and Linux AppImage remain available as convenience formats.
