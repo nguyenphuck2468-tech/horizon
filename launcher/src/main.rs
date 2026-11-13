@@ -5509,13 +5509,21 @@ fn main() {
         }),
     );
     perf::process_started();
-    backend::exe_path();
+    // Do not run launcher maintenance or load launcher settings from the setup process: it is
+    // independent of the running launcher and should not race its update cleanup or state reads.
     #[cfg(windows)]
-    backend::remove_replaced_binaries();
-    backend::cleanup_launcher_updates();
-    // What the launcher downloads goes through the player's proxy, if they set one: the parts
-    // that build their own agents (`horizon-port-pack`) are told before anything starts.
-    horizon_launcher::proxy::announce(horizon_launcher::backend::Settings::load().proxy);
+    let is_setup_window = installer_mode == Some(horizon_launcher::installer::Mode::Install);
+    #[cfg(not(windows))]
+    let is_setup_window = false;
+    if !is_setup_window {
+        backend::exe_path();
+        #[cfg(windows)]
+        backend::remove_replaced_binaries();
+        backend::cleanup_launcher_updates();
+        // What the launcher downloads goes through the player's proxy, if they set one: the parts
+        // that build their own agents (`horizon-port-pack`) are told before anything starts.
+        horizon_launcher::proxy::announce(horizon_launcher::backend::Settings::load().proxy);
+    }
     if let Some(code) = cli::run() {
         // Windows cannot probe whether a PID is still alive, so release the guard before
         // process::exit bypasses Rust destructors and leaves a stale launcher.lock behind.
