@@ -166,6 +166,128 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
     } else {
         None
     };
+    // Instance details are rendered in the replacement design and read only from the
+    // selected instance; all launch and filesystem actions still delegate to existing services.
+    let instance_details_page = if active == Route::InstanceDetails {
+        Some(if let Some(instance) = this.selected_instance().cloned() {
+            let version = this
+                .version_of(&instance)
+                .cloned()
+                .unwrap_or_else(|| tr("No build selected").to_string());
+            let home = instance.home.clone();
+            let played = horizon_launcher::next_facade::instances::play_time(
+                instance.played.as_secs(),
+            );
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(14.))
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(6.))
+                        .p(px(22.))
+                        .rounded(px(14.))
+                        .bg(t.surface)
+                        .child(div().text_size(px(11.)).text_color(t.muted).child(tr("INSTANCE PROFILE")))
+                        .child(div().font_family(theme::DISPLAY_FONT).text_size(px(25.)).text_color(t.ink).child(instance.name.clone()))
+                        .child(div().text_size(px(12.)).text_color(t.muted).child(instance.id.clone())),
+                )
+                .child(
+                    div()
+                        .flex()
+                        .gap(px(10.))
+                        .children([
+                            ("VERSION", version),
+                            ("PLAY TIME", played),
+                        ].into_iter().map(|(label, value)| {
+                            div()
+                                .flex()
+                                .flex_col()
+                                .flex_1()
+                                .gap(px(6.))
+                                .p(px(16.))
+                                .rounded(px(11.))
+                                .bg(t.plate_soft)
+                                .child(div().text_size(px(10.)).text_color(t.muted).child(tr(label)))
+                                .child(div().text_size(px(15.)).text_color(t.ink).child(value))
+                        })),
+                )
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(6.))
+                        .p(px(16.))
+                        .rounded(px(11.))
+                        .bg(t.plate_soft)
+                        .child(div().text_size(px(10.)).text_color(t.muted).child(tr("GAME DIRECTORY")))
+                        .child(div().text_size(px(12.)).text_color(t.ink_soft).child(home.display().to_string())),
+                )
+                .child(
+                    div()
+                        .flex()
+                        .gap(px(8.))
+                        .child(
+                            div()
+                                .id("next-instance-details-play")
+                                .px(px(16.))
+                                .py(px(10.))
+                                .rounded(px(8.))
+                                .bg(t.accent)
+                                .text_color(t.page)
+                                .cursor_pointer()
+                                .child(tr("Play"))
+                                .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                                    this.play();
+                                    cx.notify();
+                                })),
+                        )
+                        .child(
+                            div()
+                                .id("next-instance-details-folder")
+                                .px(px(16.))
+                                .py(px(10.))
+                                .rounded(px(8.))
+                                .bg(t.plate)
+                                .text_color(t.ink)
+                                .cursor_pointer()
+                                .child(tr("Open game folder"))
+                                .on_click(cx.listener(move |_, _: &ClickEvent, _, cx| {
+                                    crate::glass_toast::open(cx, &home);
+                                })),
+                        ),
+                )
+        } else {
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(10.))
+                .p(px(22.))
+                .rounded(px(12.))
+                .bg(t.plate_soft)
+                .child(div().text_size(px(15.)).text_color(t.ink).child(tr("No instance selected")))
+                .child(
+                    div()
+                        .id("next-instance-details-back")
+                        .px(px(12.))
+                        .py(px(8.))
+                        .rounded(px(8.))
+                        .bg(t.accent)
+                        .text_color(t.page)
+                        .cursor_pointer()
+                        .child(tr("Browse instances"))
+                        .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                            select_route(this, Route::InstanceLibrary);
+                            cx.notify();
+                        })),
+                )
+        })
+    } else {
+        None
+    };
+
     // Reuse the established device-code sign-in state machine and its safe actions. The new
     // account screen owns the presentation, while the existing provider flows remain authoritative.
     let account_sign_in_panel = if active == Route::AccountCenter {
@@ -536,7 +658,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                             .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
                                 if let Some(chosen) = this.instances.list.iter().find(|item| item.id == id).cloned() {
                                     this.select_instance(&chosen);
-                                    this.next_route = Route::Home;
+                                    this.next_route = Route::InstanceDetails;
                                 }
                                 cx.notify();
                             }))
@@ -739,6 +861,9 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
             }
             page.child(versions)
         })
+        .when(active == Route::InstanceDetails, |page| {
+            page.child(instance_details_page.expect("instance details route has its page"))
+        })
         .when(active == Route::AccountCenter, |page| {
             page.child(
                 div()
@@ -841,7 +966,12 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
         .when(active == Route::ModWorkshop, |page| {
             page.child(native_workshop_page.expect("native workshop route has its own workflow"))
         })
-        .when(!content_route && active != Route::Home && active != Route::ModWorkshop, |page| {
+        .when(
+            !content_route
+                && active != Route::Home
+                && active != Route::ModWorkshop
+                && active != Route::InstanceDetails,
+            |page| {
             page.child(
                 div()
                     .flex()
