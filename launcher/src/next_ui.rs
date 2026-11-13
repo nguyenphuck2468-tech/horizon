@@ -233,18 +233,13 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                             .min_w_0()
                             .gap(px(4.))
                             .child(world.name)
-                            .child(
-                                div()
-                                    .text_size(px(11.))
-                                    .text_color(t.muted)
-                                    .child(format!(
-                                        "{} · {} · {} · {:.1} MB",
-                                        tr(world.mode),
-                                        world.version.as_deref().unwrap_or("No build selected"),
-                                        crate::worlds_page::ago(world.last_played),
-                                        world.size as f64 / 1_048_576.0
-                                    )),
-                            ),
+                            .child(div().text_size(px(11.)).text_color(t.muted).child(format!(
+                                "{} · {} · {} · {:.1} MB",
+                                tr(world.mode),
+                                world.version.as_deref().unwrap_or("No build selected"),
+                                crate::worlds_page::ago(world.last_played),
+                                world.size as f64 / 1_048_576.0
+                            ))),
                     )
                     .child(
                         div()
