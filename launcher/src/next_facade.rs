@@ -17,7 +17,6 @@ use crate::instances as launcher_instances;
 use crate::launch as launch_engine;
 use crate::native_status as native_engine;
 use crate::nightly as nightly_engine;
-use crate::packs as content_engine;
 use crate::servers as server_engine;
 use crate::tailscale as tailscale_engine;
 
@@ -249,15 +248,163 @@ pub mod instances {
 }
 
 /// Installed content.
+fn is_content_mod(kind: crate::browser::Kind, native: bool) -> bool {
+    kind == crate::browser::Kind::Mod && !native
+}
+
 pub mod content {
-    use super::*;
     use std::path::Path;
 
+    pub use crate::browser::{Project, Query, Version};
     pub use crate::packs::Kind as PackKind;
+
+    /// Search Horizon's registry for content-only .hmod mods.
+    ///
+    /// Native .hnmod entries (and future native .hmod entries) stay in the native-mod
+    /// workflow; the registry's shared browser kind is not enough to classify them.
+    pub fn registry_mods(query: &Query) -> Result<Vec<Project>, String> {
+        if query.kind != crate::browser::Kind::Mod {
+            return Err("A Horizon content-mod search must use the Mods kind.".into());
+        }
+        let source = crate::browser::source(crate::browser::SourceId::Horizon)
+            .ok_or_else(|| "Horizon registry is unavailable.".to_owned())?;
+        let projects = crate::browser::Source::search(&*source, query)?;
+        Ok(projects
+            .into_iter()
+            .filter(|project| {
+                super::is_content_mod(
+                    project.kind,
+                    crate::browser::horizon::is_native_mod(&project.id),
+                )
+            })
+            .collect())
+    }
+
+    /// Look up a content-only registry mod by its stable project ID.
+    pub fn registry_mod(id: &str) -> Result<Project, String> {
+        let source = crate::browser::source(crate::browser::SourceId::Horizon)
+            .ok_or_else(|| "Horizon registry is unavailable.".to_owned())?;
+        let project = crate::browser::Source::project(&*source, id)?;
+        if !super::is_content_mod(
+            project.kind,
+            crate::browser::horizon::is_native_mod(&project.id),
+        ) {
+            return Err(if project.kind != crate::browser::Kind::Mod {
+                "This project is a modpack, not a Horizon content mod; open it in the Modpacks workspace.".into()
+            } else {
+                "This project is a native mod; open it in the Native Mods workspace.".into()
+            });
+        }
+        Ok(project)
+    }
+
+    /// The registry versions for a previously looked-up content mod.
+    pub fn registry_mod_versions(project: &Project) -> Result<Vec<Version>, String> {
+        if project.kind != crate::browser::Kind::Mod {
+            return Err("This project is not a Horizon mod.".into());
+        }
+        let source = crate::browser::source(crate::browser::SourceId::Horizon)
+            .ok_or_else(|| "Horizon registry is unavailable.".to_owned())?;
+        // Resolve through the live registry before classifying: is_native_mod deliberately
+        // consults only the already-loaded index and must never guess from a stale UI object.
+        let current = crate::browser::Source::project(&*source, &project.id)?;
+        if !super::is_content_mod(
+            current.kind,
+            crate::browser::horizon::is_native_mod(&current.id),
+        ) {
+            return Err(if current.kind != crate::browser::Kind::Mod {
+                "This project is no longer a Horizon content mod; modpacks use the Modpacks workspace.".into()
+            } else {
+                "Native mod versions belong in the Native Mods workspace.".into()
+            });
+        }
+        crate::browser::Source::versions(&*source, &current)
+    }
+
+    /// The trust and capability summary shown before installing a registry content mod.
+    pub fn registry_mod_trust(id: &str) -> Vec<String> {
+        crate::browser::horizon::trust_and_capabilities(id)
+    }
 
     /// Whether a file is a resource pack or a shader pack; a mod jar is neither.
     pub fn pack_kind(path: &Path) -> Result<PackKind, String> {
-        content_engine::kind_of(path)
+        crate::packs::kind_of(path)
+    }
+}
+
+/// Registry .hpack modpacks. Kept separate from .hmod content mods and .hnmod native mods.
+pub mod modpacks {
+    use std::path::Path;
+
+    pub use crate::browser::horizon::pack::Installed as RegistryModpack;
+
+    /// Installed registry modpacks, each with its own profile and game folder.
+    pub fn registry_modpacks() -> Vec<RegistryModpack> {
+        crate::browser::horizon::pack::list()
+    }
+
+    /// Install or update a registry .hpack through the signed/hash-checked pipeline.
+    pub fn install_registry_modpack(
+        id: &str,
+        progress: &dyn Fn(&str, f32),
+    ) -> Result<RegistryModpack, String> {
+        crate::browser::horizon::pack::install(id, progress)
+    }
+
+    /// Remove an installed .hpack profile through the existing service.
+    pub fn remove_registry_modpack(work: &Path) -> Result<(), String> {
+        crate::browser::horizon::pack::remove(work)
+    }
+}
+
+/// Native mod discovery and build operations. Progress is emitted by the existing pipeline;
+/// callers should run these functions on a background executor and stream steps to the UI.
+pub mod native_mods {
+    use std::path::{Path, PathBuf};
+
+    pub use crate::native_mods::{Bundle, Plan, Profile, Step};
+
+    /// Inspect .hnmod or unpacked native bundles with the same parser used by the builder.
+    pub fn discover(folder: &Path) -> Result<Vec<Bundle>, String> {
+        crate::native_mods::bundles(folder)
+    }
+
+    /// Build the selected instance with the trusted native-mod pipeline.
+    pub fn build(
+        base: &str,
+        folder: &Path,
+        instance: &crate::instances::Instance,
+        allow_revision_mismatch: bool,
+        profile: Profile,
+        progress: impl Fn(Step),
+    ) -> Result<String, String> {
+        crate::native_mods::build(
+            base,
+            folder,
+            instance,
+            allow_revision_mismatch,
+            profile,
+            progress,
+        )
+    }
+
+    /// Export a standalone headless server runtime without mutating a game instance.
+    pub fn build_server(
+        base: &str,
+        folder: &Path,
+        output: &Path,
+        allow_revision_mismatch: bool,
+        profile: Profile,
+        progress: impl Fn(Step),
+    ) -> Result<PathBuf, String> {
+        crate::native_mods::build_server(
+            base,
+            folder,
+            output,
+            allow_revision_mismatch,
+            profile,
+            progress,
+        )
     }
 }
 
@@ -505,6 +652,20 @@ mod tests {
     }
 
     #[test]
+    fn native_build_profiles_are_explicit_and_stable() {
+        use crate::native_mods::Profile;
+        assert_eq!(Profile::parse("performance"), Some(Profile::Performance));
+        assert_eq!(Profile::parse("fast"), Some(Profile::Performance));
+        assert_eq!(Profile::parse("dev"), Some(Profile::Dev));
+        assert_eq!(Profile::parse("release"), Some(Profile::Release));
+        assert_eq!(Profile::parse("unknown"), None);
+        assert_eq!(
+            Profile::ALL,
+            [Profile::Performance, Profile::Dev, Profile::Release]
+        );
+    }
+
+    #[test]
     fn a_pack_file_keeps_its_kind() {
         let root = std::env::temp_dir().join(format!("horizon-facade-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&root);
@@ -590,6 +751,24 @@ mod tests {
             diagnostics::native_state(&mods, Some(&other)),
             diagnostics::BuildState::Outdated
         );
+    }
+
+    #[test]
+    fn content_mod_facade_keeps_modpacks_and_native_mods_separate() {
+        let kind = crate::browser::Kind::Mod;
+        let modpack = crate::browser::Kind::Modpack;
+        assert!(is_content_mod(kind, false));
+        assert!(!is_content_mod(kind, true));
+        assert!(!is_content_mod(modpack, false));
+    }
+
+    #[test]
+    fn content_mods_and_registry_modpacks_have_separate_facades() {
+        let _: fn(&content::Query) -> Result<Vec<content::Project>, String> =
+            content::registry_mods;
+        let _: fn() -> Vec<modpacks::RegistryModpack> = modpacks::registry_modpacks;
+        assert_eq!(crate::browser::Kind::Mod.label(), "Mods");
+        assert_eq!(crate::browser::Kind::Modpack.label(), "Modpacks");
     }
 
     #[test]

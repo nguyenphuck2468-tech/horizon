@@ -17,4 +17,4 @@ portable installation keeps using its adjacent data folder after a self-update.
 
 The ordinary Windows ZIP, Linux self-update tarball and macOS app ZIP do not contain the portable marker:
 they keep using the normal per-user data location and remain compatible with the launcher's self-updater.
-The Windows setup executable, macOS DMG and Linux AppImage remain available as convenience formats.
+The Windows x64 setup (`horizon-launcher-setup.exe`), macOS DMGs and Linux AppImage remain available as convenience formats.

@@ -1114,7 +1114,7 @@ fn settings_json(s: &backend::Settings) -> serde_json::Value {
 }
 
 /// Runs a subcommand and returns the exit code, or None when the window should open.
-pub fn run() -> Option<i32> {
+fn parse_cli_from(args: impl IntoIterator<Item = std::ffi::OsString>) -> Result<Cli, clap::Error> {
     use clap::FromArgMatches;
     let no_ai = backend::no_ai();
     let mut definition = command();
@@ -1124,8 +1124,23 @@ pub fn run() -> Option<i32> {
             definition = definition.mut_subcommand(name, |c| c.hide(true));
         }
     }
-    let cli = Cli::from_arg_matches(&definition.get_matches()).unwrap_or_else(|e| e.exit());
+    let matches = definition.try_get_matches_from(args)?;
+    Cli::from_arg_matches(&matches)
+}
+
+/// Runs a subcommand and returns the exit code, or None when the window should open.
+pub fn run() -> Option<i32> {
+    let cli = match parse_cli_from(std::env::args_os()) {
+        Ok(cli) => cli,
+        Err(error) => {
+            // Do not let clap call process::exit: main must drop the single-instance guard first.
+            let code = error.exit_code();
+            let _ = error.print();
+            return Some(code);
+        }
+    };
     let command = cli.command?;
+    let no_ai = backend::no_ai();
     let result = match command {
         Cmd::Mcp | Cmd::AgentConfig { .. } if no_ai => Err(horizon_core::no_ai::REFUSAL.into()),
         Cmd::Mcp => crate::mcp::serve(),
@@ -3689,6 +3704,25 @@ fn modpack(action: ModpackCmd, as_json: bool) -> Result<(), String> {
 mod tests {
     use super::*;
     use clap::Parser;
+
+    #[test]
+    fn help_and_version_are_returned_for_orderly_single_instance_cleanup() {
+        use clap::error::ErrorKind;
+        let version = match super::parse_cli_from(
+            ["horizon-launcher", "--version"].map(std::ffi::OsString::from),
+        ) {
+            Err(error) => error,
+            Ok(_) => panic!("--version must return a display exit"),
+        };
+        assert_eq!(version.kind(), ErrorKind::DisplayVersion);
+        let help = match super::parse_cli_from(
+            ["horizon-launcher", "--help"].map(std::ffi::OsString::from),
+        ) {
+            Err(error) => error,
+            Ok(_) => panic!("--help must return a display exit"),
+        };
+        assert_eq!(help.kind(), ErrorKind::DisplayHelp);
+    }
 
     #[test]
     fn completions_cover_each_shell_and_nested_commands() {
