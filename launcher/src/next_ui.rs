@@ -179,7 +179,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                             div()
                                 .text_size(px(11.))
                                 .text_color(t.muted)
-                                .child(format!("{} worlds", count.unwrap_or(worlds.len()))),
+                                .child(format!("{} · {}", count.unwrap_or(worlds.len()), tr("Worlds"))),
                         ),
                 ),
         );
@@ -190,7 +190,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                     .rounded(px(10.))
                     .bg(t.plate_soft)
                     .text_color(t.muted)
-                    .child(tr("Select an instance to view its worlds.")),
+                    .child(tr("No instance selected")),
             );
         } else if worlds.is_empty() {
             panel = panel.child(
@@ -227,7 +227,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                                     .child(format!(
                                         "{} · {} · {} · {:.1} MB",
                                         tr(world.mode),
-                                        world.version.as_deref().unwrap_or("Unknown version"),
+                                        world.version.as_deref().unwrap_or("No build selected"),
                                         crate::worlds_page::ago(world.last_played),
                                         world.size as f64 / 1_048_576.0
                                     )),
