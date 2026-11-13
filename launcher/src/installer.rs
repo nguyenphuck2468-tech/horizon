@@ -570,7 +570,11 @@ mod tests {
 
     #[test]
     fn quiet_uninstall_keeps_the_launcher_instance_lock() {
-        let args = vec!["uninstall".to_owned(), "--quiet".to_owned(), "--remove-data".to_owned()];
+        let args = vec![
+            "uninstall".to_owned(),
+            "--quiet".to_owned(),
+            "--remove-data".to_owned(),
+        ];
         let mode = quiet_mode_from_args(&args, false);
         assert_eq!(mode, Some(Mode::Uninstall));
         assert!(needs_launcher_lock(mode));
@@ -587,8 +591,14 @@ mod tests {
     #[test]
     fn unsupported_or_non_quiet_arguments_do_not_select_a_quiet_mode() {
         assert_eq!(quiet_mode_from_args(&["uninstall".to_owned()], false), None);
-        assert_eq!(quiet_mode_from_args(&["setup".to_owned(), "--quiet".to_owned()], false), None);
-        assert_eq!(quiet_mode_from_args(&["other".to_owned(), "--quiet".to_owned()], false), None);
+        assert_eq!(
+            quiet_mode_from_args(&["setup".to_owned(), "--quiet".to_owned()], false),
+            None
+        );
+        assert_eq!(
+            quiet_mode_from_args(&["other".to_owned(), "--quiet".to_owned()], false),
+            None
+        );
     }
 
     #[test]

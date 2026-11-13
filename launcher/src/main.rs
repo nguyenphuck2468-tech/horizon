@@ -5483,19 +5483,20 @@ fn main() {
     // Keep the lock for the uninstaller and all normal launcher/CLI paths: uninstall can remove
     // shared files, and normal commands must still serialize access to launcher state.
     #[cfg(windows)]
-    let _single_instance = if horizon_launcher::installer::needs_launcher_lock(quiet_mode.or(installer_mode)) {
-        Some(
-            horizon_launcher::single_instance::SingleInstance::acquire(
-                &horizon_launcher::backend::data_dir(),
+    let _single_instance =
+        if horizon_launcher::installer::needs_launcher_lock(quiet_mode.or(installer_mode)) {
+            Some(
+                horizon_launcher::single_instance::SingleInstance::acquire(
+                    &horizon_launcher::backend::data_dir(),
+                )
+                .unwrap_or_else(|e| {
+                    eprintln!("Horizon: {e}");
+                    std::process::exit(2);
+                }),
             )
-            .unwrap_or_else(|e| {
-                eprintln!("Horizon: {e}");
-                std::process::exit(2);
-            }),
-        )
-    } else {
-        None
-    };
+        } else {
+            None
+        };
     #[cfg(not(windows))]
     let _single_instance = Some(
         horizon_launcher::single_instance::SingleInstance::acquire(
