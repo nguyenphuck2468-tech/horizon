@@ -480,6 +480,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                     .gap(px(8.))
                     .children(instances.iter().map(|instance| {
                         let id = instance.id.clone();
+                        let editing = instance.clone();
                         let selected = selected_id.as_deref() == Some(id.as_str());
                         div()
                             .id(SharedString::from(format!("next-instance-{id}")))
@@ -505,7 +506,28 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                                             .child(format!("{} · {} {}", instance.id, instance.played.as_secs(), tr("seconds played"))),
                                     ),
                             )
-                            .child(tr(if selected { "Selected" } else { "Select" }))
+                            .child(
+                                div()
+                                    .flex()
+                                    .items_center()
+                                    .gap(px(10.))
+                                    .child(tr(if selected { "Selected" } else { "Select" }))
+                                    .child(
+                                        div()
+                                            .id(SharedString::from(format!("next-instance-edit-{id}")))
+                                            .px(px(10.))
+                                            .py(px(6.))
+                                            .rounded(px(7.))
+                                            .bg(t.plate)
+                                            .text_size(px(11.))
+                                            .child(tr("Edit"))
+                                            .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
+                                                cx.stop_propagation();
+                                                this.open_instance_dialog(Some(editing.clone()));
+                                                cx.notify();
+                                            })),
+                                    ),
+                            )
                             .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
                                 if let Some(chosen) = this.instances.list.iter().find(|item| item.id == id).cloned() {
                                     this.select_instance(&chosen);
