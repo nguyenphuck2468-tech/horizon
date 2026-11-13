@@ -200,7 +200,7 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                         .gap(px(10.))
                         .children([
                             ("Version", version),
-                            ("Instances", played),
+                            ("Time played", played),
                         ].into_iter().map(|(label, value)| {
                             div()
                                 .flex()
