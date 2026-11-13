@@ -258,6 +258,63 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
     } else {
         None
     };
+    // Screenshots use the established capture library, clipboard, trash and viewer
+    // operations; this route gives them a dedicated workspace instead of a migration placeholder.
+    let screenshot_library_page = if active == Route::ScreenshotLibrary {
+        let count = this.screenshots_count();
+        let mut panel = div().flex().flex_col().gap(px(12.));
+        panel = panel.child(
+            div()
+                .flex()
+                .items_center()
+                .justify_between()
+                .p(px(16.))
+                .rounded(px(12.))
+                .bg(t.surface)
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(4.))
+                        .child(tr("Screenshots"))
+                        .child(
+                            div()
+                                .text_size(px(11.))
+                                .text_color(t.muted)
+                                .child(format!("{} · {}", count, tr("Screenshots"))),
+                        ),
+                ),
+        );
+        if this.selected_instance().is_none() {
+            panel = panel.child(
+                div()
+                    .p(px(18.))
+                    .rounded(px(10.))
+                    .bg(t.plate_soft)
+                    .text_color(t.muted)
+                    .child(tr("No instance selected")),
+            );
+        } else if count == 0 {
+            panel = panel.child(
+                div()
+                    .p(px(18.))
+                    .rounded(px(10.))
+                    .bg(t.plate_soft)
+                    .text_color(t.muted)
+                    .child(tr("No screenshots yet.")),
+            );
+        } else if let Some((actions, gallery)) = this.screenshots_section(cx) {
+            panel = panel.child(actions).child(gallery);
+        }
+        Some(panel)
+    } else {
+        None
+    };
+    let screenshot_viewer = if active == Route::ScreenshotLibrary {
+        this.screenshot_viewer(cx)
+    } else {
+        None
+    };
     // The native workshop has its own route and reuses only the trusted .hnmod build/import
     // services; it is not routed through the .hmod browser or .hpack profile manager.
     let native_workshop_page = if active == Route::ModWorkshop {
@@ -1114,6 +1171,9 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
         .when(active == Route::WorldLibrary, |page| {
             page.child(world_library_page.expect("world library route has its page"))
         })
+        .when(active == Route::ScreenshotLibrary, |page| {
+            page.child(screenshot_library_page.expect("screenshot library route has its page"))
+        })
         .when(active == Route::AccountDetails, |page| {
             page.child(account_details_page.expect("account details route has its page"))
         })
@@ -1224,7 +1284,8 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
                 && active != Route::Home
                 && active != Route::ModWorkshop
                 && active != Route::InstanceDetails
-                && active != Route::WorldLibrary,
+                && active != Route::WorldLibrary
+                && active != Route::ScreenshotLibrary,
             |page| {
             page.child(
                 div()
@@ -1271,6 +1332,9 @@ pub(super) fn render(this: &mut Launcher, cx: &mut Context<Launcher>) -> impl In
     }
     if this.asking_owner() {
         root = root.child(this.owner_screen(cx));
+    }
+    if let Some(viewer) = screenshot_viewer {
+        root = root.child(viewer);
     }
     root
 }
