@@ -121,11 +121,22 @@ impl Drop for SingleInstance {
 /// Whether a process with `pid` is still alive.
 #[cfg(unix)]
 fn process_alive(pid: u32) -> bool {
-    if cfg!(target_os = "linux") {
-        std::path::Path::new(&format!("/proc/{pid}")).exists()
-    } else {
-        // macOS and the BSDs have no /proc: ask the kernel through kill(pid, 0).
-        unsafe { libc::kill(pid as libc::pid_t, 0) == 0 }
+    // Never cast an out-of-range u32 to pid_t: on BSD/macOS, u32::MAX would
+    // wrap to -1, and kill(-1, 0) probes every process instead of one PID.
+    let Ok(pid) = libc::pid_t::try_from(pid) else {
+        return false;
+    };
+    if pid <= 0 {
+        return false;
+    }
+    if unsafe { libc::kill(pid, 0) } == 0 {
+        return true;
+    }
+    match std::io::Error::last_os_error().raw_os_error() {
+        Some(libc::ESRCH) => false,
+        Some(libc::EPERM) => true,
+        // Unknown probe failures must fail closed rather than steal a live lock.
+        _ => true,
     }
 }
 
@@ -205,10 +216,15 @@ mod tests {
         assert!(SingleInstance::acquire(&dir).is_ok());
     }
 
-    #[cfg(windows)]
     #[test]
-    fn windows_process_probe_keeps_the_current_process_alive() {
+    fn process_probe_keeps_the_current_process_alive() {
         assert!(process_alive(std::process::id()));
+    }
+
+    #[test]
+    fn process_probe_rejects_zero_and_out_of_range_pids() {
+        assert!(!process_alive(0));
+        assert!(!process_alive(u32::MAX));
     }
 
     #[test]
