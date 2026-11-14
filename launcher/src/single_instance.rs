@@ -201,7 +201,7 @@ mod tests {
     fn single_instance_reuses_stale_lock_from_dead_process() {
         let dir = scratch("stale");
         let lock = dir.join(LAUNCHER_LOCK);
-        fs::write(&lock, "4294967295\\n").unwrap(); // an invalid PID on supported platforms
+        fs::write(&lock, "4294967295\n").unwrap(); // an invalid PID on supported platforms
         assert!(SingleInstance::acquire(&dir).is_ok());
     }
 
