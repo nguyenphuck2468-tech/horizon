@@ -5472,30 +5472,64 @@ fn main() {
         eprintln!("Could not restore the launcher's terminal streams: {error}");
         std::process::exit(1);
     }
-    // Windows setup: `setup --quiet` / `uninstall --quiet` run here without a window, and never
-    // reach the CLI parser below (so neither the MCP tools nor the completions list them).
+    // Resolve both window and quiet setup modes before acquiring the shared-state lock.
+    // Quiet install may run beside Horizon; both interactive and quiet uninstall must serialize.
+    #[cfg(windows)]
+    let installer_mode = horizon_launcher::installer::window_mode();
+    #[cfg(windows)]
+    let quiet_mode = horizon_launcher::installer::quiet_mode();
+    // The setup wizard only copies the executable and writes per-user shortcuts/registry
+    // entries. It must remain launchable while an installed Horizon instance is running.
+    // Keep the lock for the uninstaller and all normal launcher/CLI paths: uninstall can remove
+    // shared files, and normal commands must still serialize access to launcher state.
+    #[cfg(windows)]
+    let _single_instance =
+        if horizon_launcher::installer::needs_launcher_lock(quiet_mode.or(installer_mode)) {
+            Some(
+                horizon_launcher::single_instance::SingleInstance::acquire(
+                    &horizon_launcher::backend::data_dir(),
+                )
+                .unwrap_or_else(|e| {
+                    eprintln!("Horizon: {e}");
+                    std::process::exit(2);
+                }),
+            )
+        } else {
+            None
+        };
+    #[cfg(not(windows))]
+    let _single_instance = Some(
+        horizon_launcher::single_instance::SingleInstance::acquire(
+            &horizon_launcher::backend::data_dir(),
+        )
+        .unwrap_or_else(|e| {
+            eprintln!("Horizon: {e}");
+            std::process::exit(2);
+        }),
+    );
+    // Quiet commands run only after their lock policy has been applied. Release the guard
+    // explicitly before process::exit so uninstall leaves no stale lock.
     #[cfg(windows)]
     if let Some(code) = horizon_launcher::installer::run_quiet() {
+        drop(_single_instance);
         std::process::exit(code);
     }
-    // Single-instance guard (Phase 0, C2): at most one launcher process owns the data directory.
-    // Acquired before any shared state (settings, accounts, instances) is read or written, so a
-    // second instance cannot interleave its reads and writes with the first one's.
-    let _single_instance = horizon_launcher::single_instance::SingleInstance::acquire(
-        &horizon_launcher::backend::data_dir(),
-    )
-    .unwrap_or_else(|e| {
-        eprintln!("Horizon: {e}");
-        std::process::exit(2);
-    });
     perf::process_started();
-    backend::exe_path();
+    // Do not run launcher maintenance or load launcher settings from the setup process: it is
+    // independent of the running launcher and should not race its update cleanup or state reads.
     #[cfg(windows)]
-    backend::remove_replaced_binaries();
-    backend::cleanup_launcher_updates();
-    // What the launcher downloads goes through the player's proxy, if they set one: the parts
-    // that build their own agents (`horizon-port-pack`) are told before anything starts.
-    horizon_launcher::proxy::announce(horizon_launcher::backend::Settings::load().proxy);
+    let is_setup_window = installer_mode == Some(horizon_launcher::installer::Mode::Install);
+    #[cfg(not(windows))]
+    let is_setup_window = false;
+    if !is_setup_window {
+        backend::exe_path();
+        #[cfg(windows)]
+        backend::remove_replaced_binaries();
+        backend::cleanup_launcher_updates();
+        // What the launcher downloads goes through the player's proxy, if they set one: the parts
+        // that build their own agents (`horizon-port-pack`) are told before anything starts.
+        horizon_launcher::proxy::announce(horizon_launcher::backend::Settings::load().proxy);
+    }
     if let Some(code) = cli::run() {
         // Windows cannot probe whether a PID is still alive, so release the guard before
         // process::exit bypasses Rust destructors and leaves a stale launcher.lock behind.
@@ -5504,7 +5538,7 @@ fn main() {
     }
     gpui_platform::application()
         .with_assets(blocks::Assets)
-        .run(|cx: &mut App| {
+        .run(move |cx: &mut App| {
             cx.text_system()
                 .add_fonts(vec![
                     Cow::Borrowed(horizon_theme::fonts::GEIST_MONO),
@@ -5534,7 +5568,7 @@ fn main() {
             cx.set_menus(menus());
             // The setup exe (and `horizon-launcher.exe uninstall`) opens its own window instead.
             #[cfg(windows)]
-            if let Some(mode) = horizon_launcher::installer::window_mode() {
+            if let Some(mode) = installer_mode {
                 setup_page::open(mode, cx);
                 return;
             }

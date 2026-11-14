@@ -483,6 +483,30 @@ pub fn after_update(version: &str) {
     }
 }
 
+/// Whether this window mode must serialize against a running launcher instance.
+///
+/// Installing only copies the executable and writes per-user shortcuts/registry entries, so it
+/// must be allowed while Horizon is open. Uninstalling can remove shared files and keeps the lock.
+pub fn needs_launcher_lock(mode: Option<Mode>) -> bool {
+    !matches!(mode, Some(Mode::Install))
+}
+
+fn quiet_mode_from_args(args: &[String], setup_exe: bool) -> Option<Mode> {
+    if !args.iter().any(|arg| arg == "--quiet") {
+        return None;
+    }
+    match args.first().map(String::as_str) {
+        Some("uninstall") => Some(Mode::Uninstall),
+        Some("setup") if setup_exe => Some(Mode::Install),
+        _ => None,
+    }
+}
+
+/// The mode of a supported quiet command, so lock policy is applied before it mutates files.
+pub fn quiet_mode() -> Option<Mode> {
+    quiet_mode_from_args(&args(), is_setup_exe())
+}
+
 /// `setup --quiet [--dir <folder>] [--desktop-shortcut]` (the setup exe only) and
 /// `uninstall --quiet [--remove-data]`: no window, for scripts. None: not a quiet command.
 pub fn run_quiet() -> Option<i32> {
@@ -532,6 +556,50 @@ pub fn run_quiet() -> Option<i32> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_install_wizard_does_not_require_the_launcher_instance_lock() {
+        assert!(!needs_launcher_lock(Some(Mode::Install)));
+    }
+
+    #[test]
+    fn uninstall_and_normal_launch_keep_the_launcher_instance_lock() {
+        assert!(needs_launcher_lock(Some(Mode::Uninstall)));
+        assert!(needs_launcher_lock(None));
+    }
+
+    #[test]
+    fn quiet_uninstall_keeps_the_launcher_instance_lock() {
+        let args = vec![
+            "uninstall".to_owned(),
+            "--quiet".to_owned(),
+            "--remove-data".to_owned(),
+        ];
+        let mode = quiet_mode_from_args(&args, false);
+        assert_eq!(mode, Some(Mode::Uninstall));
+        assert!(needs_launcher_lock(mode));
+    }
+
+    #[test]
+    fn quiet_setup_can_run_while_the_launcher_is_open() {
+        let args = vec!["setup".to_owned(), "--quiet".to_owned()];
+        let mode = quiet_mode_from_args(&args, true);
+        assert_eq!(mode, Some(Mode::Install));
+        assert!(!needs_launcher_lock(mode));
+    }
+
+    #[test]
+    fn unsupported_or_non_quiet_arguments_do_not_select_a_quiet_mode() {
+        assert_eq!(quiet_mode_from_args(&["uninstall".to_owned()], false), None);
+        assert_eq!(
+            quiet_mode_from_args(&["setup".to_owned(), "--quiet".to_owned()], false),
+            None
+        );
+        assert_eq!(
+            quiet_mode_from_args(&["other".to_owned(), "--quiet".to_owned()], false),
+            None
+        );
+    }
 
     #[test]
     fn the_install_folder_is_always_ours() {
